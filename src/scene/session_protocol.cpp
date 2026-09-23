@@ -1,8 +1,6 @@
 #include "opengenesislink/viewer/scene/session_protocol.hpp"
 
 #include <charconv>
-#include <cstdlib>
-#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -10,14 +8,18 @@
 namespace ogl::viewer::scene {
 namespace {
 
-void validate_component(std::string_view value, std::string_view label) {
-    if (value.empty()) {
-        throw std::invalid_argument(std::string(label) + " must not be empty");
-    }
+void validate_no_line_break(std::string_view value, std::string_view label) {
     if (value.find('\n') != std::string_view::npos ||
         value.find('\r') != std::string_view::npos) {
         throw std::invalid_argument(std::string(label) + " contains a line break");
     }
+}
+
+void validate_required_component(std::string_view value, std::string_view label) {
+    if (value.empty()) {
+        throw std::invalid_argument(std::string(label) + " must not be empty");
+    }
+    validate_no_line_break(value, label);
 }
 
 std::string required(
@@ -44,9 +46,10 @@ T parse_unsigned(const KeyValuePayload& values, std::string_view key) {
 
 double parse_double(const KeyValuePayload& values, std::string_view key) {
     const auto value = required(values, key);
-    char* end = nullptr;
-    const auto result = std::strtod(value.c_str(), &end);
-    if (end == value.c_str() || *end != '\0') {
+    double result = 0.0;
+    const auto [ptr, error] =
+        std::from_chars(value.data(), value.data() + value.size(), result);
+    if (error != std::errc{} || ptr != value.data() + value.size()) {
         throw std::runtime_error("Invalid floating-point Scene field: " + std::string(key));
     }
     return result;
@@ -106,8 +109,8 @@ KeyValuePayload parse_key_value_payload(std::string_view payload) {
 std::string encode_key_value_payload(const KeyValuePayload& values) {
     std::string output;
     for (const auto& [key, value] : values) {
-        validate_component(key, "Scene payload key");
-        validate_component(value, "Scene payload value");
+        validate_required_component(key, "Scene payload key");
+        validate_no_line_break(value, "Scene payload value");
         if (key.find('=') != std::string::npos) {
             throw std::invalid_argument("Scene payload key contains '='");
         }
@@ -171,8 +174,8 @@ Frame make_scene_join(
     std::uint32_t request_id,
     std::string_view region_id,
     std::string_view scene_ticket) {
-    validate_component(region_id, "Region id");
-    validate_component(scene_ticket, "Scene ticket");
+    validate_required_component(region_id, "Region id");
+    validate_required_component(scene_ticket, "Scene ticket");
 
     std::string payload;
     payload.reserve(region_id.size() + scene_ticket.size() + 16U);
