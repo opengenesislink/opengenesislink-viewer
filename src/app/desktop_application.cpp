@@ -1284,11 +1284,37 @@ int DesktopApplication::run(
             const bool page_down_key =
                 glfwGetKey(window, GLFW_KEY_PAGE_DOWN) ==
                 GLFW_PRESS;
+            const bool enter_key =
+                glfwGetKey(window, GLFW_KEY_ENTER) ==
+                    GLFW_PRESS ||
+                glfwGetKey(window, GLFW_KEY_KP_ENTER) ==
+                    GLFW_PRESS;
 
             if (!show_login &&
                 live_mode &&
                 live_runtime.world_model().initialized()) {
-                if (inspector_key &&
+                if (!command_visible &&
+                    enter_key &&
+                    !previous_enter_key) {
+                    command_visible = true;
+                    content_inspector_visible = false;
+                    command_input.clear();
+
+                    if (avatar_was_moving &&
+                        live_runtime.connected()) {
+                        input::AvatarControlInput stop;
+                        stop.heading_degrees =
+                            camera.yaw_degrees;
+                        stop.speed = 4.0;
+                        stop.command_seconds = 0.1;
+                        (void)live_runtime
+                            .queue_avatar_control(stop);
+                        avatar_was_moving = false;
+                    }
+                }
+
+                if (!command_visible &&
+                    inspector_key &&
                     !previous_inspector_key) {
                     content_inspector_visible =
                         !content_inspector_visible;
@@ -1307,7 +1333,8 @@ int DesktopApplication::run(
                     }
                 }
 
-                if (content_inspector_visible &&
+                if (!command_visible &&
+                    content_inspector_visible &&
                     section_key &&
                     !previous_section_key) {
                     content_inspector_section =
@@ -1316,17 +1343,30 @@ int DesktopApplication::run(
                     content_inspector_page = 0U;
                 }
 
-                if (content_inspector_visible &&
+                if (!command_visible &&
+                    content_inspector_visible &&
                     page_up_key &&
                     !previous_page_up_key &&
                     content_inspector_page > 0U) {
                     --content_inspector_page;
                 }
 
-                if (content_inspector_visible &&
+                if (!command_visible &&
+                    content_inspector_visible &&
                     page_down_key &&
                     !previous_page_down_key) {
                     ++content_inspector_page;
+                }
+            }
+
+            if (command_visible &&
+                command_submit_requested) {
+                command_submit_requested = false;
+                if (!command_input.empty()) {
+                    (void)live_runtime.submit_command(
+                        command_input);
+                    command_input.clear();
+                    command_visible = false;
                 }
             }
 
@@ -1338,6 +1378,8 @@ int DesktopApplication::run(
                 page_up_key;
             previous_page_down_key =
                 page_down_key;
+            previous_enter_key =
+                enter_key;
 
             if (show_login &&
                 submit_requested &&
@@ -1395,6 +1437,8 @@ int DesktopApplication::run(
                     live_mode = true;
                     content_inspector_visible = false;
                     content_inspector_page = 0U;
+                    command_visible = false;
+                    command_input.clear();
                     reconnect_pending = false;
                     next_scene_poll = current_time + 0.5;
                     next_avatar_command = current_time;
@@ -1485,7 +1529,8 @@ int DesktopApplication::run(
                 if (live_mode &&
                     live_runtime.connected() &&
                     !reconnect_pending) {
-                    if (!content_inspector_visible) {
+                    if (!content_inspector_visible &&
+                        !command_visible) {
                         const auto camera_input =
                             read_camera_look_input(
                                 window,
