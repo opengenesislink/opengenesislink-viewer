@@ -1,5 +1,6 @@
 #include "opengenesislink/viewer/app/viewer_runtime.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <utility>
 
