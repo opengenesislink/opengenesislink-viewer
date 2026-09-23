@@ -22,6 +22,10 @@ bool contains_capability(
 ViewerRuntime::ViewerRuntime()
     : http_{},
       core_entry_{http_},
+      asset_http_{},
+      asset_client_{asset_http_},
+      asset_cache_{},
+      bootstrap_content_{},
       scene_{},
       world_{},
       synchronizer_{scene_.session(), world_},
@@ -319,7 +323,7 @@ void ViewerRuntime::launch_asset_fetch() {
     asset_queue_.pop_front();
 
     const auto base_url = core_base_url_;
-    const auto token = bearer_token_;
+    auto token = bearer_token_;
     asset_pending_ = true;
 
     asset_future_ = std::async(
