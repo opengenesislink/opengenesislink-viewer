@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.2.0-dev
+## Current status — 0.3.0-dev
 
 The first foundation block contains:
 
@@ -34,6 +34,9 @@ The first foundation block contains:
 - byte-compatible OGL1 frame codec and bounded TCP stream decoder
 - Scene v2 HELLO / SCENE_JOIN protocol validation
 - initial SCENE_SYNC_REQUEST construction and request correlation
+- portable native TCP Scene transport for Linux/ARM64 and Windows
+- live HELLO → SCENE_JOIN → initial full-sync startup sequence
+- deterministic GOODBYE/cleanup and deferred unrelated Scene frames
 
 There is deliberately no rendering engine or GUI dependency in this block. Networking/contracts stay independent from the future Render layer.
 
@@ -60,7 +63,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block binds the completed OGL1/Scene protocol layer to the portable TCP session: endpoint connection, partial I/O handling, live HELLO + SCENE_JOIN, initial full Scene sync and deterministic disconnect cleanup. See `docs/ROADMAP.md`.
+The next development block parses the authoritative `SCENE_SYNC` snapshot/delta payload into the first Viewer WorldModel for Regions, terrain and entities, retaining the server Scene sequence for later reconnect recovery. See `docs/ROADMAP.md`.
 
 ## License
 
