@@ -33,6 +33,7 @@ add_library(opengenesis-viewer-core
     src/world/world_model.cpp
     src/world/render_world.cpp
     src/world/terrain_cache.cpp
+    src/world/terrain_patch.cpp
     src/world/scene_synchronizer.cpp
     src/input/camera.cpp
     src/app/login_flow.cpp
@@ -176,6 +177,10 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-live-app-tests tests/live_app_tests.cpp)
     target_link_libraries(ogl-viewer-live-app-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-live-app COMMAND ogl-viewer-live-app-tests)
+
+    add_executable(ogl-viewer-terrain-patch-tests tests/terrain_patch_tests.cpp)
+    target_link_libraries(ogl-viewer-terrain-patch-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-terrain-patch COMMAND ogl-viewer-terrain-patch-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()
