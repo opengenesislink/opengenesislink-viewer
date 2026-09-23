@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <map>
 #include <string>
 
@@ -10,6 +11,7 @@ struct HttpRequest {
     std::string url;
     std::map<std::string, std::string> headers;
     std::string body;
+    std::size_t max_response_bytes = 0U;
 };
 
 struct HttpResponse {

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.10.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.11.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -24,6 +24,9 @@ add_library(opengenesis-viewer-core
     src/core/curl_http_transport.cpp
     src/core/release_discovery.cpp
     src/core/auth_client.cpp
+    src/core/bootstrap_content.cpp
+    src/core/asset_client.cpp
+    src/core/asset_cache.cpp
     src/core/viewer_bootstrap.cpp
     src/scene/frame.cpp
     src/scene/session_protocol.cpp
@@ -202,6 +205,18 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-avatar-controller-tests tests/avatar_controller_tests.cpp)
     target_link_libraries(ogl-viewer-avatar-controller-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-avatar-controller COMMAND ogl-viewer-avatar-controller-tests)
+
+    add_executable(ogl-viewer-bootstrap-content-tests tests/bootstrap_content_tests.cpp)
+    target_link_libraries(ogl-viewer-bootstrap-content-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-bootstrap-content COMMAND ogl-viewer-bootstrap-content-tests)
+
+    add_executable(ogl-viewer-asset-client-tests tests/asset_client_tests.cpp)
+    target_link_libraries(ogl-viewer-asset-client-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-asset-client COMMAND ogl-viewer-asset-client-tests)
+
+    add_executable(ogl-viewer-asset-cache-tests tests/asset_cache_tests.cpp)
+    target_link_libraries(ogl-viewer-asset-cache-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-asset-cache COMMAND ogl-viewer-asset-cache-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()

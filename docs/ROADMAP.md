@@ -14,9 +14,9 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 8 | Avatar rendering | Visible proxy rendering implemented; full visual avatar system planned |
 | 9 | Avatar reconciliation | First server-authoritative WASD/reconcile path implemented |
 | 10 | Scene deltas / reconnect recovery | Delta polling + sequence-based reconnect implemented |
-| 11 | Asset fetch / cache | Planned |
-| 12 | Appearance / wearables | Planned |
-| 13 | Inventory UI | Planned |
+| 11 | Asset fetch / cache | Authenticated fetch + bounded in-memory cache foundation implemented |
+| 12 | Appearance / wearables | Bootstrap model + wearable/attachment dependencies implemented; visual decode pending |
+| 13 | Inventory UI | Bootstrap Inventory data model implemented; interactive UI planned |
 | 14 | Chat / social | Planned |
 | 15 | Object editing / build tools | Planned |
 | 16 | Parcel / land UI | Planned |
@@ -164,17 +164,39 @@ The 0.10 development path completes the first interactive live-world control loo
 
 This is server reconciliation, not final client prediction. The Viewer does not currently extrapolate unacknowledged movement or invent collision outcomes locally.
 
+## Bootstrap content and Asset delivery foundation
+
+The 0.11 development path now consumes the non-Scene data returned by the released Viewer bootstrap:
+
+- Appearance is typed as revision, Avatar height, visual-parameter CSV, wearables and attachments
+- Wearable references preserve slot, Inventory item id and Asset id
+- Attachment references preserve attachment point, Inventory item id and Asset id
+- Inventory root/folders/items and item → Asset references are retained in a rendering-independent model
+- owned Asset metadata retains id, MIME type, size, permissions, next-owner permissions, creation time and the server-provided `content_hash`
+- Appearance Asset dependencies are deduplicated in stable wearable/attachment order
+- only Appearance dependencies are prefetched; the Viewer does not download the user's entire Asset collection at login
+- Asset payloads are fetched through authenticated `GET /v1/assets/{id}`
+- Base64, requested id and decoded size are validated before cache admission
+- encoded HTTP responses are bounded while libcurl is receiving them, not only after Base64 decode
+- the cache is bounded by both entry count and bytes and evicts least-recently-used entries
+- bootstrap `content_hash` is treated as an opaque invalidation/version key
+- reconnect reuses cache entries only while the new bootstrap metadata still matches
+- Asset HTTP work uses a separate transport and therefore does not occupy the serialized OGL1 Scene request channel
+- the in-world overlay reports Appearance revision, Inventory counts, cached/required Appearance Assets and prefetch state
+
+The server contract currently does not define a canonical Viewer texture/mesh MIME and binary payload matrix. The Viewer therefore retains fetched bytes and metadata without pretending that arbitrary `application/octet-stream` data is renderable.
+
 ## Immediate next block
 
-Begin the data/render path needed for a recognizable local Avatar and user-owned content:
+Move from opaque Asset delivery to the first recognizable Avatar/content representation once the format boundary is explicit:
 
-- Asset HTTP fetch abstraction and bounded local cache
-- bootstrap Appearance model parsing
-- bootstrap Inventory summary/model parsing
-- wearable/attachment Asset dependency collection
-- first texture/mesh Asset decode boundary
-- cache invalidation by Asset id/revision/hash where exposed
-- placeholder rendering remains explicit when an Asset type is not implemented
-- later: client-side movement prediction/animation on top of the authoritative reconcile path
+- define/document canonical texture and mesh Asset MIME/payload contracts with the Server
+- decode the first supported texture format into GPU-ready pixels
+- decode the first supported mesh/primitive format into render geometry
+- resolve wearable/attachment Inventory references against cached Assets
+- construct a visual local-Avatar representation from Appearance state
+- keep unsupported Asset types on explicit proxy/placeholder rendering
+- begin an inspectable Inventory/Appearance UI over the already typed bootstrap models
+- later: persistent disk cache and client-side movement prediction/animation
 
 No final UDP/QUIC transport is assumed.
