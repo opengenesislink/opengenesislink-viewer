@@ -568,6 +568,8 @@ void ViewerRuntime::launch_asset_fetch() {
 void ViewerRuntime::launch_terrain_sample() {
     if (terrain_pending_ ||
         terrain_suspended_ ||
+        command_pending_ ||
+        command_sync_requested_ ||
         !terrain_refinement_.active() ||
         movement_pending_ ||
         queued_movement_.has_value() ||
@@ -633,6 +635,56 @@ void ViewerRuntime::launch_movement() {
 
 void ViewerRuntime::service_background() {
     using namespace std::chrono_literals;
+
+    if (command_pending_ &&
+        command_future_.valid() &&
+        command_future_.wait_for(0s) ==
+            std::future_status::ready) {
+        command_pending_ = false;
+        try {
+            auto result =
+                command_future_.get();
+            apply_command_result(
+                std::move(result));
+        } catch (const std::exception& ex) {
+            command_result_ =
+                std::string{"COMMAND FAILED: "} +
+                ex.what();
+        } catch (...) {
+            command_result_ =
+                "COMMAND FAILED";
+        }
+    }
+
+    if (command_sync_requested_ &&
+        connected()) {
+        std::unique_lock lock(
+            scene_io_mutex_,
+            std::try_to_lock);
+        if (lock.owns_lock()) {
+            try {
+                const auto frame =
+                    scene_.session()
+                        .request_sync(
+                            world_.sequence(),
+                            256U);
+                lock.unlock();
+                const auto result =
+                    synchronizer_.apply(frame);
+                if (result.applied) {
+                    rebuild_render_region();
+                }
+                command_sync_requested_ = false;
+            } catch (const std::exception& ex) {
+                lock.unlock();
+                command_result_ =
+                    std::string{
+                        "COMMAND APPLIED; SYNC FAILED: "} +
+                    ex.what();
+                command_sync_requested_ = false;
+            }
+        }
+    }
 
     if (asset_pending_ &&
         asset_future_.valid() &&
@@ -2259,6 +2311,15 @@ void ViewerRuntime::recover_source_region(
 void ViewerRuntime::wait_for_background() noexcept {
     queued_movement_.reset();
 
+    if (command_future_.valid()) {
+        try {
+            (void)command_future_.get();
+        } catch (...) {
+        }
+    }
+    command_pending_ = false;
+    command_sync_requested_ = false;
+
     if (movement_future_.valid()) {
         try {
             (void)movement_future_.get();
@@ -2317,6 +2378,9 @@ void ViewerRuntime::disconnect() noexcept {
     can_reconcile_avatar_ = false;
     last_boundary_.clear();
     background_error_.clear();
+    command_result_.clear();
+    command_pending_ = false;
+    command_sync_requested_ = false;
 
     if (!bearer_token_.empty()) {
         std::fill(
