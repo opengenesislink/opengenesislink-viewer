@@ -10,10 +10,10 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 4 | OGL1 framing | Implemented |
 | 5 | HELLO + SCENE_JOIN | Implemented over portable TCP session |
 | 6 | Full Scene snapshot | Implemented into authoritative WorldModel |
-| 7 | Region / terrain / object rendering | WorldModel ready; render layer next |
-| 8 | Avatar rendering | Planned |
+| 7 | Region / terrain / object rendering | RenderWorld/Terrain foundation implemented; graphics backend next |
+| 8 | Avatar rendering | Avatar proxy instance foundation implemented; visual avatar system planned |
 | 9 | Avatar reconciliation | Planned |
-| 10 | Scene deltas / reconnect recovery | Planned |
+| 10 | Scene deltas / reconnect recovery | Automatic snapshot recovery implemented; reconnect continuation next |
 | 11 | Asset fetch / cache | Planned |
 | 12 | Appearance / wearables | Planned |
 | 13 | Inventory UI | Planned |
@@ -72,16 +72,31 @@ The Viewer now parses `SCENE_SYNC` into a rendering-independent WorldModel:
 
 Structural changes such as entity creation, link changes or permission/Physics mutations are never guessed from incomplete delta data.
 
+## Render-facing world foundation
+
+The Viewer now has a graphics-backend-independent layer above the authoritative WorldModel:
+
+- RenderRegion/RenderInstance projection from current Scene state
+- explicit object `box_proxy` geometry until the server exposes a visual primitive descriptor
+- avatar capsule proxy instances
+- authenticated `TERRAIN_SAMPLE_REQUEST` / `TERRAIN_SAMPLE` support
+- terrain cache invalidated by the authoritative terrain revision
+- automatic full-snapshot recovery when a delta cannot safely reconstruct state
+- camera movement/yaw/pitch foundation independent of the future window/render backend
+
+The current Scene snapshot does not expose a visual GenesisMesher PrimitiveDescriptor. The Viewer therefore does not infer sphere/cylinder/capsule visuals from physics state.
+
 ## Immediate next block
 
-Build the first render-facing world layer:
+Introduce the first real desktop graphics/window backend while keeping protocol and WorldModel layers independent:
 
-- Region/terrain runtime representation
-- terrain sample acquisition and cache
-- entity render instances derived from WorldModel state
-- primitive geometry mapping compatible with GenesisMesher output
-- camera/input foundation
-- snapshot recovery wiring around `requires_snapshot`
+- cross-platform application/window event loop
+- GPU renderer abstraction
+- visible Region water plane and sampled terrain patch
+- box-proxy object drawing from RenderWorld
+- avatar capsule proxy drawing
+- camera input bindings
+- frame timing and resize handling
 - reconnect continuation using the last authoritative Scene sequence
 
 No final UDP/QUIC transport is assumed.
