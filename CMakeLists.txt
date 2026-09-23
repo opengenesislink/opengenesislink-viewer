@@ -103,6 +103,8 @@ endif()
 
 include(CTest)
 if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
+    add_test(NAME viewer-app-version COMMAND ogl-viewer --version)
+
     add_executable(ogl-viewer-core-tests tests/core_contract_tests.cpp)
     target_link_libraries(ogl-viewer-core-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-core-contracts COMMAND ogl-viewer-core-tests)
