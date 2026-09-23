@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.3.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.4.0 LANGUAGES CXX)
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" OGL_VIEWER_VERSION_LABEL)
 string(STRIP "${OGL_VIEWER_VERSION_LABEL}" OGL_VIEWER_VERSION_LABEL)
@@ -23,6 +23,7 @@ add_library(opengenesis-viewer-core
     src/scene/session_protocol.cpp
     src/scene/transport.cpp
     src/scene/scene_session.cpp
+    src/world/world_model.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -81,4 +82,8 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-scene-session-tests tests/scene_session_tests.cpp)
     target_link_libraries(ogl-viewer-scene-session-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-scene-session COMMAND ogl-viewer-scene-session-tests)
+
+    add_executable(ogl-viewer-world-model-tests tests/world_model_tests.cpp)
+    target_link_libraries(ogl-viewer-world-model-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-world-model COMMAND ogl-viewer-world-model-tests)
 endif()
