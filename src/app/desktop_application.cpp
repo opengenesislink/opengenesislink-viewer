@@ -168,11 +168,6 @@ void login_key_callback(
             *context->console_submit_requested = true;
             return;
         }
-        if (key == GLFW_KEY_ESCAPE &&
-            action == GLFW_PRESS) {
-            *context->console_visible = false;
-            context->console_input->clear();
-        }
     }
 }
 
@@ -1161,14 +1156,22 @@ int DesktopApplication::run(
         bool submit_requested = false;
         bool previous_mouse_pressed = false;
 
-        ViewerInputContext login_input{
-            .form = &login_form,
-            .visible = &show_login,
-            .submit_requested = &submit_requested,
+        std::string command_input;
+        bool command_visible = false;
+        bool command_submit_requested = false;
+
+        ViewerInputContext input_context{
+            .login_form = &login_form,
+            .login_visible = &show_login,
+            .login_submit_requested = &submit_requested,
+            .console_input = &command_input,
+            .console_visible = &command_visible,
+            .console_submit_requested =
+                &command_submit_requested,
         };
         glfwSetWindowUserPointer(
             window,
-            &login_input);
+            &input_context);
         glfwSetCharCallback(
             window,
             &login_character_callback);
@@ -1213,6 +1216,8 @@ int DesktopApplication::run(
         bool previous_section_key = false;
         bool previous_page_up_key = false;
         bool previous_page_down_key = false;
+        bool previous_enter_key = false;
+        bool previous_escape_key = false;
 
         int previous_width = 0;
         int previous_height = 0;
@@ -1220,9 +1225,23 @@ int DesktopApplication::run(
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
             glfwPollEvents();
 
-            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
+            const bool escape_key =
+                glfwGetKey(window, GLFW_KEY_ESCAPE) ==
+                GLFW_PRESS;
+            if (escape_key &&
+                !previous_escape_key) {
+                if (command_visible) {
+                    command_visible = false;
+                    command_input.clear();
+                } else if (content_inspector_visible) {
+                    content_inspector_visible = false;
+                } else {
+                    glfwSetWindowShouldClose(
+                        window,
+                        GLFW_TRUE);
+                }
             }
+            previous_escape_key = escape_key;
 
             const auto current_time = glfwGetTime();
             const auto delta_seconds =
