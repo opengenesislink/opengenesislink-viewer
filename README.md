@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.4.0-dev
+## Current status — 0.5.0-dev
 
 The first foundation block contains:
 
@@ -40,6 +40,11 @@ The first foundation block contains:
 - authoritative SCENE_SYNC snapshot/delta parser
 - Region/entity WorldModel with transforms, permissions, linksets and Physics state
 - strict Scene sequence validation and snapshot-recovery signaling
+- typed TERRAIN_SAMPLE requests and revision-aware terrain cache
+- RenderRegion/RenderInstance projection from the authoritative WorldModel
+- explicit box-proxy objects and avatar capsule proxies for the pre-render stage
+- automatic full-snapshot recovery for unsafe/incomplete deltas
+- backend-independent camera movement foundation
 - `ogl-viewer` application shell target
 - official OpenGenesisLINK Viewer application icon integrated for Windows
 - Linux desktop/icon resources derived from the same supplied logo
@@ -71,7 +76,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block connects the WorldModel to the first render-facing Region/terrain/entity layer, including terrain samples, primitive geometry mapping, camera/input foundations and automatic snapshot recovery. See `docs/ROADMAP.md`.
+The next development block adds the first real cross-platform desktop graphics/window backend and draws the RenderWorld foundation: sampled terrain, water plane, object proxies and avatar proxies with camera controls. See `docs/ROADMAP.md`.
 
 ## License
 
