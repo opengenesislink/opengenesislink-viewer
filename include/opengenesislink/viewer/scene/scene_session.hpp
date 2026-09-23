@@ -1,5 +1,6 @@
 #pragma once
 
+#include "opengenesislink/viewer/scene/avatar_protocol.hpp"
 #include "opengenesislink/viewer/scene/session_protocol.hpp"
 #include "opengenesislink/viewer/scene/terrain_protocol.hpp"
 #include "opengenesislink/viewer/scene/transport.hpp"
@@ -32,6 +33,9 @@ public:
     [[nodiscard]] TerrainSample request_terrain_sample(
         double x,
         double y);
+
+    [[nodiscard]] AvatarReconcileAck reconcile_avatar(
+        const AvatarReconcileRequest& request);
 
     [[nodiscard]] Frame receive_next();
     void disconnect() noexcept;
