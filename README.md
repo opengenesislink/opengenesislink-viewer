@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.6.0-dev
+## Current status — 0.7.0-dev
 
 The first foundation block contains:
 
@@ -53,6 +53,12 @@ The first foundation block contains:
 - `ogl-viewer` application shell target
 - official OpenGenesisLINK Viewer application icon integrated for Windows
 - Linux desktop/icon resources derived from the same supplied logo
+- ordered live Core entry: discovery → authentication → Viewer bootstrap
+- desktop live-Scene connection using the bootstrap endpoint and signed Scene Ticket
+- authoritative initial Scene state rendered through the existing WorldModel/RenderWorld path
+- periodic Scene delta polling while the graphical Viewer is running
+- sequence-based reconnect that resumes from the last applied authoritative Scene sequence
+- secure alpha live-launch flow that reads the password from `OGL_VIEWER_PASSWORD` rather than a process argument
 
 Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
@@ -72,6 +78,23 @@ ctest --preset release
 
 Windows uses vcpkg dependencies from `vcpkg.json`.
 
+## Live alpha connection
+
+The 0.7 development build can enter a real OpenGenesisLINK Region from the desktop renderer while the graphical login form is still under construction.
+
+```bash
+export OGL_VIEWER_PASSWORD='your-password'
+./build/release/ogl-viewer \
+  --connect \
+  --server https://your-core.example \
+  --username your-user \
+  --region your-region-id
+```
+
+An optional requested spawn can be supplied with `--spawn X Y Z`. Passwords are intentionally not accepted on the command line.
+
+This alpha path performs release discovery before authentication, logs in through Core, bootstraps the Viewer, connects to the returned Scene endpoint with the signed ticket, applies the initial authoritative Scene sync and renders the resulting Region. If the Scene connection drops, the Viewer attempts to resume from its last applied Scene sequence.
+
 ## Contract smoke check
 
 ```bash
@@ -82,7 +105,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block integrates the real login/bootstrap flow into the graphical application, connects the desktop Viewer to a live Scene, builds a sampled terrain patch, and begins the first usable login/world-entry UI. See `docs/ROADMAP.md`.
+The next development block adds the first in-window login/server form and error/status presentation, then builds a sampled terrain mesh from authoritative terrain samples instead of rendering only the water plane. See `docs/ROADMAP.md`.
 
 ## License
 
