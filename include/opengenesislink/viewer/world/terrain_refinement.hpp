@@ -25,6 +25,7 @@ public:
         const RegionState& region,
         std::vector<std::size_t> levels = {5U, 9U, 17U});
 
+    [[nodiscard]] bool configured() const noexcept;
     [[nodiscard]] bool active() const noexcept;
     [[nodiscard]] std::uint64_t revision() const noexcept;
     [[nodiscard]] std::size_t target_resolution() const noexcept;
