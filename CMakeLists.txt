@@ -27,6 +27,7 @@ add_library(opengenesis-viewer-core
     src/core/bootstrap_content.cpp
     src/core/asset_client.cpp
     src/core/asset_cache.cpp
+    src/core/platform_client.cpp
     src/core/viewer_bootstrap.cpp
     src/scene/frame.cpp
     src/scene/session_protocol.cpp
@@ -227,6 +228,10 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-world-actions-tests tests/world_actions_tests.cpp)
     target_link_libraries(ogl-viewer-world-actions-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-world-actions COMMAND ogl-viewer-world-actions-tests)
+
+    add_executable(ogl-viewer-platform-client-tests tests/platform_client_tests.cpp)
+    target_link_libraries(ogl-viewer-platform-client-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-platform-client COMMAND ogl-viewer-platform-client-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()
