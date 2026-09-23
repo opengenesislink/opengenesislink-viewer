@@ -1,7 +1,10 @@
 #include "opengenesislink/viewer/app/viewer_runtime.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <chrono>
+#include <cmath>
+#include <sstream>
 #include <stdexcept>
 #include <utility>
 
@@ -24,6 +27,8 @@ ViewerRuntime::ViewerRuntime()
       core_entry_{http_},
       asset_http_{},
       asset_client_{asset_http_},
+      platform_http_{},
+      platform_client_{platform_http_},
       asset_cache_{},
       bootstrap_content_{},
       scene_{},
