@@ -322,16 +322,30 @@ void ViewerRuntime::launch_asset_fetch() {
         [this,
          expected,
          base_url,
-         token]() {
-            auto asset =
-                asset_client_.fetch(
-                    base_url,
-                    token,
-                    expected.id);
-            return AssetTaskResult{
-                .expected = expected,
-                .asset = std::move(asset),
-            };
+         token]() mutable {
+            try {
+                auto asset =
+                    asset_client_.fetch(
+                        base_url,
+                        token,
+                        expected.id);
+                std::fill(
+                    token.begin(),
+                    token.end(),
+                    '\0');
+                token.clear();
+                return AssetTaskResult{
+                    .expected = expected,
+                    .asset = std::move(asset),
+                };
+            } catch (...) {
+                std::fill(
+                    token.begin(),
+                    token.end(),
+                    '\0');
+                token.clear();
+                throw;
+            }
         });
 }
 
