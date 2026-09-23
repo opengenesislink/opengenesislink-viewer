@@ -887,6 +887,199 @@ void draw_content_inspector(
     ui.render();
 }
 
+std::vector<std::string> display_lines(
+    std::string_view value,
+    std::size_t max_lines) {
+    std::vector<std::string> lines;
+    std::size_t start = 0U;
+    while (start <= value.size()) {
+        const auto end =
+            value.find('\n', start);
+        lines.emplace_back(
+            value.substr(
+                start,
+                end == std::string_view::npos
+                    ? std::string_view::npos
+                    : end - start));
+        if (end == std::string_view::npos) {
+            break;
+        }
+        start = end + 1U;
+    }
+
+    if (lines.size() > max_lines) {
+        lines.erase(
+            lines.begin(),
+            lines.begin() +
+                static_cast<std::ptrdiff_t>(
+                    lines.size() - max_lines));
+    }
+    return lines;
+}
+
+void draw_chat_and_command_bar(
+    render::UiRenderer& ui,
+    const ViewerRuntime& runtime,
+    bool command_visible,
+    const std::string& command_input,
+    int framebuffer_width,
+    int framebuffer_height) {
+    const auto width =
+        static_cast<float>(
+            std::max(framebuffer_width, 1));
+    const auto height =
+        static_cast<float>(
+            std::max(framebuffer_height, 1));
+
+    const auto panel_width =
+        std::min(width - 28.0F, 760.0F);
+    const auto x = 14.0F;
+    const auto input_height =
+        command_visible ? 54.0F : 28.0F;
+    const auto bottom = height - 18.0F;
+    const auto input_y =
+        bottom - input_height;
+
+    ui.begin();
+
+    const auto& chat =
+        runtime.world_model().chat_history();
+    const auto chat_count =
+        std::min<std::size_t>(
+            6U,
+            chat.size());
+    if (chat_count > 0U) {
+        const auto chat_height =
+            static_cast<float>(
+                chat_count) *
+                22.0F +
+            18.0F;
+        const auto chat_y =
+            input_y - chat_height - 8.0F;
+        ui.rectangle(
+            x,
+            chat_y,
+            panel_width,
+            chat_height,
+            kPanel);
+
+        const auto first =
+            chat.size() - chat_count;
+        float line_y = chat_y + 10.0F;
+        for (std::size_t index = first;
+             index < chat.size();
+             ++index) {
+            const auto& message = chat[index];
+            const auto prefix =
+                message.kind == "chat_whisper"
+                    ? "[WHISPER] "
+                    : message.kind == "chat_shout"
+                          ? "[SHOUT] "
+                          : "";
+            ui.text(
+                x + 12.0F,
+                line_y,
+                1.0F,
+                visible_tail(
+                    prefix +
+                        message.sender_name +
+                        ": " +
+                        message.text,
+                    108U),
+                kText);
+            line_y += 22.0F;
+        }
+    }
+
+    const auto command =
+        runtime.command_state();
+    const auto result_lines =
+        display_lines(
+            command.last_result,
+            5U);
+    if (!result_lines.empty()) {
+        const auto result_height =
+            static_cast<float>(
+                result_lines.size()) *
+                20.0F +
+            14.0F;
+        const auto result_y =
+            input_y -
+            (chat_count > 0U
+                 ? static_cast<float>(
+                       chat_count) *
+                       22.0F +
+                       40.0F
+                 : 8.0F) -
+            result_height;
+        ui.rectangle(
+            x,
+            result_y,
+            panel_width,
+            result_height,
+            kPanel);
+        float line_y =
+            result_y + 8.0F;
+        for (const auto& line :
+             result_lines) {
+            ui.text(
+                x + 12.0F,
+                line_y,
+                0.95F,
+                visible_tail(line, 112U),
+                command.pending
+                    ? kAccent
+                    : kMuted);
+            line_y += 20.0F;
+        }
+    }
+
+    if (command_visible) {
+        ui.rectangle(
+            x - 2.0F,
+            input_y - 2.0F,
+            panel_width + 4.0F,
+            input_height + 4.0F,
+            kAccent);
+        ui.rectangle(
+            x,
+            input_y,
+            panel_width,
+            input_height,
+            kPanelInner);
+        ui.text(
+            x + 12.0F,
+            input_y + 8.0F,
+            1.0F,
+            "CHAT / VIEWER COMMAND  |  /HELP",
+            kMuted);
+        ui.text(
+            x + 12.0F,
+            input_y + 29.0F,
+            1.2F,
+            "> " +
+                visible_tail(
+                    command_input,
+                    98U),
+            kText);
+    } else {
+        ui.rectangle(
+            x,
+            input_y,
+            330.0F,
+            input_height,
+            kPanel);
+        ui.text(
+            x + 10.0F,
+            input_y + 9.0F,
+            1.0F,
+            "ENTER: CHAT / COMMANDS   I: CONTENT",
+            kMuted);
+    }
+
+    ui.render();
+}
+
 } // namespace
 
 int DesktopApplication::run(
