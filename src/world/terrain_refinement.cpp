@@ -62,8 +62,15 @@ void TerrainRefinement::reset(
     samples_.clear();
 }
 
+bool TerrainRefinement::configured() const noexcept {
+    return metadata_.terrain_width >= 2U &&
+           metadata_.terrain_height >= 2U &&
+           !levels_.empty();
+}
+
 bool TerrainRefinement::active() const noexcept {
-    return level_index_ < levels_.size();
+    return configured() &&
+           level_index_ < levels_.size();
 }
 
 std::uint64_t TerrainRefinement::revision() const noexcept {
