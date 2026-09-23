@@ -107,6 +107,25 @@ TerrainSample SceneSession::request_terrain_sample(
     return parse_terrain_sample(response, request_id);
 }
 
+AvatarReconcileAck SceneSession::reconcile_avatar(
+    const AvatarReconcileRequest& request) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Avatar reconciliation requires a joined Scene session");
+    }
+
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_avatar_reconcile(request_id, request));
+    const auto response =
+        receive_correlated(
+            MessageType::avatar_reconcile_ack,
+            request_id);
+    return parse_avatar_reconcile_ack(
+        response,
+        request_id);
+}
+
 Frame SceneSession::receive_next() {
     if (!deferred_.empty()) {
         auto frame = std::move(deferred_.front());
