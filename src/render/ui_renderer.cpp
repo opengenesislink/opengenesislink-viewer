@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 
+#include <algorithm>
 #include <array>
 #include <cctype>
 #include <cstddef>
