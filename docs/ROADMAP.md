@@ -15,8 +15,8 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 9 | Avatar reconciliation | First server-authoritative WASD/reconcile path implemented |
 | 10 | Scene deltas / reconnect recovery | Delta polling + sequence-based reconnect implemented |
 | 11 | Asset fetch / cache | Authenticated fetch + bounded in-memory cache foundation implemented |
-| 12 | Appearance / wearables | Bootstrap model + wearable/attachment dependencies implemented; visual decode pending |
-| 13 | Inventory UI | Bootstrap Inventory data model implemented; interactive UI planned |
+| 12 | Appearance / wearables | Bootstrap model + read-only inspector + dependencies implemented; visual decode pending |
+| 13 | Inventory UI | Read-only paged bootstrap Inventory inspector implemented; mutations planned |
 | 14 | Chat / social | Planned |
 | 15 | Object editing / build tools | Planned |
 | 16 | Parcel / land UI | Planned |
@@ -186,17 +186,35 @@ The 0.11 development path now consumes the non-Scene data returned by the releas
 
 The server contract currently does not define a canonical Viewer texture/mesh MIME and binary payload matrix. The Viewer therefore retains fetched bytes and metadata without pretending that arbitrary `application/octet-stream` data is renderable.
 
+## Read-only Content Inspector
+
+The 0.12 development path makes the already typed bootstrap data inspectable inside the running Viewer without inventing mutation semantics:
+
+- `I` opens/closes the in-world Content Inspector
+- `Tab` cycles Appearance, Inventory and Asset metadata sections
+- `PageUp` / `PageDown` paginate long sections
+- Appearance shows revision, Avatar height, visual-parameter CSV, wearables and attachments
+- wearable rows preserve slot, Inventory item id and Asset id
+- attachment rows preserve attachment point, Inventory item id and Asset id
+- Inventory shows root metadata, folders, items and item → Asset references
+- Asset pages show name, MIME type, byte size, id and server-provided content-hash key
+- missing optional bootstrap sections are shown explicitly instead of fabricated
+- the view model is independent from GLFW/OpenGL and is unit-tested for section cycling, placeholders and page clamping
+- while the inspector is open, new Avatar movement input is suspended and a stop reconcile is queued when needed
+- Scene synchronization, terrain refinement, Asset prefetch and world rendering continue behind the inspector
+- the inspector is intentionally read-only; no Inventory or Appearance mutation endpoint is assumed
+
 ## Immediate next block
 
-Move from opaque Asset delivery to the first recognizable Avatar/content representation once the format boundary is explicit:
+Move from bootstrap-only inspection toward live user-content workflows that the Server explicitly supports:
 
-- define/document canonical texture and mesh Asset MIME/payload contracts with the Server
-- decode the first supported texture format into GPU-ready pixels
-- decode the first supported mesh/primitive format into render geometry
-- resolve wearable/attachment Inventory references against cached Assets
-- construct a visual local-Avatar representation from Appearance state
+- authenticated Appearance refresh after the initial bootstrap
+- authenticated Inventory refresh after the initial bootstrap
+- detect Appearance revision changes and rebuild Appearance Asset dependency prefetch
+- detect Inventory changes without requiring a full Region reconnect
+- define read-only item/folder selection details before adding mutations
+- add mutation actions only where a released Server endpoint and permission model exist
+- coordinate the first canonical texture/mesh MIME and payload contracts with the Server before visual decoding
 - keep unsupported Asset types on explicit proxy/placeholder rendering
-- begin an inspectable Inventory/Appearance UI over the already typed bootstrap models
-- later: persistent disk cache and client-side movement prediction/animation
 
 No final UDP/QUIC transport is assumed.

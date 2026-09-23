@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.11.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.12.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -46,6 +46,7 @@ add_library(opengenesis-viewer-core
     src/app/viewer_runtime.cpp
     src/app/launch_options.cpp
     src/app/login_form.cpp
+    src/app/content_inspector.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -217,6 +218,10 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-asset-cache-tests tests/asset_cache_tests.cpp)
     target_link_libraries(ogl-viewer-asset-cache-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-asset-cache COMMAND ogl-viewer-asset-cache-tests)
+
+    add_executable(ogl-viewer-content-inspector-tests tests/content_inspector_tests.cpp)
+    target_link_libraries(ogl-viewer-content-inspector-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-content-inspector COMMAND ogl-viewer-content-inspector-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()

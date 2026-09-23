@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.11.0-dev
+## Current status — 0.12.0-dev
 
 The first foundation block contains:
 
@@ -82,6 +82,11 @@ The first foundation block contains:
 - bounded in-memory LRU-style Asset cache with `content_hash` invalidation
 - asynchronous Appearance Asset prefetch on a separate HTTP transport without occupying the Scene TCP channel
 - in-world diagnostics for Appearance revision, Inventory counts and Asset prefetch/cache state
+- read-only in-world Content Inspector over the typed Viewer bootstrap snapshot
+- Appearance inspector with revision, height, visual parameters, wearables and attachments
+- Inventory inspector with root, folders, items and Asset references
+- Asset metadata inspector with MIME, size, id and content-hash information
+- paged inspector navigation via I, Tab and PageUp/PageDown without introducing Inventory/Appearance mutation
 
 Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
@@ -103,7 +108,7 @@ Windows uses vcpkg dependencies from `vcpkg.json`.
 
 ## Live alpha connection
 
-The 0.11 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
+The 0.12 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
 
 The command-line live path remains available for development and automated testing.
 
@@ -128,9 +133,13 @@ This alpha path performs release discovery before authentication, logs in throug
 
 The utility calls both required discovery endpoints and exits non-zero if the released Viewer/Scene contracts are incompatible.
 
+## Content inspector
+
+While connected to a Region, press `I` to open the read-only Content Inspector. `Tab` cycles through Appearance, Inventory and Asset metadata; `PageUp` / `PageDown` navigate longer lists. Opening the inspector suspends new Avatar movement input while Scene synchronization, terrain refinement and Asset prefetch continue.
+
 ## Next milestone
 
-The next development block defines the first concrete visual Asset formats and turns cached Appearance dependencies into a recognizable local Avatar. Until the server publishes a stable texture/mesh payload contract, cached Asset bytes remain opaque and proxy rendering stays explicit. See `docs/ROADMAP.md`.
+The next block adds authenticated refresh paths for Appearance/Inventory data and begins the first interactive Inventory/Appearance actions that are explicitly supported by the Server contract. Visual Asset decoding remains gated on a stable texture/mesh MIME and payload contract; unsupported bytes continue to use explicit proxy rendering. See `docs/ROADMAP.md`.
 
 ## License
 
