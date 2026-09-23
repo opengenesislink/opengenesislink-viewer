@@ -245,6 +245,15 @@ AssetClient::AssetClient(
         throw std::invalid_argument(
             "Asset byte limit must be non-zero");
     }
+    constexpr std::size_t response_overhead =
+        1024U * 1024U;
+    if (max_decoded_bytes_ >
+        (std::numeric_limits<std::size_t>::max() -
+         response_overhead) /
+            2U) {
+        throw std::invalid_argument(
+            "Asset byte limit is too large");
+    }
 }
 
 AssetBlob AssetClient::fetch(
