@@ -1,5 +1,7 @@
 #include "opengenesislink/viewer/app/viewer_runtime.hpp"
 
+#include "opengenesislink/viewer/world/terrain_patch.hpp"
+
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
@@ -12,10 +14,54 @@ ViewerRuntime::ViewerRuntime()
       scene_{},
       world_{},
       synchronizer_{scene_.session(), world_},
-      render_builder_{} {}
+      render_builder_{},
+      terrain_cache_{scene_.session()} {}
 
 ViewerRuntime::~ViewerRuntime() {
     disconnect();
+}
+
+void ViewerRuntime::rebuild_render_region() {
+    if (!world_.initialized()) {
+        render_region_.reset();
+        return;
+    }
+
+    std::optional<world::TerrainPatch> previous_patch;
+    if (render_region_.has_value() &&
+        render_region_->terrain_patch.has_value()) {
+        previous_patch = render_region_->terrain_patch;
+    }
+
+    auto next = render_builder_.build(world_);
+    const auto& region = world_.region();
+
+    if (previous_patch.has_value() &&
+        previous_patch->revision == region.terrain_revision) {
+        next.terrain_patch = std::move(previous_patch);
+        render_region_ = std::move(next);
+        return;
+    }
+
+    terrain_cache_.invalidate();
+    auto patch = world::build_terrain_patch(
+        region,
+        9U,
+        9U,
+        [this, &region](
+            std::size_t grid_x,
+            std::size_t grid_y) {
+            return terrain_cache_.sample_grid(
+                region,
+                grid_x,
+                grid_y);
+        });
+
+    if (terrain_cache_.revision() == region.terrain_revision) {
+        next.terrain_patch = std::move(patch);
+    }
+
+    render_region_ = std::move(next);
 }
 
 ConnectionInfo ViewerRuntime::connect(
@@ -37,7 +83,7 @@ ConnectionInfo ViewerRuntime::connect(
                 "Initial authoritative Scene state was not applied");
         }
 
-        render_region_ = render_builder_.build(world_);
+        rebuild_render_region();
         bearer_token_ = entry.login.token;
         core_base_url_ = request.core_base_url;
         region_id_ = entry.bootstrap.region_id;
@@ -80,7 +126,7 @@ world::SynchronizeResult ViewerRuntime::poll(
 
     const auto result = synchronizer_.poll(max_events);
     if (result.applied) {
-        render_region_ = render_builder_.build(world_);
+        rebuild_render_region();
     }
     return result;
 }
@@ -122,7 +168,7 @@ ConnectionInfo ViewerRuntime::reconnect() {
                 "Reconnected Scene state was not applied");
         }
 
-        render_region_ = render_builder_.build(world_);
+        rebuild_render_region();
 
         if (!info_.has_value()) {
             throw std::runtime_error(
@@ -152,6 +198,7 @@ ConnectionInfo ViewerRuntime::reconnect() {
 void ViewerRuntime::disconnect() noexcept {
     scene_.disconnect();
     world_.clear();
+    terrain_cache_.invalidate();
     render_region_.reset();
     info_.reset();
     core_base_url_.clear();
