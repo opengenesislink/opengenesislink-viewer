@@ -4,7 +4,6 @@
 
 #include <charconv>
 #include <cmath>
-#include <limits>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -340,16 +339,6 @@ Frame make_terrain_set_request(
     std::size_t grid_x,
     std::size_t grid_y,
     double height) {
-    if (grid_x >
-            static_cast<std::size_t>(
-                std::numeric_limits<std::uint64_t>::max()) ||
-        grid_y >
-            static_cast<std::size_t>(
-                std::numeric_limits<std::uint64_t>::max())) {
-        throw std::invalid_argument(
-            "Terrain grid coordinate is out of range");
-    }
-
     return {
         .type = MessageType::terrain_set_request,
         .request_id = request_id,
