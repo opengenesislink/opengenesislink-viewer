@@ -119,6 +119,14 @@ ConsoleCommand parse_console_command(
             ConsoleCommandKind::direct_message,
             tokens);
     }
+    if (name == "/social" &&
+        tokens.size() == 2U &&
+        tokens[1] == "refresh") {
+        return command(
+            ConsoleCommandKind::social_refresh,
+            tokens,
+            2U);
+    }
     if (name == "/friend") {
         require_args(
             tokens, 2U,
@@ -247,6 +255,15 @@ ConsoleCommand parse_console_command(
                 tokens,
                 2U);
         }
+        if (tokens[1] == "info") {
+            require_args(
+                tokens, 2U,
+                "/group info <group-id>");
+            return command(
+                ConsoleCommandKind::group_details,
+                tokens,
+                2U);
+        }
         if (tokens[1] == "invite") {
             require_args(
                 tokens, 3U,
@@ -350,6 +367,15 @@ ConsoleCommand parse_console_command(
                 "/parcel policy <id> <group-id|-> <entry 0|1> <public-build 0|1> <group-build 0|1> [group-terraform 0|1]");
             return command(
                 ConsoleCommandKind::parcel_policy,
+                tokens,
+                2U);
+        }
+        if (tokens[1] == "access-list") {
+            require_args(
+                tokens, 2U,
+                "/parcel access-list <parcel-id>");
+            return command(
+                ConsoleCommandKind::parcel_access_list,
                 tokens,
                 2U);
         }
@@ -500,13 +526,13 @@ ConsoleCommand parse_console_command(
 
 std::string console_help() {
     return
-        "TEXT = LOCAL CHAT | /dm USER TEXT | /friend request|accept|remove USER | "
+        "TEXT = LOCAL CHAT | /dm USER TEXT | /social refresh | /friend request|accept|remove USER | "
         "/block USER on|off | /mute USER on|off | /appearance refresh | "
         "/wear SLOT ITEM ASSET | /unwear SLOT | /attach POINT ITEM ASSET | "
         "/detach POINT [ITEM] | /inventory refresh|folder|item ... | "
-        "/groups refresh | /group create|invite|accept|add|role|remove|post ... | "
+        "/groups refresh | /group create|info|invite|accept|add|role|remove|post ... | "
         "/notifications refresh | /notify read ID | /parcels refresh | "
-        "/parcel create|policy|access|access-remove ... | /tp REGION [X Y Z] | "
+        "/parcel create|policy|access-list|access|access-remove ... | /tp REGION [X Y Z] | "
         "/handoff REGION | /build create|delete|move|scale|text|link|unlink|shape|material|force ... | "
         "/terrain set X Y HEIGHT | /refresh";
 }
