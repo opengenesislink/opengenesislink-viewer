@@ -19,6 +19,8 @@ add_library(opengenesis-viewer-core
     src/core/release_discovery.cpp
     src/core/auth_client.cpp
     src/core/viewer_bootstrap.cpp
+    src/scene/frame.cpp
+    src/scene/session_protocol.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -65,4 +67,8 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-core-tests tests/core_contract_tests.cpp)
     target_link_libraries(ogl-viewer-core-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-core-contracts COMMAND ogl-viewer-core-tests)
+
+    add_executable(ogl-viewer-scene-tests tests/scene_protocol_tests.cpp)
+    target_link_libraries(ogl-viewer-scene-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-scene-protocol COMMAND ogl-viewer-scene-tests)
 endif()
