@@ -48,10 +48,13 @@ struct LoginLayout {
     Rect button;
 };
 
-struct LoginInputContext {
-    LoginFormState* form = nullptr;
-    bool* visible = nullptr;
-    bool* submit_requested = nullptr;
+struct ViewerInputContext {
+    LoginFormState* login_form = nullptr;
+    bool* login_visible = nullptr;
+    bool* login_submit_requested = nullptr;
+    std::string* console_input = nullptr;
+    bool* console_visible = nullptr;
+    bool* console_submit_requested = nullptr;
 };
 
 constexpr render::UiColor kPanel{
@@ -86,19 +89,30 @@ void glfw_error_callback(int code, const char* description) {
 void login_character_callback(
     GLFWwindow* window,
     unsigned int codepoint) {
-    auto* context = static_cast<LoginInputContext*>(
+    auto* context = static_cast<ViewerInputContext*>(
         glfwGetWindowUserPointer(window));
     if (context == nullptr ||
-        context->form == nullptr ||
-        context->visible == nullptr ||
-        !*context->visible ||
-        context->form->connecting ||
         codepoint > 126U) {
         return;
     }
 
-    context->form->append_ascii(
-        static_cast<char>(codepoint));
+    if (context->login_form != nullptr &&
+        context->login_visible != nullptr &&
+        *context->login_visible &&
+        !context->login_form->connecting) {
+        context->login_form->append_ascii(
+            static_cast<char>(codepoint));
+        return;
+    }
+
+    if (context->console_input != nullptr &&
+        context->console_visible != nullptr &&
+        *context->console_visible &&
+        codepoint >= 32U &&
+        context->console_input->size() < 2048U) {
+        context->console_input->push_back(
+            static_cast<char>(codepoint));
+    }
 }
 
 void login_key_callback(
@@ -107,38 +121,58 @@ void login_key_callback(
     int,
     int action,
     int mods) {
-    auto* context = static_cast<LoginInputContext*>(
+    auto* context = static_cast<ViewerInputContext*>(
         glfwGetWindowUserPointer(window));
     if (context == nullptr ||
-        context->form == nullptr ||
-        context->visible == nullptr ||
-        context->submit_requested == nullptr ||
-        !*context->visible ||
-        context->form->connecting) {
+        (action != GLFW_PRESS &&
+         action != GLFW_REPEAT)) {
         return;
     }
 
-    if (action != GLFW_PRESS &&
-        action != GLFW_REPEAT) {
+    if (context->login_form != nullptr &&
+        context->login_visible != nullptr &&
+        context->login_submit_requested != nullptr &&
+        *context->login_visible &&
+        !context->login_form->connecting) {
+        if (key == GLFW_KEY_BACKSPACE) {
+            context->login_form->backspace();
+            return;
+        }
+        if (key == GLFW_KEY_TAB &&
+            action == GLFW_PRESS) {
+            context->login_form->focus_next(
+                (mods & GLFW_MOD_SHIFT) != 0);
+            return;
+        }
+        if ((key == GLFW_KEY_ENTER ||
+             key == GLFW_KEY_KP_ENTER) &&
+            action == GLFW_PRESS) {
+            *context->login_submit_requested = true;
+        }
         return;
     }
 
-    if (key == GLFW_KEY_BACKSPACE) {
-        context->form->backspace();
-        return;
-    }
-
-    if (key == GLFW_KEY_TAB &&
-        action == GLFW_PRESS) {
-        context->form->focus_next(
-            (mods & GLFW_MOD_SHIFT) != 0);
-        return;
-    }
-
-    if ((key == GLFW_KEY_ENTER ||
-         key == GLFW_KEY_KP_ENTER) &&
-        action == GLFW_PRESS) {
-        *context->submit_requested = true;
+    if (context->console_input != nullptr &&
+        context->console_visible != nullptr &&
+        context->console_submit_requested != nullptr &&
+        *context->console_visible) {
+        if (key == GLFW_KEY_BACKSPACE) {
+            if (!context->console_input->empty()) {
+                context->console_input->pop_back();
+            }
+            return;
+        }
+        if ((key == GLFW_KEY_ENTER ||
+             key == GLFW_KEY_KP_ENTER) &&
+            action == GLFW_PRESS) {
+            *context->console_submit_requested = true;
+            return;
+        }
+        if (key == GLFW_KEY_ESCAPE &&
+            action == GLFW_PRESS) {
+            *context->console_visible = false;
+            context->console_input->clear();
+        }
     }
 }
 
@@ -934,7 +968,7 @@ int DesktopApplication::run(
         bool submit_requested = false;
         bool previous_mouse_pressed = false;
 
-        LoginInputContext login_input{
+        ViewerInputContext login_input{
             .form = &login_form,
             .visible = &show_login,
             .submit_requested = &submit_requested,
