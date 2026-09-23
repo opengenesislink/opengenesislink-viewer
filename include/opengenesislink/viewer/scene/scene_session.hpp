@@ -22,7 +22,8 @@ public:
 
     [[nodiscard]] SceneStartupResult start(
         std::string_view region_id,
-        std::string_view scene_ticket);
+        std::string_view scene_ticket,
+        std::uint64_t initial_sync_since = 0U);
 
     [[nodiscard]] Frame request_sync(
         std::uint64_t since,
@@ -60,7 +61,8 @@ public:
     [[nodiscard]] SceneStartupResult connect_and_enter(
         std::string_view scene_endpoint,
         std::string_view region_id,
-        std::string_view scene_ticket);
+        std::string_view scene_ticket,
+        std::uint64_t initial_sync_since = 0U);
 
     void disconnect() noexcept;
     [[nodiscard]] bool is_connected() const noexcept;
