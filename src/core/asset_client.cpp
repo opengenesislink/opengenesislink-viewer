@@ -268,6 +268,9 @@ AssetBlob AssetClient::fetch(
             },
         },
         .body = {},
+        .max_response_bytes =
+            max_decoded_bytes_ * 2U +
+            1024U * 1024U,
     });
 
     if (response.status < 200 ||
