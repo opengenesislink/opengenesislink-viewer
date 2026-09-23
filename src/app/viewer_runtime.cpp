@@ -39,6 +39,11 @@ ConnectionInfo ViewerRuntime::connect(
 
         render_region_ = render_builder_.build(world_);
         bearer_token_ = entry.login.token;
+        core_base_url_ = request.core_base_url;
+        region_id_ = entry.bootstrap.region_id;
+        spawn_x_ = request.spawn_x;
+        spawn_y_ = request.spawn_y;
+        spawn_z_ = request.spawn_z;
 
         ConnectionInfo info;
         info.server_version = entry.discovery.release.server_version;
@@ -50,6 +55,13 @@ ConnectionInfo ViewerRuntime::connect(
         info.scene_endpoint = entry.bootstrap.scene_endpoint;
         info.scene_capabilities = entry.bootstrap.capabilities;
         info.spawn = entry.bootstrap.spawn;
+        if (!info.spawn.has_value()) {
+            info.spawn = core::SpawnPoint{
+                .x = startup.join.spawn_x,
+                .y = startup.join.spawn_y,
+                .z = startup.join.spawn_z,
+            };
+        }
 
         info_ = info;
         return info;
@@ -73,11 +85,80 @@ world::SynchronizeResult ViewerRuntime::poll(
     return result;
 }
 
+ConnectionInfo ViewerRuntime::reconnect() {
+    if (bearer_token_.empty() ||
+        core_base_url_.empty() ||
+        region_id_.empty() ||
+        !world_.initialized()) {
+        throw std::runtime_error(
+            "Viewer runtime has no reconnect context");
+    }
+
+    const auto previous_sequence = world_.sequence();
+    scene_.disconnect();
+
+    core::ViewerBootstrapClient bootstrap_client(http_);
+    const auto bootstrap = bootstrap_client.bootstrap(
+        core_base_url_,
+        bearer_token_,
+        {
+            .region = region_id_,
+            .x = spawn_x_,
+            .y = spawn_y_,
+            .z = spawn_z_,
+        });
+
+    try {
+        const auto startup = scene_.connect_and_enter(
+            bootstrap.scene_endpoint,
+            bootstrap.region_id,
+            bootstrap.scene_ticket,
+            previous_sequence);
+
+        const auto synchronized =
+            synchronizer_.apply(startup.initial_sync);
+        if (!synchronized.applied || !world_.initialized()) {
+            throw std::runtime_error(
+                "Reconnected Scene state was not applied");
+        }
+
+        render_region_ = render_builder_.build(world_);
+
+        if (!info_.has_value()) {
+            throw std::runtime_error(
+                "Viewer runtime lost connection metadata");
+        }
+
+        info_->region_id = bootstrap.region_id;
+        info_->scene_endpoint = bootstrap.scene_endpoint;
+        info_->scene_capabilities = bootstrap.capabilities;
+        info_->spawn = bootstrap.spawn;
+        if (!info_->spawn.has_value()) {
+            info_->spawn = core::SpawnPoint{
+                .x = startup.join.spawn_x,
+                .y = startup.join.spawn_y,
+                .z = startup.join.spawn_z,
+            };
+        }
+
+        region_id_ = bootstrap.region_id;
+        return *info_;
+    } catch (...) {
+        scene_.disconnect();
+        throw;
+    }
+}
+
 void ViewerRuntime::disconnect() noexcept {
     scene_.disconnect();
     world_.clear();
     render_region_.reset();
     info_.reset();
+    core_base_url_.clear();
+    region_id_.clear();
+    spawn_x_ = 128.0;
+    spawn_y_ = 128.0;
+    spawn_z_ = 25.0;
 
     if (!bearer_token_.empty()) {
         std::fill(
