@@ -2,6 +2,7 @@
 
 #include "opengenesislink/viewer/core/bootstrap_content.hpp"
 #include "opengenesislink/viewer/core/http_transport.hpp"
+#include "opengenesislink/viewer/core/viewer_bootstrap.hpp"
 
 #include <cstdint>
 #include <optional>
