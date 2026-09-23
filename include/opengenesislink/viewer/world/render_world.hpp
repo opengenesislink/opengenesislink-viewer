@@ -2,6 +2,7 @@
 
 #include "opengenesislink/viewer/world/world_model.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -26,6 +27,9 @@ struct RenderRegion {
     std::string region_id;
     std::uint64_t scene_sequence = 0;
     std::uint64_t terrain_revision = 0;
+    std::size_t terrain_width = 0;
+    std::size_t terrain_height = 0;
+    double terrain_cell_size = 0.0;
     double water_height = 0.0;
     std::unordered_map<std::uint64_t, RenderInstance> instances;
 };
