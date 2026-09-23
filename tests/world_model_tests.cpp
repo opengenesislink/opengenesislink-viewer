@@ -145,14 +145,17 @@ void test_sequence_gap_requests_snapshot() {
         "mode=delta\n"
         "region=region-1\n"
         "from=10\n"
-        "latest=12\n"
-        "count=1\n"
-        "event=12|entity_updated|100||1.000|2.000|3.000|0.000|0.000|0.000|1.000|1.000|1.000\n"));
+        "latest=13\n"
+        "count=2\n"
+        "event=11|entity_updated|100||999.000|2.000|3.000|0.000|0.000|0.000|1.000|1.000|1.000\n"
+        "event=13|entity_updated|100||1.000|2.000|3.000|0.000|0.000|0.000|1.000|1.000|1.000\n"));
 
     const auto applied = model.apply(delta);
     require(!applied.applied, "gapped delta must not be accepted");
     require(applied.requires_snapshot, "gapped delta must request snapshot recovery");
     require(model.sequence() == 10U, "gapped delta changed authoritative sequence");
+    require(model.region().entities.at(100U).transform.position.x == 10.0,
+            "gapped delta partially mutated WorldModel");
 }
 
 void test_parser_rejects_bad_counts_and_types() {
