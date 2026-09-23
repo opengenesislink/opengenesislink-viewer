@@ -39,6 +39,8 @@ public:
     [[nodiscard]] world::SynchronizeResult poll(
         std::uint32_t max_events = 256U);
 
+    [[nodiscard]] ConnectionInfo reconnect();
+
     void disconnect() noexcept;
 
     [[nodiscard]] bool connected() const noexcept;
@@ -56,6 +58,11 @@ private:
     std::optional<world::RenderRegion> render_region_;
     std::optional<ConnectionInfo> info_;
     std::string bearer_token_;
+    std::string core_base_url_;
+    std::string region_id_;
+    double spawn_x_ = 128.0;
+    double spawn_y_ = 128.0;
+    double spawn_z_ = 25.0;
 };
 
 } // namespace ogl::viewer::app
