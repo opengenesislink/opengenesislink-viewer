@@ -40,8 +40,13 @@ The first foundation block contains:
 - authoritative SCENE_SYNC snapshot/delta parser
 - Region/entity WorldModel with transforms, permissions, linksets and Physics state
 - strict Scene sequence validation and snapshot-recovery signaling
+- `ogl-viewer` application shell target
+- official OpenGenesisLINK Viewer application icon integrated for Windows builds
+- Linux desktop/icon installation resources from the same supplied logo
 
 There is deliberately no rendering engine or GUI dependency in this block. Networking/contracts stay independent from the future Render layer.
+
+The application branding is already wired into packaging. No substitute artwork is generated: the repository uses build-ready derivatives of the official Viewer logo supplied by the project.
 
 ## Build
 
