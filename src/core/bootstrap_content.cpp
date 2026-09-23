@@ -3,8 +3,10 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <limits>
 #include <stdexcept>
 #include <unordered_set>
+#include <utility>
 
 namespace ogl::viewer::core {
 namespace {
