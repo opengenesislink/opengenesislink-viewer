@@ -1,0 +1,10 @@
+build/
+out/
+.vscode/
+.idea/
+.vs/
+*.user
+*.suo
+*.swp
+*.tmp
+.DS_Store
