@@ -20,6 +20,208 @@ bool contains_capability(
                capability) != capabilities.end();
 }
 
+std::string join_arguments(
+    const std::vector<std::string>& arguments,
+    std::size_t first = 0U) {
+    std::string result;
+    for (std::size_t index = first;
+         index < arguments.size();
+         ++index) {
+        if (!result.empty()) {
+            result += ' ';
+        }
+        result += arguments[index];
+    }
+    return result;
+}
+
+template <typename T>
+T parse_unsigned_argument(
+    std::string_view value,
+    std::string_view label) {
+    T result{};
+    const auto [ptr, error] =
+        std::from_chars(
+            value.data(),
+            value.data() + value.size(),
+            result);
+    if (error != std::errc{} ||
+        ptr != value.data() + value.size()) {
+        throw std::invalid_argument(
+            "Invalid " + std::string(label));
+    }
+    return result;
+}
+
+double parse_double_argument(
+    std::string_view value,
+    std::string_view label) {
+    double result = 0.0;
+    const auto [ptr, error] =
+        std::from_chars(
+            value.data(),
+            value.data() + value.size(),
+            result);
+    if (error != std::errc{} ||
+        ptr != value.data() + value.size() ||
+        !std::isfinite(result)) {
+        throw std::invalid_argument(
+            "Invalid " + std::string(label));
+    }
+    return result;
+}
+
+bool parse_toggle_argument(
+    std::string_view value,
+    std::string_view label) {
+    if (value == "on" ||
+        value == "allow" ||
+        value == "1" ||
+        value == "true") {
+        return true;
+    }
+    if (value == "off" ||
+        value == "deny" ||
+        value == "0" ||
+        value == "false") {
+        return false;
+    }
+    throw std::invalid_argument(
+        "Invalid " + std::string(label) +
+        "; expected on/off or allow/deny");
+}
+
+scene::SceneTransform to_scene_transform(
+    const world::Transform& transform) {
+    return {
+        .x = transform.position.x,
+        .y = transform.position.y,
+        .z = transform.position.z,
+        .rx = transform.rotation.x,
+        .ry = transform.rotation.y,
+        .rz = transform.rotation.z,
+        .sx = transform.scale.x,
+        .sy = transform.scale.y,
+        .sz = transform.scale.z,
+    };
+}
+
+std::string summarize_social(
+    const std::vector<core::PresenceInfo>& presences,
+    const std::vector<core::FriendRelation>& friends,
+    const core::MessageList& messages,
+    const std::vector<core::SocialPolicy>& policies) {
+    std::ostringstream out;
+    out << "SOCIAL: "
+        << friends.size() << " FRIENDS, "
+        << messages.unread << " UNREAD DM, "
+        << presences.size() << " PRESENCE, "
+        << policies.size() << " POLICIES";
+    for (const auto& relation : friends) {
+        out << "\nFRIEND "
+            << relation.other_user_id
+            << " [" << relation.status << ']';
+    }
+    for (const auto& message : messages.messages) {
+        out << "\nDM "
+            << message.direction << ' '
+            << message.sender_id
+            << " -> "
+            << message.recipient_id
+            << ": " << message.text;
+    }
+    return out.str();
+}
+
+std::string summarize_groups(
+    const std::vector<core::GroupInfo>& groups,
+    const std::vector<core::GroupInvite>& invites) {
+    std::ostringstream out;
+    out << "GROUPS: "
+        << groups.size()
+        << " MEMBERSHIPS, "
+        << invites.size()
+        << " INVITES";
+    for (const auto& group : groups) {
+        out << "\nGROUP "
+            << group.id
+            << " | " << group.name;
+    }
+    for (const auto& invite : invites) {
+        out << "\nINVITE "
+            << invite.id
+            << " | GROUP "
+            << invite.group_id
+            << " | " << invite.state;
+    }
+    return out.str();
+}
+
+std::string summarize_group_details(
+    std::string_view group_id,
+    const std::vector<core::GroupMember>& members,
+    const std::vector<core::GroupPost>& posts) {
+    std::ostringstream out;
+    out << "GROUP " << group_id
+        << ": " << members.size()
+        << " MEMBERS, "
+        << posts.size() << " POSTS";
+    for (const auto& member : members) {
+        out << "\nMEMBER "
+            << member.user_id
+            << " | " << member.role
+            << " | POWERS "
+            << member.powers;
+    }
+    for (const auto& post : posts) {
+        out << "\n" << post.kind
+            << " " << post.sender_id
+            << ": " << post.text;
+    }
+    return out.str();
+}
+
+std::string summarize_notifications(
+    const core::NotificationList& notifications) {
+    std::ostringstream out;
+    out << "NOTIFICATIONS: "
+        << notifications.unread
+        << " UNREAD / "
+        << notifications.notifications.size()
+        << " TOTAL";
+    for (const auto& item :
+         notifications.notifications) {
+        out << "\n"
+            << (item.read_unix == 0 ? "* " : "  ")
+            << item.id << " | "
+            << item.title << " | "
+            << item.body;
+    }
+    return out.str();
+}
+
+std::string summarize_parcels(
+    const std::vector<core::ParcelInfo>& parcels,
+    std::string_view heading) {
+    std::ostringstream out;
+    out << heading << ": "
+        << parcels.size();
+    for (const auto& parcel : parcels) {
+        out << "\nPARCEL "
+            << parcel.id
+            << " | " << parcel.name
+            << " | [" << parcel.x1
+            << ',' << parcel.y1
+            << "]-[" << parcel.x2
+            << ',' << parcel.y2
+            << "] ENTRY="
+            << (parcel.public_entry ? "PUBLIC" : "RESTRICTED")
+            << " BUILD="
+            << (parcel.public_build ? "PUBLIC" : "CONTROLLED");
+    }
+    return out.str();
+}
+
 } // namespace
 
 ViewerRuntime::ViewerRuntime()
