@@ -29,7 +29,7 @@ jobs:
             vcpkg-viewer-windows-x64-
       - name: Install dependencies
         shell: pwsh
-        run: vcpkg install curl:x64-windows nlohmann-json:x64-windows
+        run: vcpkg install --triplet x64-windows
       - name: Configure release
         shell: pwsh
         run: >
