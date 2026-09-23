@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=OpenGenesisLINK Viewer
+Comment=First-party viewer for OpenGenesisLINK virtual worlds
+Exec=ogl-viewer
+Icon=opengenesislink-viewer
+Terminal=true
+Categories=Game;Network;
+NoDisplay=true
