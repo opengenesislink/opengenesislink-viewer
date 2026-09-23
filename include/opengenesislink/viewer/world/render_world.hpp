@@ -8,12 +8,14 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ogl::viewer::world {
 
 enum class RenderGeometry {
     box_proxy,
-    avatar_capsule
+    avatar_capsule,
+    avatar_humanoid
 };
 
 struct RenderInstance {
@@ -23,6 +25,10 @@ struct RenderInstance {
     std::uint64_t parent_entity_id = 0;
     std::uint32_t link_number = 0;
     bool physical = false;
+    bool local_avatar = false;
+    double avatar_height = 1.9;
+    std::vector<std::string> wearable_slots;
+    std::vector<std::string> attachment_points;
 };
 
 struct RenderRegion {
