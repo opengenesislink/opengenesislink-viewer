@@ -1516,12 +1516,19 @@ bool ViewerRuntime::submit_command(
                             args.at(4),
                             "parcel y2");
                     const core::ParcelInfo parcel{
+                        .id = {},
                         .region_id = current_region,
                         .name = args.at(0),
+                        .owner_user_id = {},
+                        .group_id = {},
                         .x1 = x1,
                         .y1 = y1,
                         .x2 = x2,
                         .y2 = y2,
+                        .public_entry = false,
+                        .public_build = false,
+                        .group_build = false,
+                        .group_terraform = false,
                     };
                     const auto id =
                         platform_lock(
