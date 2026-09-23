@@ -28,3 +28,9 @@ jobs:
         run: cmake --build --preset release
       - name: Unit tests
         run: ctest --preset release
+      - name: Install smoke
+        run: |
+          cmake --install build/release --prefix build/install
+          test -x build/install/bin/ogl-viewer
+          test -f build/install/share/icons/hicolor/64x64/apps/opengenesislink-viewer.png
+          test -f build/install/share/applications/opengenesislink-viewer.desktop

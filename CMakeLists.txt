@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 project(OpenGenesisLINKViewer VERSION 0.4.0 LANGUAGES CXX)
 
+include(GNUInstallDirs)
+
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" OGL_VIEWER_VERSION_LABEL)
 string(STRIP "${OGL_VIEWER_VERSION_LABEL}" OGL_VIEWER_VERSION_LABEL)
 
@@ -59,18 +61,50 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     endif()
 endif()
 
+add_executable(ogl-viewer apps/viewer/main.cpp)
+target_link_libraries(ogl-viewer PRIVATE OpenGenesis::ViewerCore)
+
+if(WIN32)
+    set(OGL_VIEWER_ICON_ICO
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/branding/opengenesislink-viewer.ico")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    configure_file(
+        resources/windows/opengenesislink-viewer.rc.in
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/opengenesislink-viewer.rc"
+        @ONLY
+    )
+    target_sources(
+        ogl-viewer PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/opengenesislink-viewer.rc"
+    )
+endif()
+
 add_executable(ogl-viewer-contract-smoke apps/contract-smoke/main.cpp)
 target_link_libraries(ogl-viewer-contract-smoke PRIVATE OpenGenesis::ViewerCore)
 
-install(TARGETS opengenesis-viewer-core ogl-viewer-contract-smoke
+install(TARGETS opengenesis-viewer-core ogl-viewer ogl-viewer-contract-smoke
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )
 install(DIRECTORY include/ DESTINATION include)
 
+if(UNIX AND NOT APPLE)
+    install(
+        FILES assets/branding/opengenesislink-viewer.png
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/64x64/apps"
+        RENAME opengenesislink-viewer.png
+    )
+    install(
+        FILES packaging/linux/opengenesislink-viewer.desktop
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
+    )
+endif()
+
 include(CTest)
 if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
+    add_test(NAME viewer-app-version COMMAND ogl-viewer --version)
+
     add_executable(ogl-viewer-core-tests tests/core_contract_tests.cpp)
     target_link_libraries(ogl-viewer-core-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-core-contracts COMMAND ogl-viewer-core-tests)
