@@ -391,7 +391,7 @@ ConsoleCommand parse_console_command(
     if (name == "/build") {
         require_args(
             tokens, 1U,
-            "/build create|delete|move|scale|text|link|unlink|physical ...");
+            "/build create|delete|move|scale|text|link|unlink|shape|material|force ...");
         if (tokens[1] == "create") {
             require_args(
                 tokens, 5U,
@@ -449,12 +449,30 @@ ConsoleCommand parse_console_command(
                 tokens,
                 2U);
         }
-        if (tokens[1] == "physical") {
+        if (tokens[1] == "shape") {
             require_args(
                 tokens, 3U,
-                "/build physical <entity-id> on|off");
+                "/build shape <entity-id> sphere|box|capsule");
             return command(
-                ConsoleCommandKind::build_physical,
+                ConsoleCommandKind::build_shape,
+                tokens,
+                2U);
+        }
+        if (tokens[1] == "material") {
+            require_args(
+                tokens, 5U,
+                "/build material <entity-id> <mass> <restitution> <friction>");
+            return command(
+                ConsoleCommandKind::build_material,
+                tokens,
+                2U);
+        }
+        if (tokens[1] == "force") {
+            require_args(
+                tokens, 5U,
+                "/build force <entity-id> <x> <y> <z>");
+            return command(
+                ConsoleCommandKind::build_force,
                 tokens,
                 2U);
         }
@@ -489,7 +507,7 @@ std::string console_help() {
         "/groups refresh | /group create|invite|accept|add|role|remove|post ... | "
         "/notifications refresh | /notify read ID | /parcels refresh | "
         "/parcel create|policy|access|access-remove ... | /tp REGION [X Y Z] | "
-        "/handoff REGION | /build create|delete|move|scale|text|link|unlink|physical ... | "
+        "/handoff REGION | /build create|delete|move|scale|text|link|unlink|shape|material|force ... | "
         "/terrain set X Y HEIGHT | /refresh";
 }
 
