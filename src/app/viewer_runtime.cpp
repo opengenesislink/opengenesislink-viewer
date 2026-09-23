@@ -270,6 +270,36 @@ void ViewerRuntime::rebuild_render_region() {
         terrain_suspended_ = false;
     }
 
+    if (avatar_id_ != 0U) {
+        if (auto local =
+                next.instances.find(avatar_id_);
+            local != next.instances.end() &&
+            local->second.geometry ==
+                world::RenderGeometry::avatar_humanoid) {
+            local->second.local_avatar = true;
+            if (bootstrap_content_.appearance.has_value()) {
+                const auto& appearance =
+                    *bootstrap_content_.appearance;
+                if (appearance.avatar_height > 0.0) {
+                    local->second.avatar_height =
+                        appearance.avatar_height;
+                }
+                local->second.wearable_slots.clear();
+                for (const auto& wearable :
+                     appearance.wearables) {
+                    local->second.wearable_slots.push_back(
+                        wearable.slot);
+                }
+                local->second.attachment_points.clear();
+                for (const auto& attachment :
+                     appearance.attachments) {
+                    local->second.attachment_points.push_back(
+                        attachment.point);
+                }
+            }
+        }
+    }
+
     render_region_ = std::move(next);
 }
 
@@ -2184,6 +2214,9 @@ void ViewerRuntime::apply_command_result(
             std::move(result.appearance);
         prepare_asset_prefetch(
             bootstrap_content_);
+        if (world_.initialized()) {
+            rebuild_render_region();
+        }
     }
     if (result.inventory.has_value()) {
         bootstrap_content_.inventory =
