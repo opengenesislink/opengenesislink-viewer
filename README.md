@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.12.0-dev
+## Current status — 0.13.0-dev
 
 The first foundation block contains:
 
@@ -86,7 +86,17 @@ The first foundation block contains:
 - Appearance inspector with revision, height, visual parameters, wearables and attachments
 - Inventory inspector with root, folders, items and Asset references
 - Asset metadata inspector with MIME, size, id and content-hash information
-- paged inspector navigation via I, Tab and PageUp/PageDown without introducing Inventory/Appearance mutation
+- paged inspector navigation via I, Tab and PageUp/PageDown
+- live Local Chat history plus Enter-activated chat/command bar
+- direct messages, friends, block/mute and presence-backed social refresh
+- live Appearance refresh plus wearable/attachment set/remove operations
+- Inventory refresh plus folder/item creation through released Core endpoints
+- Groups, roles, invitations, group channel posts and notifications
+- Object Build Tools for create/delete/transform/link/text/permissions/motion/interaction and released Physics actions
+- Parcel/Land workflows for list/create/policy/access plus authenticated terrain height edits
+- native OpenGenesisLINK teleport and two-phase adjacent Region handoff with reservation, commit and rollback recovery
+- procedural humanoid Avatar fallback using authoritative avatar height, wearable slots and attachment points
+- unified command results remain visible in-world while Scene/terrain/Asset background work continues
 
 Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
@@ -108,7 +118,7 @@ Windows uses vcpkg dependencies from `vcpkg.json`.
 
 ## Live alpha connection
 
-The 0.12 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
+The 0.13 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
 
 The command-line live path remains available for development and automated testing.
 
@@ -137,9 +147,13 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 While connected to a Region, press `I` to open the read-only Content Inspector. `Tab` cycles through Appearance, Inventory and Asset metadata; `PageUp` / `PageDown` navigate longer lists. Opening the inspector suspends new Avatar movement input while Scene synchronization, terrain refinement and Asset prefetch continue.
 
+## Alpha command bar
+
+Press `Enter` while in-world to open Local Chat / Viewer Commands. Plain text is sent to Local Chat. `/help` shows the available alpha commands for Appearance, Inventory, Social, Groups, Notifications, Parcels, Build Tools, terrain editing and native OpenGenesisLINK travel.
+
 ## Next milestone
 
-The next block adds authenticated refresh paths for Appearance/Inventory data and begins the first interactive Inventory/Appearance actions that are explicitly supported by the Server contract. Visual Asset decoding remains gated on a stable texture/mesh MIME and payload contract; unsupported bytes continue to use explicit proxy rendering. See `docs/ROADMAP.md`.
+The remaining first-alpha blockers are Atlas destination integration plus release packaging/real-server validation. Full arbitrary object mesh/material rendering remains gated on a stable Server visual-state contract, and Hypergrid travel into OpenSimulator/OSGrid remains a separate interoperability block. See `docs/ROADMAP.md`.
 
 ## License
 
