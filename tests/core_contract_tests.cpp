@@ -152,6 +152,46 @@ void test_bootstrap() {
     require(auth->second == "Bearer session-token", "authorization header mismatch");
 }
 
+void test_aggregated_session_bootstrap() {
+    FakeTransport transport;
+    transport.responses = {
+        {200, R"({
+            "viewer_contract":"ogl-viewer-bootstrap-v1",
+            "scene_contract":"scene-v2",
+            "session":{
+                "user":{"id":"u-1","display_name":"Avatar Resident"},
+                "region":{"id":"region-current","name":"Current"},
+                "scene_endpoint":"127.0.0.1:19100",
+                "scene_ticket":"current-signed-ticket",
+                "capabilities":"scene.sync,scene.avatar.reconcile,scene.region.metadata",
+                "spawn":{"x":130,"y":131,"z":25}
+            },
+            "appearance":{"revision":4},
+            "inventory":{"root":{"id":"root-1"}},
+            "assets":[]
+        })"}
+    };
+
+    ogl::viewer::core::ViewerBootstrapClient client(transport);
+    const auto result = client.bootstrap(
+        "https://core.example",
+        "session-token",
+        {.region = "region-current", .x = 130, .y = 131, .z = 25});
+
+    require(result.scene_endpoint == "127.0.0.1:19100",
+            "aggregated bootstrap scene endpoint mismatch");
+    require(result.scene_ticket == "current-signed-ticket",
+            "aggregated bootstrap Scene ticket mismatch");
+    require(result.region_id == "region-current",
+            "aggregated bootstrap Region mismatch");
+    require(result.spawn.has_value() &&
+            result.spawn->x == 130.0 &&
+            result.spawn->y == 131.0,
+            "aggregated bootstrap spawn mismatch");
+    require(result.capabilities.size() == 3U,
+            "aggregated bootstrap capabilities mismatch");
+}
+
 } // namespace
 
 int main() {
@@ -160,6 +200,7 @@ int main() {
         test_release_rejects_breaking_contract();
         test_login();
         test_bootstrap();
+        test_aggregated_session_bootstrap();
         std::cout << "OpenGenesisLINK Viewer core contract tests passed\n";
         return EXIT_SUCCESS;
     } catch (const std::exception& ex) {
