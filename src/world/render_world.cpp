@@ -15,6 +15,9 @@ RenderRegion RenderWorldBuilder::build(const WorldModel& model) const {
     render.region_id = region.region_id;
     render.scene_sequence = region.sequence;
     render.terrain_revision = region.terrain_revision;
+    render.terrain_width = region.terrain_width;
+    render.terrain_height = region.terrain_height;
+    render.terrain_cell_size = region.terrain_cell_size;
     render.water_height = region.water_height;
     render.instances.reserve(region.entities.size());
 
