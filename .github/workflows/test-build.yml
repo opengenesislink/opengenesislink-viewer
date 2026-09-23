@@ -1,0 +1,133 @@
+name: Viewer Alpha Test Build
+
+on:
+  push:
+    branches:
+      - 'test-build/**'
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: linux-x86_64
+            deb_arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: linux-arm64
+            deb_arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build dpkg-dev libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev
+      - name: Configure
+        run: cmake --preset release -DOGL_VIEWER_BUILD_TESTS=OFF
+      - name: Build
+        run: cmake --build --preset release
+      - name: Install staging tree
+        run: cmake --install build/release --prefix build/install
+      - name: Smoke installed Viewer
+        run: |
+          test -x build/install/bin/ogl-viewer
+          build/install/bin/ogl-viewer --version
+          test -f build/install/share/icons/hicolor/64x64/apps/opengenesislink-viewer.png
+          test -f build/install/share/applications/opengenesislink-viewer.desktop
+      - name: Package tarball and Debian package
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '\r\n' < VERSION)"
+          mkdir -p artifacts
+          tar -C build/install -czf "artifacts/OpenGenesisLINK-Viewer-${VERSION}-${{ matrix.arch }}.tar.gz" .
+
+          PKGROOT="build/debroot"
+          rm -rf "$PKGROOT"
+          mkdir -p "$PKGROOT/DEBIAN" "$PKGROOT/usr"
+          cp -a build/install/. "$PKGROOT/usr/"
+          DEB_VERSION="$(printf '%s' "$VERSION" | sed 's/-alpha\./~alpha./')"
+          cat > "$PKGROOT/DEBIAN/control" <<EOF
+          Package: opengenesislink-viewer
+          Version: ${DEB_VERSION}
+          Section: games
+          Priority: optional
+          Architecture: ${{ matrix.deb_arch }}
+          Maintainer: OpenGenesisLINK
+          Depends: libc6, libstdc++6, libcurl4t64, libglfw3, libglew2.2, libopengl0, libglx0
+          Description: OpenGenesisLINK first-party virtual world Viewer alpha test build
+          EOF
+          dpkg-deb --build "$PKGROOT" "artifacts/opengenesislink-viewer_${DEB_VERSION}_${{ matrix.deb_arch }}.deb"
+          dpkg-deb --info "artifacts/opengenesislink-viewer_${DEB_VERSION}_${{ matrix.deb_arch }}.deb" >/dev/null
+      - name: Upload Linux test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenGenesisLINK-Viewer-0.13.0-alpha.1-${{ matrix.arch }}
+          path: |
+            artifacts/*.tar.gz
+            artifacts/*.deb
+          if-no-files-found: error
+          retention-days: 30
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Prepare vcpkg binary cache
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:GITHUB_WORKSPACE\.vcpkg-cache" | Out-Null
+          "VCPKG_DEFAULT_BINARY_CACHE=$env:GITHUB_WORKSPACE\.vcpkg-cache" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - uses: actions/cache@v4
+        with:
+          path: .vcpkg-cache
+          key: vcpkg-viewer-alpha-windows-x64-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-viewer-alpha-windows-x64-
+            vcpkg-viewer-windows-x64-
+      - name: Install dependencies
+        shell: pwsh
+        run: vcpkg install --triplet x64-windows
+      - name: Configure
+        shell: pwsh
+        run: >
+          cmake -S . -B build/windows -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DOGL_VIEWER_BUILD_TESTS=OFF
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+      - name: Build
+        shell: pwsh
+        run: cmake --build build/windows --parallel 1
+      - name: Install staging tree
+        shell: pwsh
+        run: cmake --install build/windows --prefix build/install
+      - name: Collect runtime DLLs
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path build/windows -Filter *.dll -File -Recurse | ForEach-Object {
+            Copy-Item $_.FullName -Destination build/install/bin -Force
+          }
+      - name: Smoke installed Viewer
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "build/install/bin/ogl-viewer.exe")) { throw "Viewer executable missing" }
+          & "build/install/bin/ogl-viewer.exe" --version
+      - name: Package Windows ZIP
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Compress-Archive -Path "build/install/*" -DestinationPath "artifacts/OpenGenesisLINK-Viewer-$version-windows-x86_64.zip" -Force
+      - name: Upload Windows test artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenGenesisLINK-Viewer-0.13.0-alpha.1-windows-x86_64
+          path: artifacts/*.zip
+          if-no-files-found: error
+          retention-days: 30
