@@ -96,7 +96,7 @@ Windows uses vcpkg dependencies from `vcpkg.json`.
 
 ## Live alpha connection
 
-The 0.9 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
+The 0.10 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
 
 The command-line live path remains available for development and automated testing.
 
