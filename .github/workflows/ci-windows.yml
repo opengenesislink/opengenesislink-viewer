@@ -44,3 +44,10 @@ jobs:
       - name: Unit tests
         shell: pwsh
         run: ctest --test-dir build/windows --output-on-failure
+      - name: Install smoke
+        shell: pwsh
+        run: |
+          cmake --install build/windows --prefix build/install
+          if (-not (Test-Path "build/install/bin/ogl-viewer.exe")) {
+            throw "Installed Viewer executable is missing"
+          }
