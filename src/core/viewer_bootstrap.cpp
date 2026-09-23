@@ -99,25 +99,42 @@ ViewerBootstrapResult ViewerBootstrapClient::bootstrap(
 
     ViewerBootstrapResult result;
     result.raw_json = response.body;
-    result.viewer_contract = doc.value("viewer_contract", "");
-    result.scene_contract = doc.value("scene_contract", "");
-    result.scene_endpoint = doc.value("scene_endpoint", "");
-    result.scene_ticket = doc.value("scene_ticket", "");
-    result.capabilities = parse_capabilities(doc);
+    result.viewer_contract =
+        doc.value("viewer_contract", "");
+    result.scene_contract =
+        doc.value("scene_contract", "");
 
-    if (const auto region = doc.find("region"); region != doc.end()) {
+    const nlohmann::json* session = &doc;
+    if (const auto nested = doc.find("session");
+        nested != doc.end() && nested->is_object()) {
+        session = &(*nested);
+    }
+
+    result.scene_endpoint =
+        session->value("scene_endpoint", "");
+    result.scene_ticket =
+        session->value("scene_ticket", "");
+    result.capabilities =
+        parse_capabilities(*session);
+
+    if (const auto region = session->find("region");
+        region != session->end()) {
         if (region->is_object()) {
-            result.region_id = region->value("id", "");
+            result.region_id =
+                region->value("id", "");
         } else if (region->is_string()) {
-            result.region_id = region->get<std::string>();
+            result.region_id =
+                region->get<std::string>();
         }
     }
     if (result.region_id.empty()) {
-        result.region_id = doc.value("region_id", "");
+        result.region_id =
+            session->value("region_id", "");
     }
 
-    if (const auto spawn = doc.find("spawn");
-        spawn != doc.end() && spawn->is_object()) {
+    if (const auto spawn = session->find("spawn");
+        spawn != session->end() &&
+        spawn->is_object()) {
         result.spawn = SpawnPoint{
             .x = spawn->value("x", 0.0),
             .y = spawn->value("y", 0.0),
