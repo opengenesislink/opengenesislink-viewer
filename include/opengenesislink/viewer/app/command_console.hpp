@@ -47,7 +47,9 @@ enum class ConsoleCommandKind {
     build_text,
     build_link,
     build_unlink,
-    build_physical,
+    build_shape,
+    build_material,
+    build_force,
     terrain_set,
     refresh_all
 };
