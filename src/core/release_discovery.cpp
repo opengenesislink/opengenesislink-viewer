@@ -70,6 +70,8 @@ DiscoveryResult ReleaseDiscovery::discover(const std::string& core_base_url) con
     const auto root_response = transport_.perform({
         .method = "GET",
         .url = endpoint(core_base_url, "/v1"),
+        .headers = {},
+        .body = {},
     });
     const auto root_json = parse_ok_json(root_response, "GET /v1");
 
@@ -96,6 +98,8 @@ DiscoveryResult ReleaseDiscovery::discover(const std::string& core_base_url) con
     const auto release_response = transport_.perform({
         .method = "GET",
         .url = endpoint(core_base_url, "/v1/release"),
+        .headers = {},
+        .body = {},
     });
     const auto release_json = parse_ok_json(release_response, "GET /v1/release");
 
