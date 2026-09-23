@@ -73,6 +73,14 @@ struct SceneEvent {
     Transform transform;
 };
 
+struct ChatMessage {
+    std::uint64_t sequence = 0;
+    std::uint64_t sender_entity_id = 0;
+    std::string sender_name;
+    std::string kind;
+    std::string text;
+};
+
 struct SceneDelta {
     std::string region_id;
     std::uint64_t from = 0;
@@ -108,6 +116,8 @@ public:
     [[nodiscard]] bool initialized() const noexcept;
     [[nodiscard]] const RegionState& region() const;
     [[nodiscard]] std::uint64_t sequence() const noexcept;
+    [[nodiscard]] const std::vector<ChatMessage>&
+    chat_history() const noexcept;
 
     [[nodiscard]] bool apply_reconciled_avatar(
         std::uint64_t entity_id,
@@ -120,6 +130,7 @@ private:
     [[nodiscard]] bool apply_event(const SceneEvent& event);
 
     RegionState region_;
+    std::vector<ChatMessage> chat_history_;
     bool initialized_ = false;
 };
 
