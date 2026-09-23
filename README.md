@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.7.0-dev
+## Current status — 0.8.0-dev
 
 The first foundation block contains:
 
@@ -59,6 +59,10 @@ The first foundation block contains:
 - periodic Scene delta polling while the graphical Viewer is running
 - sequence-based reconnect that resumes from the last applied authoritative Scene sequence
 - secure alpha live-launch flow that reads the password from `OGL_VIEWER_PASSWORD` rather than a process argument
+- deterministic terrain-patch builder with validated sample distribution and triangle indices
+- live 9×9 terrain sampling through authenticated `TERRAIN_SAMPLE` requests
+- terrain patch reuse while the authoritative terrain revision is unchanged
+- dynamic OpenGL terrain VAO/VBO/EBO path rendered below water/objects/avatars
 
 Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
@@ -80,7 +84,7 @@ Windows uses vcpkg dependencies from `vcpkg.json`.
 
 ## Live alpha connection
 
-The 0.7 development build can enter a real OpenGenesisLINK Region from the desktop renderer while the graphical login form is still under construction.
+The 0.8 development build can enter a real OpenGenesisLINK Region from the desktop renderer while the graphical login form is still under construction.
 
 ```bash
 export OGL_VIEWER_PASSWORD='your-password'
@@ -105,7 +109,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block adds the first in-window login/server form and error/status presentation, then builds a sampled terrain mesh from authoritative terrain samples instead of rendering only the water plane. See `docs/ROADMAP.md`.
+The next development block adds the first in-window login/server form and error/status presentation, then moves terrain loading from the initial coarse 9×9 sample to progressive refinement. The first avatar-control/reconciliation path follows after that. See `docs/ROADMAP.md`.
 
 ## License
 

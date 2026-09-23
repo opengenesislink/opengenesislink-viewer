@@ -13,10 +13,12 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace ogl::viewer::render {
 namespace {
@@ -156,6 +158,9 @@ struct OpenGlRenderer::Impl {
     GLuint vao = 0;
     GLuint vbo = 0;
     GLuint ebo = 0;
+    GLuint terrain_vao = 0;
+    GLuint terrain_vbo = 0;
+    GLuint terrain_ebo = 0;
     GLint mvp_location = -1;
     GLint color_location = -1;
     int width = 1280;
@@ -163,10 +168,16 @@ struct OpenGlRenderer::Impl {
     bool initialized = false;
 
     void destroy() noexcept {
+        if (terrain_ebo != 0U) glDeleteBuffers(1, &terrain_ebo);
+        if (terrain_vbo != 0U) glDeleteBuffers(1, &terrain_vbo);
+        if (terrain_vao != 0U) glDeleteVertexArrays(1, &terrain_vao);
         if (ebo != 0U) glDeleteBuffers(1, &ebo);
         if (vbo != 0U) glDeleteBuffers(1, &vbo);
         if (vao != 0U) glDeleteVertexArrays(1, &vao);
         if (program != 0U) glDeleteProgram(program);
+        terrain_ebo = 0;
+        terrain_vbo = 0;
+        terrain_vao = 0;
         ebo = 0;
         vbo = 0;
         vao = 0;
@@ -263,6 +274,23 @@ void OpenGlRenderer::initialize() {
         nullptr);
     glBindVertexArray(0);
 
+    glGenVertexArrays(1, &impl_->terrain_vao);
+    glGenBuffers(1, &impl_->terrain_vbo);
+    glGenBuffers(1, &impl_->terrain_ebo);
+
+    glBindVertexArray(impl_->terrain_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, impl_->terrain_vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, impl_->terrain_ebo);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        static_cast<GLsizei>(3U * sizeof(float)),
+        nullptr);
+    glBindVertexArray(0);
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -294,6 +322,68 @@ void OpenGlRenderer::render(
         view_projection(camera, impl_->width, impl_->height);
 
     glUseProgram(impl_->program);
+
+    if (region->terrain_patch.has_value() &&
+        !region->terrain_patch->vertices.empty() &&
+        !region->terrain_patch->indices.empty()) {
+        const auto& patch = *region->terrain_patch;
+
+        if (patch.indices.size() >
+            static_cast<std::size_t>(
+                std::numeric_limits<GLsizei>::max())) {
+            throw std::runtime_error(
+                "Terrain index count exceeds OpenGL draw range");
+        }
+
+        std::vector<float> terrain_vertices;
+        terrain_vertices.reserve(
+            patch.vertices.size() * 3U);
+        for (const auto& vertex : patch.vertices) {
+            terrain_vertices.push_back(
+                static_cast<float>(vertex.x));
+            terrain_vertices.push_back(
+                static_cast<float>(vertex.y));
+            terrain_vertices.push_back(
+                static_cast<float>(vertex.z));
+        }
+
+        glBindVertexArray(impl_->terrain_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, impl_->terrain_vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            static_cast<GLsizeiptr>(
+                terrain_vertices.size() * sizeof(float)),
+            terrain_vertices.data(),
+            GL_DYNAMIC_DRAW);
+        glBindBuffer(
+            GL_ELEMENT_ARRAY_BUFFER,
+            impl_->terrain_ebo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            static_cast<GLsizeiptr>(
+                patch.indices.size() *
+                sizeof(std::uint32_t)),
+            patch.indices.data(),
+            GL_DYNAMIC_DRAW);
+
+        glUniformMatrix4fv(
+            impl_->mvp_location,
+            1,
+            GL_FALSE,
+            &vp[0][0]);
+        glUniform4f(
+            impl_->color_location,
+            0.16F,
+            0.42F,
+            0.18F,
+            1.0F);
+        glDrawElements(
+            GL_TRIANGLES,
+            static_cast<GLsizei>(patch.indices.size()),
+            GL_UNSIGNED_INT,
+            nullptr);
+    }
+
     glBindVertexArray(impl_->vao);
 
     if (region->terrain_width > 0U &&

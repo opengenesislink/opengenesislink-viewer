@@ -10,7 +10,7 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 4 | OGL1 framing | Implemented |
 | 5 | HELLO + SCENE_JOIN | Implemented over portable TCP session |
 | 6 | Full Scene snapshot | Implemented into authoritative WorldModel |
-| 7 | Region / terrain / object rendering | OpenGL desktop proxy renderer implemented; terrain mesh next |
+| 7 | Region / terrain / object rendering | Live sampled terrain mesh + OpenGL proxy rendering implemented |
 | 8 | Avatar rendering | Visible proxy rendering implemented; full visual avatar system planned |
 | 9 | Avatar reconciliation | Planned |
 | 10 | Scene deltas / reconnect recovery | Delta polling + sequence-based reconnect implemented |
@@ -116,14 +116,28 @@ The 0.7 development path now joins the existing Core, Scene and OpenGL foundatio
 - server fallback to snapshot remains authoritative when history is too old
 - alpha CLI launch path keeps the password out of process arguments via `OGL_VIEWER_PASSWORD`
 
+## Sampled terrain rendering
+
+The 0.8 development path now renders an authoritative terrain surface:
+
+- terrain heights come only from authenticated `TERRAIN_SAMPLE` responses
+- a deterministic 9×9 grid spans the authoritative Region terrain extent
+- sample coordinates are cached against the server terrain revision
+- unchanged revisions reuse the existing RenderRegion terrain patch
+- revision changes trigger a fresh sampled patch
+- the OpenGL backend owns a separate dynamic terrain VAO/VBO/EBO path
+- water, terrain, object proxies and avatar proxies remain separate render layers
+
+The Viewer does not derive terrain heights from water level, Physics or object data. The initial 9×9 resolution is deliberately coarse to keep the alpha world-entry request count bounded.
+
 ## Immediate next block
 
-Make live entry usable without command-line configuration and improve world rendering:
+Make live entry usable without command-line configuration and refine world interaction:
 
 - graphical login/server form inside the Viewer window
 - connection/login/bootstrap/world-entry status and errors in the application UI
-- sampled terrain patch/mesh instead of only the water plane
-- progressive terrain sampling/cache refresh
+- progressive terrain refinement after the initial coarse patch
+- non-blocking terrain sampling so network RTT does not stall the frame loop
 - first avatar-control path tied to server reconciliation
 - preserve the supplied Viewer logo throughout login/window/package branding
 
