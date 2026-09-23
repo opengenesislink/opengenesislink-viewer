@@ -1,9 +1,11 @@
 #pragma once
 
+#include "opengenesislink/viewer/world/terrain_patch.hpp"
 #include "opengenesislink/viewer/world/world_model.hpp"
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -31,6 +33,7 @@ struct RenderRegion {
     std::size_t terrain_height = 0;
     double terrain_cell_size = 0.0;
     double water_height = 0.0;
+    std::optional<TerrainPatch> terrain_patch;
     std::unordered_map<std::uint64_t, RenderInstance> instances;
 };
 
