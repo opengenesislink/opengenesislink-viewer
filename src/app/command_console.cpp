@@ -1,9 +1,11 @@
 #include "opengenesislink/viewer/app/command_console.hpp"
 
 #include <cctype>
+#include <cstddef>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace ogl::viewer::app {
