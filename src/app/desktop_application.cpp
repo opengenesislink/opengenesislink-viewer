@@ -1,5 +1,6 @@
 #include "opengenesislink/viewer/app/desktop_application.hpp"
 
+#include "opengenesislink/viewer/app/content_inspector.hpp"
 #include "opengenesislink/viewer/app/login_form.hpp"
 #include "opengenesislink/viewer/app/viewer_runtime.hpp"
 #include "opengenesislink/viewer/input/camera.hpp"
@@ -746,6 +747,112 @@ void draw_world_status(
     ui.render();
 }
 
+void draw_content_inspector(
+    render::UiRenderer& ui,
+    const ViewerRuntime& runtime,
+    ContentInspectorSection section,
+    std::size_t page,
+    int framebuffer_width,
+    int framebuffer_height) {
+    const auto view =
+        build_content_inspector_view(
+            runtime.bootstrap_content(),
+            section,
+            page,
+            12U);
+
+    const auto safe_width =
+        static_cast<float>(
+            std::max(framebuffer_width, 1));
+    const auto safe_height =
+        static_cast<float>(
+            std::max(framebuffer_height, 1));
+
+    const auto panel_width =
+        std::clamp(
+            safe_width - 80.0F,
+            620.0F,
+            880.0F);
+    const auto panel_height =
+        std::clamp(
+            safe_height - 120.0F,
+            430.0F,
+            610.0F);
+    const auto panel_x =
+        (safe_width - panel_width) * 0.5F;
+    const auto panel_y =
+        (safe_height - panel_height) * 0.5F;
+
+    ui.begin();
+    ui.rectangle(
+        panel_x - 2.0F,
+        panel_y - 2.0F,
+        panel_width + 4.0F,
+        panel_height + 4.0F,
+        kAccent);
+    ui.rectangle(
+        panel_x,
+        panel_y,
+        panel_width,
+        panel_height,
+        kPanel);
+
+    ui.rectangle(
+        panel_x + 18.0F,
+        panel_y + 18.0F,
+        panel_width - 36.0F,
+        76.0F,
+        kPanelInner);
+
+    ui.text(
+        panel_x + 34.0F,
+        panel_y + 34.0F,
+        2.5F,
+        "CONTENT INSPECTOR / " +
+            view.title,
+        kText);
+
+    ui.text(
+        panel_x + 34.0F,
+        panel_y + 67.0F,
+        1.2F,
+        "APPEARANCE  |  INVENTORY  |  ASSETS",
+        kMuted);
+
+    float line_y = panel_y + 118.0F;
+    for (const auto& line : view.lines) {
+        ui.text(
+            panel_x + 34.0F,
+            line_y,
+            1.25F,
+            visible_tail(line, 92U),
+            kText);
+        line_y += 28.0F;
+    }
+
+    const auto page_text =
+        "PAGE " +
+        std::to_string(view.page + 1U) +
+        "/" +
+        std::to_string(view.page_count);
+
+    ui.text(
+        panel_x + 34.0F,
+        panel_y + panel_height - 48.0F,
+        1.15F,
+        page_text,
+        kAccent);
+
+    ui.text(
+        panel_x + 190.0F,
+        panel_y + panel_height - 48.0F,
+        1.05F,
+        "I CLOSE  |  TAB SECTION  |  PGUP PGDN PAGE",
+        kMuted);
+
+    ui.render();
+}
+
 } // namespace
 
 int DesktopApplication::run(
@@ -871,6 +978,15 @@ int DesktopApplication::run(
         bool reconnect_pending = false;
         bool avatar_was_moving = false;
 
+        bool content_inspector_visible = false;
+        ContentInspectorSection content_inspector_section =
+            ContentInspectorSection::appearance;
+        std::size_t content_inspector_page = 0U;
+        bool previous_inspector_key = false;
+        bool previous_section_key = false;
+        bool previous_page_up_key = false;
+        bool previous_page_down_key = false;
+
         int previous_width = 0;
         int previous_height = 0;
 
@@ -909,6 +1025,73 @@ int DesktopApplication::run(
                     width,
                     height);
             }
+
+            const bool inspector_key =
+                glfwGetKey(window, GLFW_KEY_I) ==
+                GLFW_PRESS;
+            const bool section_key =
+                glfwGetKey(window, GLFW_KEY_TAB) ==
+                GLFW_PRESS;
+            const bool page_up_key =
+                glfwGetKey(window, GLFW_KEY_PAGE_UP) ==
+                GLFW_PRESS;
+            const bool page_down_key =
+                glfwGetKey(window, GLFW_KEY_PAGE_DOWN) ==
+                GLFW_PRESS;
+
+            if (!show_login &&
+                live_mode &&
+                live_runtime.world_model().initialized()) {
+                if (inspector_key &&
+                    !previous_inspector_key) {
+                    content_inspector_visible =
+                        !content_inspector_visible;
+
+                    if (content_inspector_visible &&
+                        avatar_was_moving &&
+                        live_runtime.connected()) {
+                        input::AvatarControlInput stop;
+                        stop.heading_degrees =
+                            camera.yaw_degrees;
+                        stop.speed = 4.0;
+                        stop.command_seconds = 0.1;
+                        (void)live_runtime
+                            .queue_avatar_control(stop);
+                        avatar_was_moving = false;
+                    }
+                }
+
+                if (content_inspector_visible &&
+                    section_key &&
+                    !previous_section_key) {
+                    content_inspector_section =
+                        next_content_inspector_section(
+                            content_inspector_section);
+                    content_inspector_page = 0U;
+                }
+
+                if (content_inspector_visible &&
+                    page_up_key &&
+                    !previous_page_up_key &&
+                    content_inspector_page > 0U) {
+                    --content_inspector_page;
+                }
+
+                if (content_inspector_visible &&
+                    page_down_key &&
+                    !previous_page_down_key) {
+                    ++content_inspector_page;
+                }
+            }
+
+            previous_inspector_key =
+                inspector_key;
+            previous_section_key =
+                section_key;
+            previous_page_up_key =
+                page_up_key;
+            previous_page_down_key =
+                page_down_key;
 
             if (show_login &&
                 submit_requested &&
@@ -964,6 +1147,8 @@ int DesktopApplication::run(
                         "CONNECTED TO " + info.region_id;
                     show_login = false;
                     live_mode = true;
+                    content_inspector_visible = false;
+                    content_inspector_page = 0U;
                     reconnect_pending = false;
                     next_scene_poll = current_time + 0.5;
                     next_avatar_command = current_time;
@@ -1054,30 +1239,32 @@ int DesktopApplication::run(
                 if (live_mode &&
                     live_runtime.connected() &&
                     !reconnect_pending) {
-                    const auto camera_input =
-                        read_camera_look_input(
-                            window,
+                    if (!content_inspector_visible) {
+                        const auto camera_input =
+                            read_camera_look_input(
+                                window,
+                                delta_seconds);
+                        camera_controller.update(
+                            camera,
+                            camera_input,
                             delta_seconds);
-                    camera_controller.update(
-                        camera,
-                        camera_input,
-                        delta_seconds);
 
-                    const auto avatar_input =
-                        read_avatar_control(
-                            window,
-                            camera);
-                    if (current_time >=
-                            next_avatar_command &&
-                        (avatar_input.moving ||
-                         avatar_was_moving)) {
-                        (void)live_runtime
-                            .queue_avatar_control(
-                                avatar_input.control);
-                        next_avatar_command =
-                            current_time + 0.1;
-                        avatar_was_moving =
-                            avatar_input.moving;
+                        const auto avatar_input =
+                            read_avatar_control(
+                                window,
+                                camera);
+                        if (current_time >=
+                                next_avatar_command &&
+                            (avatar_input.moving ||
+                             avatar_was_moving)) {
+                            (void)live_runtime
+                                .queue_avatar_control(
+                                    avatar_input.control);
+                            next_avatar_command =
+                                current_time + 0.1;
+                            avatar_was_moving =
+                                avatar_input.moving;
+                        }
                     }
 
                     live_runtime.service_background();
@@ -1121,6 +1308,16 @@ int DesktopApplication::run(
                     ui_renderer,
                     live_runtime,
                     reconnect_pending);
+
+                if (content_inspector_visible) {
+                    draw_content_inspector(
+                        ui_renderer,
+                        live_runtime,
+                        content_inspector_section,
+                        content_inspector_page,
+                        width,
+                        height);
+                }
             }
 
             glfwSwapBuffers(window);
