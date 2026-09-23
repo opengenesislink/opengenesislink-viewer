@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.5.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.6.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -15,6 +15,10 @@ option(OGL_VIEWER_ENABLE_WERROR "Treat warnings as errors" OFF)
 
 find_package(CURL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 add_library(opengenesis-viewer-core
     src/core/curl_http_transport.cpp
@@ -66,8 +70,44 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     endif()
 endif()
 
+add_library(opengenesis-viewer-graphics
+    src/render/opengl_renderer.cpp
+    src/app/desktop_application.cpp
+)
+add_library(OpenGenesis::ViewerGraphics ALIAS opengenesis-viewer-graphics)
+
+target_include_directories(opengenesis-viewer-graphics PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(opengenesis-viewer-graphics PUBLIC
+    OpenGenesis::ViewerCore
+    OpenGL::GL
+    glfw
+    GLEW::GLEW
+    glm::glm
+)
+
+if(MSVC)
+    target_compile_options(opengenesis-viewer-graphics PRIVATE /W4 /permissive- /Zc:__cplusplus)
+    if(OGL_VIEWER_ENABLE_WERROR)
+        target_compile_options(opengenesis-viewer-graphics PRIVATE /WX)
+    endif()
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(opengenesis-viewer-graphics PRIVATE
+        -Wall -Wextra -Wpedantic -Wconversion -Wshadow
+    )
+    if(OGL_VIEWER_ENABLE_WERROR)
+        target_compile_options(opengenesis-viewer-graphics PRIVATE -Werror)
+    endif()
+endif()
+
 add_executable(ogl-viewer apps/viewer/main.cpp)
-target_link_libraries(ogl-viewer PRIVATE OpenGenesis::ViewerCore)
+target_link_libraries(ogl-viewer PRIVATE
+    OpenGenesis::ViewerCore
+    OpenGenesis::ViewerGraphics
+)
 
 if(WIN32)
     set(OGL_VIEWER_ICON_ICO
