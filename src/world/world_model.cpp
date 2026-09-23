@@ -450,6 +450,25 @@ std::uint64_t WorldModel::sequence() const noexcept {
     return initialized_ ? region_.sequence : 0U;
 }
 
+bool WorldModel::apply_reconciled_avatar(
+    std::uint64_t entity_id,
+    const Transform& transform,
+    const Vec3& velocity) {
+    if (!initialized_) {
+        return false;
+    }
+
+    const auto found = region_.entities.find(entity_id);
+    if (found == region_.entities.end() ||
+        found->second.kind != EntityKind::avatar) {
+        return false;
+    }
+
+    found->second.transform = transform;
+    found->second.physics.velocity = velocity;
+    return true;
+}
+
 void WorldModel::clear() noexcept {
     region_ = {};
     initialized_ = false;
