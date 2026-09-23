@@ -49,6 +49,7 @@ add_library(opengenesis-viewer-core
     src/app/launch_options.cpp
     src/app/login_form.cpp
     src/app/content_inspector.cpp
+    src/app/command_console.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -232,6 +233,10 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-platform-client-tests tests/platform_client_tests.cpp)
     target_link_libraries(ogl-viewer-platform-client-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-platform-client COMMAND ogl-viewer-platform-client-tests)
+
+    add_executable(ogl-viewer-command-console-tests tests/command_console_tests.cpp)
+    target_link_libraries(ogl-viewer-command-console-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-command-console COMMAND ogl-viewer-command-console-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()
