@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.9.0-dev
+## Current status — 0.10.0-dev
 
 The first foundation block contains:
 
@@ -68,6 +68,13 @@ The first foundation block contains:
 - asynchronous Core discovery/login/bootstrap so the GLFW event loop remains responsive
 - visible login/connection error state inside the Viewer window
 - lightweight OpenGL UI renderer with built-in bitmap text and no additional GUI toolkit dependency
+- additive compatibility with both legacy root and current aggregated `session` Viewer bootstrap payloads
+- exact `avatar-reconcile-v1` request/ack codec for Scene messages 152/153
+- server-authoritative WASD avatar control using monotonic client movement sequences
+- authoritative reconcile ACK application without skipping normal Scene event sequences
+- progressive non-blocking terrain refinement from 5×5 to 9×9 to 17×17
+- one-at-a-time serialized Scene I/O across sync, terrain and movement requests
+- in-world runtime status overlay for Scene sequence, terrain refinement, movement/reconnect state and boundary feedback
 
 Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
@@ -89,7 +96,7 @@ Windows uses vcpkg dependencies from `vcpkg.json`.
 
 ## Live alpha connection
 
-The 0.9 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
+The 0.10 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
 
 The command-line live path remains available for development and automated testing.
 
@@ -116,7 +123,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block makes terrain refinement non-blocking and begins the first server-reconciled avatar-control path. Inventory, appearance and asset presentation remain later alpha milestones. See `docs/ROADMAP.md`.
+The next development block builds the first Asset fetch/cache pipeline and starts consuming bootstrap Appearance/Inventory data for real avatar presentation. Client-side movement prediction and animation remain later refinements; the current movement path intentionally applies the server's authoritative reconcile result. See `docs/ROADMAP.md`.
 
 ## License
 

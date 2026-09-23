@@ -109,6 +109,11 @@ public:
     [[nodiscard]] const RegionState& region() const;
     [[nodiscard]] std::uint64_t sequence() const noexcept;
 
+    [[nodiscard]] bool apply_reconciled_avatar(
+        std::uint64_t entity_id,
+        const Transform& transform,
+        const Vec3& velocity);
+
     void clear() noexcept;
 
 private:

@@ -98,6 +98,27 @@ public:
                     "mode=snapshot\nsequence=123\nentity_count=0\n"),
             });
             break;
+        case MessageType::avatar_reconcile:
+            queue({
+                .type = MessageType::avatar_reconcile_ack,
+                .request_id = frame.request_id,
+                .payload = payload_from_string(
+                    "status=reconciled\n"
+                    "client_sequence=5\n"
+                    "server_sequence=130\n"
+                    "tick=900\n"
+                    "boundary=\n"
+                    "x=129\n"
+                    "y=130\n"
+                    "z=25\n"
+                    "rx=0\n"
+                    "ry=0\n"
+                    "rz=90\n"
+                    "vx=0\n"
+                    "vy=4\n"
+                    "vz=0\n"),
+            });
+            break;
         case MessageType::goodbye:
             break;
         default:
@@ -224,6 +245,48 @@ void test_start_can_resume_from_authoritative_sequence() {
         "resumed startup must request delta from the supplied sequence");
 }
 
+void test_avatar_reconcile_over_live_session() {
+    FakeByteStream stream;
+    FrameChannel channel(stream);
+    SceneSession session(channel);
+
+    (void)session.start(
+        "region-1",
+        "signed-ticket");
+
+    const auto ack = session.reconcile_avatar({
+        .client_sequence = 5U,
+        .pose = {
+            .x = 129.0,
+            .y = 130.0,
+            .z = 25.0,
+            .rx = 0.0,
+            .ry = 0.0,
+            .rz = 90.0,
+        },
+        .velocity = {
+            .x = 0.0,
+            .y = 4.0,
+            .z = 0.0,
+        },
+    });
+
+    require(ack.client_sequence == 5U,
+            "live reconcile client sequence mismatch");
+    require(ack.server_sequence == 130U,
+            "live reconcile server sequence mismatch");
+    require(ack.pose.y == 130.0,
+            "live reconcile pose mismatch");
+
+    require(stream.sent.back().type ==
+                MessageType::avatar_reconcile,
+            "Scene session did not send AVATAR_RECONCILE");
+    require(
+        payload_as_string(stream.sent.back()).starts_with(
+            "client_sequence=5\n"),
+        "Scene session reconcile payload mismatch");
+}
+
 void test_start_requires_open_channel() {
     FakeByteStream stream;
     stream.close();
@@ -242,6 +305,7 @@ int main() {
         test_endpoint_parser();
         test_live_startup_sequence_over_fragmented_stream();
         test_start_can_resume_from_authoritative_sequence();
+        test_avatar_reconcile_over_live_session();
         test_start_requires_open_channel();
         std::cout << "OpenGenesisLINK Viewer Scene session tests passed\n";
         return EXIT_SUCCESS;

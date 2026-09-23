@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.9.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.10.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -30,12 +30,15 @@ add_library(opengenesis-viewer-core
     src/scene/transport.cpp
     src/scene/scene_session.cpp
     src/scene/terrain_protocol.cpp
+    src/scene/avatar_protocol.cpp
     src/world/world_model.cpp
     src/world/render_world.cpp
     src/world/terrain_cache.cpp
     src/world/terrain_patch.cpp
+    src/world/terrain_refinement.cpp
     src/world/scene_synchronizer.cpp
     src/input/camera.cpp
+    src/input/avatar_controller.cpp
     src/app/login_flow.cpp
     src/app/viewer_runtime.cpp
     src/app/launch_options.cpp
@@ -187,6 +190,18 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-login-form-tests tests/login_form_tests.cpp)
     target_link_libraries(ogl-viewer-login-form-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-login-form COMMAND ogl-viewer-login-form-tests)
+
+    add_executable(ogl-viewer-avatar-protocol-tests tests/avatar_protocol_tests.cpp)
+    target_link_libraries(ogl-viewer-avatar-protocol-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-avatar-protocol COMMAND ogl-viewer-avatar-protocol-tests)
+
+    add_executable(ogl-viewer-terrain-refinement-tests tests/terrain_refinement_tests.cpp)
+    target_link_libraries(ogl-viewer-terrain-refinement-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-terrain-refinement COMMAND ogl-viewer-terrain-refinement-tests)
+
+    add_executable(ogl-viewer-avatar-controller-tests tests/avatar_controller_tests.cpp)
+    target_link_libraries(ogl-viewer-avatar-controller-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-avatar-controller COMMAND ogl-viewer-avatar-controller-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()

@@ -40,7 +40,9 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
       - name: Build
         shell: pwsh
-        run: cmake --build build/windows
+        # vcpkg z-applocal copies shared runtime DLLs beside each test binary.
+        # Parallel links can race on the same destination DLL in this build dir.
+        run: cmake --build build/windows --parallel 1
       - name: Unit tests
         shell: pwsh
         run: ctest --test-dir build/windows --output-on-failure

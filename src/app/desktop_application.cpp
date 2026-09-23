@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <future>
 #include <iostream>
 #include <stdexcept>
@@ -206,6 +207,92 @@ input::CameraInput read_camera_input(
     }
 
     return input;
+}
+
+input::CameraInput read_camera_look_input(
+    GLFWwindow* window,
+    double delta_seconds) {
+    input::CameraInput input;
+    constexpr double look_speed = 90.0;
+
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        input.yaw_delta += look_speed * delta_seconds;
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        input.yaw_delta -= look_speed * delta_seconds;
+    }
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        input.pitch_delta += look_speed * delta_seconds;
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        input.pitch_delta -= look_speed * delta_seconds;
+    }
+    return input;
+}
+
+struct LiveAvatarInput {
+    input::AvatarControlInput control;
+    bool moving = false;
+};
+
+LiveAvatarInput read_avatar_control(
+    GLFWwindow* window,
+    const input::CameraState& camera) {
+    LiveAvatarInput result;
+    result.control.heading_degrees =
+        camera.yaw_degrees;
+    result.control.speed = 4.0;
+    result.control.command_seconds = 0.1;
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        result.control.forward += 1.0;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        result.control.forward -= 1.0;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        result.control.right += 1.0;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        result.control.right -= 1.0;
+    }
+
+    result.moving =
+        result.control.forward != 0.0 ||
+        result.control.right != 0.0;
+    return result;
+}
+
+void follow_avatar_camera(
+    input::CameraState& camera,
+    const ViewerRuntime& runtime) {
+    if (!runtime.world_model().initialized() ||
+        runtime.avatar_id() == 0U) {
+        return;
+    }
+
+    const auto& entities =
+        runtime.world_model().region().entities;
+    const auto found =
+        entities.find(runtime.avatar_id());
+    if (found == entities.end()) {
+        return;
+    }
+
+    constexpr double pi =
+        3.1415926535897932384626433832795;
+    const auto heading =
+        camera.yaw_degrees * pi / 180.0;
+    const auto backward_x = -std::cos(heading);
+    const auto backward_y = -std::sin(heading);
+
+    camera.position = {
+        found->second.transform.position.x +
+            backward_x * 9.0,
+        found->second.transform.position.y +
+            backward_y * 9.0,
+        found->second.transform.position.z + 4.5,
+    };
 }
 
 std::string connected_title(const ConnectionInfo& info) {
@@ -536,6 +623,96 @@ void wipe_password(std::string& password) noexcept {
     password.clear();
 }
 
+void draw_world_status(
+    render::UiRenderer& ui,
+    const ViewerRuntime& runtime,
+    bool reconnect_pending) {
+    if (!runtime.world_model().initialized()) {
+        return;
+    }
+
+    const auto background =
+        runtime.background_state();
+    const auto& info =
+        runtime.connection_info();
+
+    ui.begin();
+    ui.rectangle(
+        14.0F,
+        14.0F,
+        430.0F,
+        112.0F,
+        kPanel);
+
+    ui.text(
+        28.0F,
+        29.0F,
+        1.6F,
+        "REGION: " + info.region_id,
+        kText);
+
+    const auto terrain =
+        background.terrain_resolution == 0U
+            ? std::string{"LOADING"}
+            : std::to_string(
+                  background.terrain_resolution) +
+                  "X" +
+                  std::to_string(
+                      background.terrain_resolution);
+
+    ui.text(
+        28.0F,
+        54.0F,
+        1.4F,
+        "SEQ: " +
+            std::to_string(
+                runtime.world_model().sequence()) +
+            "  TERRAIN: " + terrain,
+        kMuted);
+
+    std::string movement =
+        info.avatar_reconcile_supported
+            ? "RECONCILE"
+            : "UNAVAILABLE";
+    if (background.movement_pending) {
+        movement = "RECONCILING";
+    }
+    if (reconnect_pending) {
+        movement = "RECONNECTING";
+    }
+
+    ui.text(
+        28.0F,
+        78.0F,
+        1.4F,
+        "MOVE: " + movement +
+            (background.boundary.empty()
+                 ? std::string{}
+                 : "  EDGE: " +
+                       background.boundary),
+        reconnect_pending ? kError : kAccent);
+
+    if (!background.last_error.empty()) {
+        ui.text(
+            28.0F,
+            101.0F,
+            1.0F,
+            visible_tail(
+                background.last_error,
+                64U),
+            kError);
+    } else {
+        ui.text(
+            28.0F,
+            101.0F,
+            1.0F,
+            "WASD MOVE  |  ARROWS LOOK  |  ESC EXIT",
+            kMuted);
+    }
+
+    ui.render();
+}
+
 } // namespace
 
 int DesktopApplication::run(
@@ -657,7 +834,9 @@ int DesktopApplication::run(
         double previous_time = glfwGetTime();
         double next_scene_poll = previous_time + 0.5;
         double next_reconnect_attempt = 0.0;
+        double next_avatar_command = previous_time;
         bool reconnect_pending = false;
+        bool avatar_was_moving = false;
 
         int previous_width = 0;
         int previous_height = 0;
@@ -754,6 +933,8 @@ int DesktopApplication::run(
                     live_mode = true;
                     reconnect_pending = false;
                     next_scene_poll = current_time + 0.5;
+                    next_avatar_command = current_time;
+                    avatar_was_moving = false;
                     position_camera_at_spawn(camera, info);
 
                     const auto title =
@@ -837,14 +1018,49 @@ int DesktopApplication::run(
 
             if (!show_login &&
                 !connection_pending) {
-                const auto camera_input =
-                    read_camera_input(
-                        window,
+                if (live_mode &&
+                    live_runtime.connected() &&
+                    !reconnect_pending) {
+                    const auto camera_input =
+                        read_camera_look_input(
+                            window,
+                            delta_seconds);
+                    camera_controller.update(
+                        camera,
+                        camera_input,
                         delta_seconds);
-                camera_controller.update(
-                    camera,
-                    camera_input,
-                    delta_seconds);
+
+                    const auto avatar_input =
+                        read_avatar_control(
+                            window,
+                            camera);
+                    if (current_time >=
+                            next_avatar_command &&
+                        (avatar_input.moving ||
+                         avatar_was_moving)) {
+                        (void)live_runtime
+                            .queue_avatar_control(
+                                avatar_input.control);
+                        next_avatar_command =
+                            current_time + 0.1;
+                        avatar_was_moving =
+                            avatar_input.moving;
+                    }
+
+                    live_runtime.service_background();
+                    follow_avatar_camera(
+                        camera,
+                        live_runtime);
+                } else if (!live_mode) {
+                    const auto camera_input =
+                        read_camera_input(
+                            window,
+                            delta_seconds);
+                    camera_controller.update(
+                        camera,
+                        camera_input,
+                        delta_seconds);
+                }
             }
 
             const world::RenderRegion* render_region =
@@ -866,6 +1082,12 @@ int DesktopApplication::run(
                     ui_renderer,
                     login_form,
                     layout);
+            } else if (live_mode &&
+                       live_runtime.world_model().initialized()) {
+                draw_world_status(
+                    ui_renderer,
+                    live_runtime,
+                    reconnect_pending);
             }
 
             glfwSwapBuffers(window);
