@@ -5,6 +5,7 @@
 #include "opengenesislink/viewer/scene/scene_session.hpp"
 #include "opengenesislink/viewer/world/render_world.hpp"
 #include "opengenesislink/viewer/world/scene_synchronizer.hpp"
+#include "opengenesislink/viewer/world/terrain_cache.hpp"
 #include "opengenesislink/viewer/world/world_model.hpp"
 
 #include <optional>
@@ -49,12 +50,15 @@ public:
     [[nodiscard]] const world::WorldModel& world_model() const noexcept;
 
 private:
+    void rebuild_render_region();
+
     core::CurlHttpTransport http_;
     CoreEntryCoordinator core_entry_;
     scene::SceneConnection scene_;
     world::WorldModel world_;
     world::SceneSynchronizer synchronizer_;
     world::RenderWorldBuilder render_builder_;
+    world::TerrainCache terrain_cache_;
     std::optional<world::RenderRegion> render_region_;
     std::optional<ConnectionInfo> info_;
     std::string bearer_token_;
