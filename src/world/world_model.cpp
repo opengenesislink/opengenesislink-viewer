@@ -344,34 +344,46 @@ SyncApplyResult WorldModel::apply(const SceneSyncPayload& sync) {
         };
     }
 
+    auto expected_sequence = region_.sequence + 1U;
+    for (const auto& event : delta.events) {
+        if (event.sequence != expected_sequence) {
+            return {
+                .applied = false,
+                .requires_snapshot = true,
+                .events_applied = 0U,
+            };
+        }
+        expected_sequence = event.sequence + 1U;
+    }
+
+    if (delta.events.empty()) {
+        if (delta.latest != delta.from) {
+            return {
+                .applied = false,
+                .requires_snapshot = true,
+                .events_applied = 0U,
+            };
+        }
+    } else if (delta.events.back().sequence > delta.latest) {
+        return {
+            .applied = false,
+            .requires_snapshot = true,
+            .events_applied = 0U,
+        };
+    }
+
     SyncApplyResult result{
         .applied = true,
         .requires_snapshot = false,
         .events_applied = 0U,
     };
-    auto expected_sequence = region_.sequence + 1U;
 
     for (const auto& event : delta.events) {
-        if (event.sequence != expected_sequence) {
-            result.applied = false;
-            result.requires_snapshot = true;
-            return result;
-        }
-
         if (!apply_event(event)) {
             result.requires_snapshot = true;
         }
-
         region_.sequence = event.sequence;
-        expected_sequence = event.sequence + 1U;
         ++result.events_applied;
-    }
-
-    if (delta.events.empty()) {
-        if (delta.latest != delta.from) {
-            result.applied = false;
-            result.requires_snapshot = true;
-        }
     }
 
     return result;
