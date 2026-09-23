@@ -43,6 +43,8 @@ struct RuntimeBackgroundState {
     bool movement_pending = false;
     std::size_t asset_dependencies = 0;
     std::size_t asset_cached = 0;
+    std::size_t asset_failed = 0;
+    std::size_t asset_missing_metadata = 0;
     std::size_t asset_cache_bytes = 0;
     bool asset_prefetch_pending = false;
     std::uint64_t appearance_revision = 0;
@@ -119,6 +121,9 @@ private:
     std::future<AssetTaskResult> asset_future_;
     bool asset_pending_ = false;
     std::size_t asset_dependency_count_ = 0U;
+    std::size_t asset_ready_count_ = 0U;
+    std::size_t asset_failed_count_ = 0U;
+    std::size_t asset_missing_metadata_count_ = 0U;
     std::string asset_error_;
 
     scene::SceneConnection scene_;
