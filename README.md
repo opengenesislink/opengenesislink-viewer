@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.10.0-dev
+## Current status — 0.11.0-dev
 
 The first foundation block contains:
 
@@ -75,6 +75,13 @@ The first foundation block contains:
 - progressive non-blocking terrain refinement from 5×5 to 9×9 to 17×17
 - one-at-a-time serialized Scene I/O across sync, terrain and movement requests
 - in-world runtime status overlay for Scene sequence, terrain refinement, movement/reconnect state and boundary feedback
+- typed aggregated bootstrap models for Avatar Appearance, wearables, attachments, Inventory folders/items and owned Asset metadata
+- deduplicated Appearance → Asset dependency collection
+- authenticated `GET /v1/assets/{id}` client with strict id/size/Base64 validation
+- HTTP response byte limits enforced during libcurl download
+- bounded in-memory LRU-style Asset cache with `content_hash` invalidation
+- asynchronous Appearance Asset prefetch on a separate HTTP transport without occupying the Scene TCP channel
+- in-world diagnostics for Appearance revision, Inventory counts and Asset prefetch/cache state
 
 Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
@@ -96,7 +103,7 @@ Windows uses vcpkg dependencies from `vcpkg.json`.
 
 ## Live alpha connection
 
-The 0.10 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
+The 0.11 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
 
 The command-line live path remains available for development and automated testing.
 
@@ -123,7 +130,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block builds the first Asset fetch/cache pipeline and starts consuming bootstrap Appearance/Inventory data for real avatar presentation. Client-side movement prediction and animation remain later refinements; the current movement path intentionally applies the server's authoritative reconcile result. See `docs/ROADMAP.md`.
+The next development block defines the first concrete visual Asset formats and turns cached Appearance dependencies into a recognizable local Avatar. Until the server publishes a stable texture/mesh payload contract, cached Asset bytes remain opaque and proxy rendering stays explicit. See `docs/ROADMAP.md`.
 
 ## License
 
