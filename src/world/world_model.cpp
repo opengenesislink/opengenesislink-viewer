@@ -344,7 +344,11 @@ SyncApplyResult WorldModel::apply(const SceneSyncPayload& sync) {
         };
     }
 
-    SyncApplyResult result{.applied = true};
+    SyncApplyResult result{
+        .applied = true,
+        .requires_snapshot = false,
+        .events_applied = 0U,
+    };
     auto expected_sequence = region_.sequence + 1U;
 
     for (const auto& event : delta.events) {
