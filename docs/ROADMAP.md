@@ -9,8 +9,8 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 3 | Viewer bootstrap | Foundation implemented |
 | 4 | OGL1 framing | Implemented |
 | 5 | HELLO + SCENE_JOIN | Implemented over portable TCP session |
-| 6 | Full Scene snapshot | Initial sync request implemented; snapshot model parser next |
-| 7 | Region / terrain / object rendering | Planned |
+| 6 | Full Scene snapshot | Implemented into authoritative WorldModel |
+| 7 | Region / terrain / object rendering | WorldModel ready; render layer next |
 | 8 | Avatar rendering | Planned |
 | 9 | Avatar reconciliation | Planned |
 | 10 | Scene deltas / reconnect recovery | Planned |
@@ -56,16 +56,32 @@ The Viewer now binds the OGL1 protocol to a portable blocking TCP session for Li
 - initial `SCENE_SYNC_REQUEST since=0`
 - GOODBYE plus deterministic local cleanup
 
+## Authoritative WorldModel
+
+The Viewer now parses `SCENE_SYNC` into a rendering-independent WorldModel:
+
+- full `mode=snapshot` Region state
+- 31-field object/avatar entity records
+- transforms, ownership, permissions and linkset metadata
+- Physics state and velocities
+- terrain dimensions/revision and water height
+- ordered `mode=delta` events
+- strict Scene sequence tracking
+- safe transform/avatar/text/deletion delta application
+- authoritative snapshot recovery request when a delta lacks enough data to reconstruct state
+
+Structural changes such as entity creation, link changes or permission/Physics mutations are never guessed from incomplete delta data.
+
 ## Immediate next block
 
-Turn the initial `SCENE_SYNC` payload into the first authoritative WorldModel:
+Build the first render-facing world layer:
 
-- parse `mode=snapshot` and `mode=delta`
-- parse Scene sequence/revision state
-- materialize Region metadata, terrain and entities from the full snapshot
-- retain latest applied sequence
-- apply ordered deltas
-- trigger full snapshot recovery when the server falls back from stale history
-- add reconnect state around the existing Scene session
+- Region/terrain runtime representation
+- terrain sample acquisition and cache
+- entity render instances derived from WorldModel state
+- primitive geometry mapping compatible with GenesisMesher output
+- camera/input foundation
+- snapshot recovery wiring around `requires_snapshot`
+- reconnect continuation using the last authoritative Scene sequence
 
 No final UDP/QUIC transport is assumed.
