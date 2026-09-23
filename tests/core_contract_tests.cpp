@@ -190,6 +190,12 @@ void test_aggregated_session_bootstrap() {
             "aggregated bootstrap spawn mismatch");
     require(result.capabilities.size() == 3U,
             "aggregated bootstrap capabilities mismatch");
+    require(result.content.appearance.has_value() &&
+            result.content.appearance->revision == 4U,
+            "aggregated bootstrap Appearance was not retained");
+    require(result.content.inventory.has_value() &&
+            result.content.inventory->root.id == "root-1",
+            "aggregated bootstrap Inventory was not retained");
 }
 
 } // namespace
