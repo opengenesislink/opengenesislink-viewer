@@ -10,9 +10,9 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 4 | OGL1 framing | Implemented |
 | 5 | HELLO + SCENE_JOIN | Implemented over portable TCP session |
 | 6 | Full Scene snapshot | Implemented into authoritative WorldModel |
-| 7 | Region / terrain / object rendering | Live sampled terrain mesh + OpenGL proxy rendering implemented |
+| 7 | Region / terrain / object rendering | Progressive non-blocking terrain refinement + OpenGL proxy rendering implemented |
 | 8 | Avatar rendering | Visible proxy rendering implemented; full visual avatar system planned |
-| 9 | Avatar reconciliation | Planned |
+| 9 | Avatar reconciliation | First server-authoritative WASD/reconcile path implemented |
 | 10 | Scene deltas / reconnect recovery | Delta polling + sequence-based reconnect implemented |
 | 11 | Asset fetch / cache | Planned |
 | 12 | Appearance / wearables | Planned |
@@ -144,15 +144,37 @@ The 0.9 development path removes the command-line requirement for normal Viewer 
 - the supplied official Viewer logo remains the application/window/package branding; no substitute artwork is generated
 - the UI renderer is an isolated OpenGL layer and does not couple Core/Scene/WorldModel to GLFW
 
+## Progressive world streaming and avatar reconciliation
+
+The 0.10 development path completes the first interactive live-world control loop:
+
+- the current aggregated Viewer bootstrap `session` object and the earlier root-field bootstrap remain accepted under the same `ogl-viewer-bootstrap-v1` contract
+- terrain no longer blocks world entry while a 9×9 mesh is synchronously assembled
+- refinement proceeds through 5×5, 9×9 and 17×17 levels
+- samples already present in a coarser level are reused by finer levels
+- only one correlated Scene request owns the TCP channel at a time
+- Scene delta polling uses a non-blocking lock and yields when terrain/movement I/O owns the channel
+- `AVATAR_RECONCILE` uses a monotonic client sequence and the released `avatar-reconcile-v1` payload
+- WASD produces bounded normalized movement commands relative to Viewer heading
+- authoritative ACK position/rotation/velocity is applied immediately to the local Avatar without advancing the normal Scene sequence
+- subsequent `SCENE_SYNC` deltas remain authoritative for event history
+- a zero-velocity reconcile is sent when movement input stops
+- the live camera follows the authoritative local Avatar
+- the in-world overlay exposes Scene sequence, terrain resolution, movement state, reconnect state and boundary/error feedback
+
+This is server reconciliation, not final client prediction. The Viewer does not currently extrapolate unacknowledged movement or invent collision outcomes locally.
+
 ## Immediate next block
 
-Refine world streaming and begin controlled avatar movement:
+Begin the data/render path needed for a recognizable local Avatar and user-owned content:
 
-- progressive terrain refinement after the initial coarse patch
-- non-blocking terrain sampling so network RTT does not stall the frame loop
-- first avatar-control command path
-- server reconciliation applied back to camera/avatar presentation
-- movement sequence/retry handling
-- connection status overlay while inside a Region
+- Asset HTTP fetch abstraction and bounded local cache
+- bootstrap Appearance model parsing
+- bootstrap Inventory summary/model parsing
+- wearable/attachment Asset dependency collection
+- first texture/mesh Asset decode boundary
+- cache invalidation by Asset id/revision/hash where exposed
+- placeholder rendering remains explicit when an Asset type is not implemented
+- later: client-side movement prediction/animation on top of the authoritative reconcile path
 
 No final UDP/QUIC transport is assumed.
