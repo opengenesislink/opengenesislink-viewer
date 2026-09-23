@@ -2,6 +2,7 @@
 
 #include <curl/curl.h>
 
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -25,10 +26,34 @@ CurlGlobal& curl_global() {
     return global;
 }
 
-std::size_t write_body(char* data, std::size_t size, std::size_t count, void* userdata) {
+struct WriteContext {
+    std::string* body = nullptr;
+    std::size_t max_bytes = 0U;
+    bool exceeded = false;
+};
+
+std::size_t write_body(
+    char* data,
+    std::size_t size,
+    std::size_t count,
+    void* userdata) {
     const auto bytes = size * count;
-    auto* body = static_cast<std::string*>(userdata);
-    body->append(data, bytes);
+    auto* context =
+        static_cast<WriteContext*>(userdata);
+    if (context == nullptr ||
+        context->body == nullptr) {
+        return 0U;
+    }
+
+    if (context->max_bytes != 0U &&
+        (bytes > context->max_bytes ||
+         context->body->size() >
+             context->max_bytes - bytes)) {
+        context->exceeded = true;
+        return 0U;
+    }
+
+    context->body->append(data, bytes);
     return bytes;
 }
 
@@ -69,13 +94,18 @@ HttpResponse CurlHttpTransport::perform(const HttpRequest& request) {
     const std::unique_ptr<curl_slist, HeaderListDeleter> headers(headers_raw);
 
     std::string response_body;
+    WriteContext write_context{
+        .body = &response_body,
+        .max_bytes = request.max_response_bytes,
+        .exceeded = false,
+    };
     char error_buffer[CURL_ERROR_SIZE] = {};
 
     curl_easy_setopt(handle.get(), CURLOPT_URL, request.url.c_str());
     curl_easy_setopt(handle.get(), CURLOPT_CUSTOMREQUEST, request.method.c_str());
     curl_easy_setopt(handle.get(), CURLOPT_HTTPHEADER, headers.get());
     curl_easy_setopt(handle.get(), CURLOPT_WRITEFUNCTION, &write_body);
-    curl_easy_setopt(handle.get(), CURLOPT_WRITEDATA, &response_body);
+    curl_easy_setopt(handle.get(), CURLOPT_WRITEDATA, &write_context);
     curl_easy_setopt(handle.get(), CURLOPT_ERRORBUFFER, error_buffer);
     curl_easy_setopt(handle.get(), CURLOPT_CONNECTTIMEOUT_MS,
                      static_cast<long>(connect_timeout_.count()));
@@ -94,9 +124,16 @@ HttpResponse CurlHttpTransport::perform(const HttpRequest& request) {
 
     const CURLcode code = curl_easy_perform(handle.get());
     if (code != CURLE_OK) {
+        if (write_context.exceeded) {
+            throw std::runtime_error(
+                "HTTP response exceeded configured byte limit");
+        }
         const std::string detail =
-            error_buffer[0] != '\0' ? error_buffer : curl_easy_strerror(code);
-        throw std::runtime_error("HTTP transport failed: " + detail);
+            error_buffer[0] != '\0'
+                ? error_buffer
+                : curl_easy_strerror(code);
+        throw std::runtime_error(
+            "HTTP transport failed: " + detail);
     }
 
     long status = 0;
