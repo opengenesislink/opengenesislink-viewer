@@ -73,6 +73,12 @@ struct BootstrapContent {
     std::map<std::string, std::string> endpoints;
 };
 
+[[nodiscard]] AvatarAppearanceSnapshot parse_appearance_snapshot(
+    std::string_view json);
+
+[[nodiscard]] InventorySnapshot parse_inventory_snapshot(
+    std::string_view json);
+
 [[nodiscard]] BootstrapContent parse_bootstrap_content(
     std::string_view json);
 
