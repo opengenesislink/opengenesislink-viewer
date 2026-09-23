@@ -1706,6 +1706,38 @@ bool ViewerRuntime::submit_command(
                     break;
                 }
 
+                case ConsoleCommandKind::build_list: {
+                    std::ostringstream out;
+                    std::size_t objects = 0U;
+                    for (const auto& [id, entity] :
+                         region_snapshot.entities) {
+                        if (entity.kind !=
+                            world::EntityKind::object) {
+                            continue;
+                        }
+                        ++objects;
+                        out << "\n#" << id
+                            << " | " << entity.name
+                            << " | "
+                            << entity.transform.position.x
+                            << ","
+                            << entity.transform.position.y
+                            << ","
+                            << entity.transform.position.z
+                            << " | SCALE "
+                            << entity.transform.scale.x
+                            << ","
+                            << entity.transform.scale.y
+                            << ","
+                            << entity.transform.scale.z;
+                    }
+                    result.output =
+                        "OBJECTS: " +
+                        std::to_string(objects) +
+                        out.str();
+                    break;
+                }
+
                 case ConsoleCommandKind::build_create: {
                     scene::ObjectCreateRequest create;
                     create.name = args.at(0);
@@ -1718,6 +1750,12 @@ bool ViewerRuntime::submit_command(
                     create.transform.z =
                         parse_double_argument(
                             args.at(3), "object z");
+                    if (args.size() > 4U) {
+                        create.physical =
+                            parse_toggle_argument(
+                                args.at(4),
+                                "physical flag");
+                    }
                     const auto ack =
                         scene_lock(
                             [&create](
@@ -1854,6 +1892,97 @@ bool ViewerRuntime::submit_command(
                             ? "OBJECT UNLINKED"
                             : "OBJECT LINKED";
                     result.scene_mutated = true;
+                    break;
+                }
+
+                case ConsoleCommandKind::build_permissions: {
+                    const auto id =
+                        parse_unsigned_argument<
+                            std::uint64_t>(
+                            args.at(0),
+                            "entity id");
+                    scene::ObjectPermissionsRequest permissions;
+                    permissions.entity_id = id;
+                    if (args.at(1) != "-") {
+                        permissions.group_id =
+                            args.at(1);
+                    }
+                    permissions.group_permissions =
+                        parse_unsigned_argument<
+                            std::uint32_t>(
+                            args.at(2),
+                            "group permission mask");
+                    permissions.everyone_permissions =
+                        parse_unsigned_argument<
+                            std::uint32_t>(
+                            args.at(3),
+                            "everyone permission mask");
+                    (void)scene_lock(
+                        [&permissions](
+                            scene::SceneSession& session) {
+                            return session
+                                .update_object_permissions(
+                                    permissions);
+                        });
+                    result.output =
+                        "OBJECT PERMISSIONS UPDATED";
+                    result.scene_mutated = true;
+                    break;
+                }
+
+                case ConsoleCommandKind::build_motion: {
+                    scene::ObjectMotionRequest motion;
+                    motion.entity_id =
+                        parse_unsigned_argument<
+                            std::uint64_t>(
+                            args.at(0),
+                            "entity id");
+                    motion.vx =
+                        parse_double_argument(
+                            args.at(1), "vx");
+                    motion.vy =
+                        parse_double_argument(
+                            args.at(2), "vy");
+                    motion.vz =
+                        parse_double_argument(
+                            args.at(3), "vz");
+                    motion.avx =
+                        parse_double_argument(
+                            args.at(4), "avx");
+                    motion.avy =
+                        parse_double_argument(
+                            args.at(5), "avy");
+                    motion.avz =
+                        parse_double_argument(
+                            args.at(6), "avz");
+                    (void)scene_lock(
+                        [&motion](
+                            scene::SceneSession& session) {
+                            return session
+                                .set_object_motion(
+                                    motion);
+                        });
+                    result.output =
+                        "OBJECT MOTION UPDATED";
+                    result.scene_mutated = true;
+                    break;
+                }
+
+                case ConsoleCommandKind::build_interact: {
+                    const auto id =
+                        parse_unsigned_argument<
+                            std::uint64_t>(
+                            args.at(0),
+                            "entity id");
+                    (void)scene_lock(
+                        [id, &args](
+                            scene::SceneSession& session) {
+                            return session.interact_object(
+                                id,
+                                args.at(1));
+                        });
+                    result.output =
+                        "OBJECT INTERACTION SENT";
                     break;
                 }
 
