@@ -220,8 +220,11 @@ void test_render_world_projection() {
         "object must use explicit box proxy until visual primitive contract exists");
     require(
         render.instances.at(200U).geometry ==
-            world::RenderGeometry::avatar_capsule,
-        "avatar proxy geometry mismatch");
+            world::RenderGeometry::avatar_humanoid,
+        "avatar humanoid fallback geometry mismatch");
+    require(
+        render.instances.at(200U).avatar_height == 1.8,
+        "avatar fallback height mismatch");
     require(
         render.instances.at(100U).transform.scale.y == 2.0,
         "render transform mismatch");
