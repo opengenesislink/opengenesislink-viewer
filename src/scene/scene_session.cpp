@@ -48,7 +48,8 @@ Frame SceneSession::receive_correlated(
 
 SceneStartupResult SceneSession::start(
     std::string_view region_id,
-    std::string_view scene_ticket) {
+    std::string_view scene_ticket,
+    std::uint64_t initial_sync_since) {
     if (!channel_.is_open()) {
         throw std::runtime_error("Scene channel is not connected");
     }
@@ -71,7 +72,7 @@ SceneStartupResult SceneSession::start(
     auto join = parse_scene_join_ack(join_frame, join_request_id);
     joined_ = true;
 
-    auto initial_sync = request_sync(0U, 256U);
+    auto initial_sync = request_sync(initial_sync_since, 256U);
     return {
         .hello = std::move(hello),
         .join = std::move(join),
@@ -147,11 +148,15 @@ SceneConnection::~SceneConnection() {
 SceneStartupResult SceneConnection::connect_and_enter(
     std::string_view scene_endpoint,
     std::string_view region_id,
-    std::string_view scene_ticket) {
+    std::string_view scene_ticket,
+    std::uint64_t initial_sync_since) {
     disconnect();
     try {
         stream_.connect(parse_scene_endpoint(scene_endpoint));
-        return session_.start(region_id, scene_ticket);
+        return session_.start(
+            region_id,
+            scene_ticket,
+            initial_sync_since);
     } catch (...) {
         channel_.close();
         throw;

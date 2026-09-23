@@ -206,6 +206,24 @@ void test_live_startup_sequence_over_fragmented_stream() {
             "disconnect must send GOODBYE");
 }
 
+void test_start_can_resume_from_authoritative_sequence() {
+    FakeByteStream stream;
+    FrameChannel channel(stream);
+    SceneSession session(channel);
+
+    (void)session.start(
+        "region-1",
+        "signed-ticket",
+        55U);
+
+    require(stream.sent.size() == 3U,
+            "resumed startup must send exactly three requests");
+    require(
+        payload_as_string(stream.sent[2]) ==
+            "since=55\nmax_events=256\n",
+        "resumed startup must request delta from the supplied sequence");
+}
+
 void test_start_requires_open_channel() {
     FakeByteStream stream;
     stream.close();
@@ -223,6 +241,7 @@ int main() {
     try {
         test_endpoint_parser();
         test_live_startup_sequence_over_fragmented_stream();
+        test_start_can_resume_from_authoritative_sequence();
         test_start_requires_open_channel();
         std::cout << "OpenGenesisLINK Viewer Scene session tests passed\n";
         return EXIT_SUCCESS;
