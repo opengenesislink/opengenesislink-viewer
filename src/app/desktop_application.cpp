@@ -1609,6 +1609,14 @@ int DesktopApplication::run(
                         width,
                         height);
                 }
+
+                draw_chat_and_command_bar(
+                    ui_renderer,
+                    live_runtime,
+                    command_visible,
+                    command_input,
+                    width,
+                    height);
             }
 
             glfwSwapBuffers(window);
