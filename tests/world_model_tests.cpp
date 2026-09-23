@@ -158,6 +158,45 @@ void test_sequence_gap_requests_snapshot() {
             "gapped delta partially mutated WorldModel");
 }
 
+void test_authoritative_avatar_reconcile_does_not_advance_sequence() {
+    WorldModel model;
+    (void)model.apply(
+        parse_scene_sync(
+            sync_frame(snapshot_payload())));
+
+    ogl::viewer::world::Transform transform;
+    transform.position = {130.0, 131.0, 25.0};
+    transform.rotation = {0.0, 0.0, 45.0};
+    transform.scale = {0.5, 0.5, 1.8};
+
+    const auto applied =
+        model.apply_reconciled_avatar(
+            200U,
+            transform,
+            {1.0, 2.0, 0.0});
+
+    require(applied,
+            "authoritative avatar reconcile was not applied");
+    require(model.sequence() == 10U,
+            "avatar reconcile must not advance Scene sequence");
+
+    const auto& avatar =
+        model.region().entities.at(200U);
+    require(avatar.transform.position.x == 130.0 &&
+            avatar.transform.position.y == 131.0,
+            "avatar reconcile transform mismatch");
+    require(avatar.physics.velocity.x == 1.0 &&
+            avatar.physics.velocity.y == 2.0,
+            "avatar reconcile velocity mismatch");
+
+    require(
+        !model.apply_reconciled_avatar(
+            100U,
+            transform,
+            {0.0, 0.0, 0.0}),
+        "object entity must reject avatar reconcile");
+}
+
 void test_parser_rejects_bad_counts_and_types() {
     require_throws([] {
         (void)parse_scene_sync(sync_frame(
@@ -189,6 +228,7 @@ int main() {
         test_safe_delta_application();
         test_structural_delta_requests_snapshot();
         test_sequence_gap_requests_snapshot();
+        test_authoritative_avatar_reconcile_does_not_advance_sequence();
         test_parser_rejects_bad_counts_and_types();
         std::cout << "OpenGenesisLINK Viewer WorldModel tests passed\n";
         return EXIT_SUCCESS;
