@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.3.0-dev
+## Current status — 0.4.0-dev
 
 The first foundation block contains:
 
@@ -37,6 +37,9 @@ The first foundation block contains:
 - portable native TCP Scene transport for Linux/ARM64 and Windows
 - live HELLO → SCENE_JOIN → initial full-sync startup sequence
 - deterministic GOODBYE/cleanup and deferred unrelated Scene frames
+- authoritative SCENE_SYNC snapshot/delta parser
+- Region/entity WorldModel with transforms, permissions, linksets and Physics state
+- strict Scene sequence validation and snapshot-recovery signaling
 
 There is deliberately no rendering engine or GUI dependency in this block. Networking/contracts stay independent from the future Render layer.
 
@@ -63,7 +66,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block parses the authoritative `SCENE_SYNC` snapshot/delta payload into the first Viewer WorldModel for Regions, terrain and entities, retaining the server Scene sequence for later reconnect recovery. See `docs/ROADMAP.md`.
+The next development block connects the WorldModel to the first render-facing Region/terrain/entity layer, including terrain samples, primitive geometry mapping, camera/input foundations and automatic snapshot recovery. See `docs/ROADMAP.md`.
 
 ## License
 
