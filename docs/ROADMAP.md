@@ -130,15 +130,29 @@ The 0.8 development path now renders an authoritative terrain surface:
 
 The Viewer does not derive terrain heights from water level, Physics or object data. The initial 9×9 resolution is deliberately coarse to keep the alpha world-entry request count bounded.
 
+## Graphical login UI
+
+The 0.9 development path removes the command-line requirement for normal Viewer startup:
+
+- default launch opens an in-window server/login form
+- fields cover Core URL, username, password and Region id
+- password input is masked and cleared from the form immediately after submission
+- mouse selection, Tab/Shift+Tab navigation, Backspace and Enter submission are supported
+- Core discovery/authentication/bootstrap runs asynchronously so the GLFW event loop remains responsive
+- connection failures are shown in the Viewer instead of only on stderr
+- the existing CLI connection path remains for development/automation
+- the supplied official Viewer logo remains the application/window/package branding; no substitute artwork is generated
+- the UI renderer is an isolated OpenGL layer and does not couple Core/Scene/WorldModel to GLFW
+
 ## Immediate next block
 
-Make live entry usable without command-line configuration and refine world interaction:
+Refine world streaming and begin controlled avatar movement:
 
-- graphical login/server form inside the Viewer window
-- connection/login/bootstrap/world-entry status and errors in the application UI
 - progressive terrain refinement after the initial coarse patch
 - non-blocking terrain sampling so network RTT does not stall the frame loop
-- first avatar-control path tied to server reconciliation
-- preserve the supplied Viewer logo throughout login/window/package branding
+- first avatar-control command path
+- server reconciliation applied back to camera/avatar presentation
+- movement sequence/retry handling
+- connection status overlay while inside a Region
 
 No final UDP/QUIC transport is assumed.

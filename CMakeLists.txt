@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.8.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.9.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -39,6 +39,7 @@ add_library(opengenesis-viewer-core
     src/app/login_flow.cpp
     src/app/viewer_runtime.cpp
     src/app/launch_options.cpp
+    src/app/login_form.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -76,6 +77,7 @@ endif()
 
 add_library(opengenesis-viewer-graphics
     src/render/opengl_renderer.cpp
+    src/render/ui_renderer.cpp
     src/app/desktop_application.cpp
 )
 add_library(OpenGenesis::ViewerGraphics ALIAS opengenesis-viewer-graphics)
@@ -181,6 +183,10 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-terrain-patch-tests tests/terrain_patch_tests.cpp)
     target_link_libraries(ogl-viewer-terrain-patch-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-terrain-patch COMMAND ogl-viewer-terrain-patch-tests)
+
+    add_executable(ogl-viewer-login-form-tests tests/login_form_tests.cpp)
+    target_link_libraries(ogl-viewer-login-form-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-login-form COMMAND ogl-viewer-login-form-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()

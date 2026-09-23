@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.8.0-dev
+## Current status — 0.9.0-dev
 
 The first foundation block contains:
 
@@ -63,6 +63,11 @@ The first foundation block contains:
 - live 9×9 terrain sampling through authenticated `TERRAIN_SAMPLE` requests
 - terrain patch reuse while the authoritative terrain revision is unchanged
 - dynamic OpenGL terrain VAO/VBO/EBO path rendered below water/objects/avatars
+- in-window graphical login form for Core URL, username, password and Region
+- mouse and keyboard form navigation with masked password input
+- asynchronous Core discovery/login/bootstrap so the GLFW event loop remains responsive
+- visible login/connection error state inside the Viewer window
+- lightweight OpenGL UI renderer with built-in bitmap text and no additional GUI toolkit dependency
 
 Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
@@ -84,7 +89,9 @@ Windows uses vcpkg dependencies from `vcpkg.json`.
 
 ## Live alpha connection
 
-The 0.8 development build can enter a real OpenGenesisLINK Region from the desktop renderer while the graphical login form is still under construction.
+The 0.9 development build opens directly into a graphical login form when started without arguments. Enter the Core server URL, username, password and Region id, then select ENTER WORLD. The login path remains strictly ordered: release discovery, authentication, Viewer bootstrap, Scene join and authoritative Scene sync.
+
+The command-line live path remains available for development and automated testing.
 
 ```bash
 export OGL_VIEWER_PASSWORD='your-password'
@@ -109,7 +116,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block adds the first in-window login/server form and error/status presentation, then moves terrain loading from the initial coarse 9×9 sample to progressive refinement. The first avatar-control/reconciliation path follows after that. See `docs/ROADMAP.md`.
+The next development block makes terrain refinement non-blocking and begins the first server-reconciled avatar-control path. Inventory, appearance and asset presentation remain later alpha milestones. See `docs/ROADMAP.md`.
 
 ## License
 
