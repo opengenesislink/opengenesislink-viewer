@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.5.0-dev
+## Current status — 0.6.0-dev
 
 The first foundation block contains:
 
@@ -45,11 +45,16 @@ The first foundation block contains:
 - explicit box-proxy objects and avatar capsule proxies for the pre-render stage
 - automatic full-snapshot recovery for unsafe/incomplete deltas
 - backend-independent camera movement foundation
+- GLFW desktop window and event loop
+- OpenGL 3.3 Core renderer backend isolated from Scene/Core networking
+- visible Region water plane and WorldModel-derived object/avatar proxies
+- keyboard camera controls and resize/VSync frame loop
+- optional `--render-demo` mode for local graphics verification without inventing server state
 - `ogl-viewer` application shell target
 - official OpenGenesisLINK Viewer application icon integrated for Windows
 - Linux desktop/icon resources derived from the same supplied logo
 
-There is deliberately no rendering engine or GUI dependency in this block. Networking/contracts stay independent from the future Render layer.
+Networking, contracts and the authoritative WorldModel remain independent from the desktop graphics backend. The current OpenGL layer is the first alpha renderer and can be replaced or supplemented later without redesigning the Scene/Core protocol stack.
 
 Application branding is already wired into packaging. No substitute artwork is generated: the repository uses build-ready derivatives of the official Viewer logo supplied by the project.
 
@@ -58,7 +63,8 @@ Application branding is already wired into packaging. No substitute artwork is g
 Linux:
 
 ```bash
-sudo apt-get install ninja-build libcurl4-openssl-dev nlohmann-json3-dev
+sudo apt-get install ninja-build libcurl4-openssl-dev nlohmann-json3-dev \
+  libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev
 cmake --preset release
 cmake --build --preset release
 ctest --preset release
@@ -76,7 +82,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block adds the first real cross-platform desktop graphics/window backend and draws the RenderWorld foundation: sampled terrain, water plane, object proxies and avatar proxies with camera controls. See `docs/ROADMAP.md`.
+The next development block integrates the real login/bootstrap flow into the graphical application, connects the desktop Viewer to a live Scene, builds a sampled terrain patch, and begins the first usable login/world-entry UI. See `docs/ROADMAP.md`.
 
 ## License
 
