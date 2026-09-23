@@ -67,6 +67,9 @@ void ViewerRuntime::prepare_asset_prefetch(
     bootstrap_content_ = content;
     asset_queue_.clear();
     asset_dependency_count_ = 0U;
+    asset_ready_count_ = 0U;
+    asset_failed_count_ = 0U;
+    asset_missing_metadata_count_ = 0U;
     asset_error_.clear();
 
     if (!bootstrap_content_.appearance.has_value()) {
@@ -79,25 +82,27 @@ void ViewerRuntime::prepare_asset_prefetch(
     asset_dependency_count_ =
         dependencies.size();
 
-    std::size_t missing_metadata = 0U;
     for (const auto& asset_id : dependencies) {
         const auto* metadata =
             core::find_asset_metadata(
                 bootstrap_content_,
                 asset_id);
         if (metadata == nullptr) {
-            ++missing_metadata;
+            ++asset_missing_metadata_count_;
             continue;
         }
 
-        if (asset_cache_.find(*metadata) == nullptr) {
+        if (asset_cache_.find(*metadata) != nullptr) {
+            ++asset_ready_count_;
+        } else {
             asset_queue_.push_back(*metadata);
         }
     }
 
-    if (missing_metadata != 0U) {
+    if (asset_missing_metadata_count_ != 0U) {
         asset_error_ =
-            std::to_string(missing_metadata) +
+            std::to_string(
+                asset_missing_metadata_count_) +
             " Appearance Asset dependencies are missing bootstrap metadata";
     }
 }
@@ -445,10 +450,14 @@ void ViewerRuntime::service_background() {
                     "Fetched Asset exceeds Viewer cache limits");
             }
 
-            if (asset_queue_.empty()) {
+            ++asset_ready_count_;
+            if (asset_queue_.empty() &&
+                asset_failed_count_ == 0U &&
+                asset_missing_metadata_count_ == 0U) {
                 asset_error_.clear();
             }
         } catch (const std::exception& ex) {
+            ++asset_failed_count_;
             asset_error_ = ex.what();
         }
     }
@@ -629,6 +638,9 @@ void ViewerRuntime::disconnect() noexcept {
     asset_cache_.clear();
     bootstrap_content_ = {};
     asset_dependency_count_ = 0U;
+    asset_ready_count_ = 0U;
+    asset_failed_count_ = 0U;
+    asset_missing_metadata_count_ = 0U;
     asset_error_.clear();
     render_region_.reset();
     info_.reset();
@@ -706,7 +718,11 @@ ViewerRuntime::background_state() const {
     state.asset_dependencies =
         asset_dependency_count_;
     state.asset_cached =
-        asset_cache_.entries();
+        asset_ready_count_;
+    state.asset_failed =
+        asset_failed_count_;
+    state.asset_missing_metadata =
+        asset_missing_metadata_count_;
     state.asset_cache_bytes =
         asset_cache_.bytes();
     state.asset_prefetch_pending =
