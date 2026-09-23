@@ -417,11 +417,17 @@ ConsoleCommand parse_console_command(
     if (name == "/build") {
         require_args(
             tokens, 1U,
-            "/build create|delete|move|scale|text|link|unlink|shape|material|force ...");
+            "/build list|create|delete|move|scale|text|link|unlink|permissions|motion|touch|shape|material|force ...");
+        if (tokens[1] == "list") {
+            return command(
+                ConsoleCommandKind::build_list,
+                tokens,
+                2U);
+        }
         if (tokens[1] == "create") {
             require_args(
                 tokens, 5U,
-                "/build create <name> <x> <y> <z>");
+                "/build create <name> <x> <y> <z> [physical on|off]");
             return command(
                 ConsoleCommandKind::build_create,
                 tokens,
@@ -472,6 +478,33 @@ ConsoleCommand parse_console_command(
                 tokens[1] == "link"
                     ? ConsoleCommandKind::build_link
                     : ConsoleCommandKind::build_unlink,
+                tokens,
+                2U);
+        }
+        if (tokens[1] == "permissions") {
+            require_args(
+                tokens, 5U,
+                "/build permissions <entity-id> <group-id|-> <group-mask> <everyone-mask>");
+            return command(
+                ConsoleCommandKind::build_permissions,
+                tokens,
+                2U);
+        }
+        if (tokens[1] == "motion") {
+            require_args(
+                tokens, 8U,
+                "/build motion <entity-id> <vx> <vy> <vz> <avx> <avy> <avz>");
+            return command(
+                ConsoleCommandKind::build_motion,
+                tokens,
+                2U);
+        }
+        if (tokens[1] == "touch") {
+            require_args(
+                tokens, 3U,
+                "/build touch <entity-id> start|touch|end");
+            return command(
+                ConsoleCommandKind::build_interact,
                 tokens,
                 2U);
         }
@@ -533,7 +566,7 @@ std::string console_help() {
         "/groups refresh | /group create|info|invite|accept|add|role|remove|post ... | "
         "/notifications refresh | /notify read ID | /parcels refresh | "
         "/parcel create|policy|access-list|access|access-remove ... | /tp REGION [X Y Z] | "
-        "/handoff REGION | /build create|delete|move|scale|text|link|unlink|shape|material|force ... | "
+        "/handoff REGION | /build list|create|delete|move|scale|text|link|unlink|permissions|motion|touch|shape|material|force ... | "
         "/terrain set X Y HEIGHT | /refresh";
 }
 
