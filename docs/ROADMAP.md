@@ -8,8 +8,8 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 2 | Core login/session | Foundation implemented |
 | 3 | Viewer bootstrap | Foundation implemented |
 | 4 | OGL1 framing | Implemented |
-| 5 | HELLO + SCENE_JOIN | Protocol foundation implemented; TCP session next |
-| 6 | Full Scene snapshot | Planned |
+| 5 | HELLO + SCENE_JOIN | Implemented over portable TCP session |
+| 6 | Full Scene snapshot | Initial sync request implemented; snapshot model parser next |
 | 7 | Region / terrain / object rendering | Planned |
 | 8 | Avatar rendering | Planned |
 | 9 | Avatar reconciliation | Planned |
@@ -43,17 +43,29 @@ The Viewer now has a server-compatible OGL1 protocol layer:
 - Scene error parsing
 - SCENE_SYNC_REQUEST construction with the server's 1..1024 batch bound
 
+## Live Scene connection
+
+The Viewer now binds the OGL1 protocol to a portable blocking TCP session for Linux, Linux ARM64 and Windows:
+
+- `host:port`, `tcp://host:port` and bracketed IPv6 endpoint parsing
+- complete partial-write handling
+- incremental fragmented/coalesced frame reads
+- correlated request ids with unrelated-frame deferral
+- live HELLO negotiation
+- live Scene Ticket join
+- initial `SCENE_SYNC_REQUEST since=0`
+- GOODBYE plus deterministic local cleanup
+
 ## Immediate next block
 
-Bind this protocol layer to a portable Scene TCP connection:
+Turn the initial `SCENE_SYNC` payload into the first authoritative WorldModel:
 
-- endpoint parsing and connection lifecycle
-- complete write/read loops for partial socket I/O
-- HELLO negotiation over the live socket
-- Scene Ticket join over the live socket
-- initial `SCENE_SYNC_REQUEST since=0`
-- request-id allocator/correlation
-- deterministic disconnect cleanup
-- reconnect state needed for later delta recovery
+- parse `mode=snapshot` and `mode=delta`
+- parse Scene sequence/revision state
+- materialize Region metadata, terrain and entities from the full snapshot
+- retain latest applied sequence
+- apply ordered deltas
+- trigger full snapshot recovery when the server falls back from stale history
+- add reconnect state around the existing Scene session
 
 No final UDP/QUIC transport is assumed.
