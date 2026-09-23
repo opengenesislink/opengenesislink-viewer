@@ -99,6 +99,8 @@ ViewerBootstrapResult ViewerBootstrapClient::bootstrap(
 
     ViewerBootstrapResult result;
     result.raw_json = response.body;
+    result.content =
+        parse_bootstrap_content(response.body);
     result.viewer_contract =
         doc.value("viewer_contract", "");
     result.scene_contract =
