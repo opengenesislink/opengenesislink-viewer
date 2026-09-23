@@ -52,8 +52,9 @@ void ViewerRuntime::rebuild_render_region() {
         next.terrain_patch = std::move(previous_patch);
     }
 
-    if (terrain_refinement_.revision() !=
-        region.terrain_revision) {
+    if (!terrain_refinement_.configured() ||
+        terrain_refinement_.revision() !=
+            region.terrain_revision) {
         terrain_refinement_.reset(region);
         terrain_suspended_ = false;
     }
