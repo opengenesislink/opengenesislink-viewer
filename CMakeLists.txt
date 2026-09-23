@@ -34,6 +34,7 @@ add_library(opengenesis-viewer-core
     src/scene/scene_session.cpp
     src/scene/terrain_protocol.cpp
     src/scene/avatar_protocol.cpp
+    src/scene/world_actions.cpp
     src/world/world_model.cpp
     src/world/render_world.cpp
     src/world/terrain_cache.cpp
@@ -222,6 +223,10 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-content-inspector-tests tests/content_inspector_tests.cpp)
     target_link_libraries(ogl-viewer-content-inspector-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-content-inspector COMMAND ogl-viewer-content-inspector-tests)
+
+    add_executable(ogl-viewer-world-actions-tests tests/world_actions_tests.cpp)
+    target_link_libraries(ogl-viewer-world-actions-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-world-actions COMMAND ogl-viewer-world-actions-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()
