@@ -21,6 +21,8 @@ add_library(opengenesis-viewer-core
     src/core/viewer_bootstrap.cpp
     src/scene/frame.cpp
     src/scene/session_protocol.cpp
+    src/scene/transport.cpp
+    src/scene/scene_session.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -33,6 +35,10 @@ target_link_libraries(opengenesis-viewer-core PUBLIC
     CURL::libcurl
     nlohmann_json::nlohmann_json
 )
+
+if(WIN32)
+    target_link_libraries(opengenesis-viewer-core PRIVATE ws2_32)
+endif()
 
 target_compile_definitions(opengenesis-viewer-core PUBLIC
     OGL_VIEWER_VERSION="${OGL_VIEWER_VERSION_LABEL}"
@@ -71,4 +77,8 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-scene-tests tests/scene_protocol_tests.cpp)
     target_link_libraries(ogl-viewer-scene-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-scene-protocol COMMAND ogl-viewer-scene-tests)
+
+    add_executable(ogl-viewer-scene-session-tests tests/scene_session_tests.cpp)
+    target_link_libraries(ogl-viewer-scene-session-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-scene-session COMMAND ogl-viewer-scene-session-tests)
 endif()
