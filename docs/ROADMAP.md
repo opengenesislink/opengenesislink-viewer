@@ -10,8 +10,8 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 4 | OGL1 framing | Implemented |
 | 5 | HELLO + SCENE_JOIN | Implemented over portable TCP session |
 | 6 | Full Scene snapshot | Implemented into authoritative WorldModel |
-| 7 | Region / terrain / object rendering | RenderWorld/Terrain foundation implemented; graphics backend next |
-| 8 | Avatar rendering | Avatar proxy instance foundation implemented; visual avatar system planned |
+| 7 | Region / terrain / object rendering | OpenGL desktop proxy renderer implemented; terrain mesh next |
+| 8 | Avatar rendering | Visible proxy rendering implemented; full visual avatar system planned |
 | 9 | Avatar reconciliation | Planned |
 | 10 | Scene deltas / reconnect recovery | Automatic snapshot recovery implemented; reconnect continuation next |
 | 11 | Asset fetch / cache | Planned |
@@ -86,17 +86,33 @@ The Viewer now has a graphics-backend-independent layer above the authoritative 
 
 The current Scene snapshot does not expose a visual GenesisMesher PrimitiveDescriptor. The Viewer therefore does not infer sphere/cylinder/capsule visuals from physics state.
 
+## Desktop graphics foundation
+
+The Viewer now has its first actual desktop graphics backend:
+
+- GLFW cross-platform application/window event loop
+- OpenGL 3.3 Core renderer isolated behind `OpenGlRenderer`
+- shader compile/link path and depth-tested proxy geometry
+- Region water plane derived from authoritative Region dimensions/water height
+- visible object and avatar proxy instances from `RenderWorld`
+- keyboard camera movement and look controls
+- resize-aware viewport, frame timing and VSync
+- `--render-demo` local graphics mode that is explicitly separate from live server state
+- official supplied Viewer application logo remains wired into Windows resources and Linux desktop packaging
+
+The renderer still uses box geometry for object/avatar proxy drawing. This is intentional until the server exposes enough visual primitive/avatar data; the Viewer does not infer unavailable visual state.
+
 ## Immediate next block
 
-Introduce the first real desktop graphics/window backend while keeping protocol and WorldModel layers independent:
+Make the graphical Viewer usable against a live OpenGenesisLINK server:
 
-- cross-platform application/window event loop
-- GPU renderer abstraction
-- visible Region water plane and sampled terrain patch
-- box-proxy object drawing from RenderWorld
-- avatar capsule proxy drawing
-- camera input bindings
-- frame timing and resize handling
+- graphical login/server form
+- Core release discovery before login
+- authenticated Core login and Viewer bootstrap
+- connect the returned Scene endpoint/ticket
+- feed initial `SCENE_SYNC` into WorldModel/RenderWorld
+- construct a sampled terrain patch instead of only the water plane
+- show connection/login/world-entry errors in the application UI
 - reconnect continuation using the last authoritative Scene sequence
 
 No final UDP/QUIC transport is assumed.
