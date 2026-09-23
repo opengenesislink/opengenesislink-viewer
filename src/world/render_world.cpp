@@ -26,12 +26,18 @@ RenderRegion RenderWorldBuilder::build(const WorldModel& model) const {
         instance.entity_id = id;
         instance.geometry =
             entity.kind == EntityKind::avatar
-                ? RenderGeometry::avatar_capsule
+                ? RenderGeometry::avatar_humanoid
                 : RenderGeometry::box_proxy;
         instance.transform = entity.transform;
         instance.parent_entity_id = entity.parent_entity_id;
         instance.link_number = entity.link_number;
         instance.physical = entity.physics.physical;
+        if (entity.kind == EntityKind::avatar &&
+            entity.transform.scale.z > 0.5 &&
+            entity.transform.scale.z < 3.0) {
+            instance.avatar_height =
+                entity.transform.scale.z;
+        }
         render.instances.emplace(id, instance);
     }
 

@@ -126,6 +126,247 @@ AvatarReconcileAck SceneSession::reconcile_avatar(
         request_id);
 }
 
+SceneCommandAck SceneSession::send_chat(
+    std::string_view text) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Local chat requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(make_chat_send(request_id, text));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::chat_event,
+            request_id),
+        MessageType::chat_event,
+        request_id);
+}
+
+SceneCommandAck SceneSession::create_object(
+    const ObjectCreateRequest& request) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Object creation requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(make_object_create(request_id, request));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_create_ack,
+            request_id),
+        MessageType::entity_create_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::update_object(
+    std::uint64_t entity_id,
+    const SceneTransform& transform) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Object update requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_update(
+            request_id,
+            entity_id,
+            transform));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_update_ack,
+            request_id),
+        MessageType::entity_update_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::delete_object(
+    std::uint64_t entity_id) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Object deletion requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_delete(
+            request_id,
+            entity_id));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_delete_ack,
+            request_id),
+        MessageType::entity_delete_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::update_object_permissions(
+    const ObjectPermissionsRequest& request) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Permission update requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_permissions(
+            request_id,
+            request));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_permissions_ack,
+            request_id),
+        MessageType::entity_permissions_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::link_object(
+    std::uint64_t root_id,
+    std::uint64_t child_id,
+    bool unlink) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Linkset update requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_link(
+            request_id,
+            root_id,
+            child_id,
+            unlink));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_link_ack,
+            request_id),
+        MessageType::entity_link_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::set_object_text(
+    std::uint64_t entity_id,
+    std::string_view text) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Floating text update requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_text(
+            request_id,
+            entity_id,
+            text));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_text_ack,
+            request_id),
+        MessageType::entity_text_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::set_object_motion(
+    const ObjectMotionRequest& request) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Object motion update requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_motion(
+            request_id,
+            request));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_motion_ack,
+            request_id),
+        MessageType::entity_motion_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::object_physics(
+    std::uint64_t entity_id,
+    std::string_view action,
+    std::string_view additional_fields) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Object Physics command requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_physics(
+            request_id,
+            entity_id,
+            action,
+            additional_fields));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_physics_ack,
+            request_id),
+        MessageType::entity_physics_ack,
+        request_id);
+}
+
+SceneCommandAck SceneSession::interact_object(
+    std::uint64_t entity_id,
+    std::string_view phase) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Object interaction requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_object_interact(
+            request_id,
+            entity_id,
+            phase));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::entity_interact_ack,
+            request_id),
+        MessageType::entity_interact_ack,
+        request_id);
+}
+
+ParcelInfoResult SceneSession::request_parcel_info(
+    std::optional<double> x,
+    std::optional<double> y) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Parcel query requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_parcel_info_request(
+            request_id,
+            x,
+            y));
+    return parse_parcel_info(
+        receive_correlated(
+            MessageType::parcel_info,
+            request_id),
+        request_id);
+}
+
+SceneCommandAck SceneSession::set_terrain_height(
+    std::size_t grid_x,
+    std::size_t grid_y,
+    double height) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Terrain modification requires a joined Scene session");
+    }
+    const auto request_id = allocate_request_id();
+    channel_.send(
+        make_terrain_set_request(
+            request_id,
+            grid_x,
+            grid_y,
+            height));
+    return parse_scene_command_ack(
+        receive_correlated(
+            MessageType::terrain_set_ack,
+            request_id),
+        MessageType::terrain_set_ack,
+        request_id);
+}
+
 Frame SceneSession::receive_next() {
     if (!deferred_.empty()) {
         auto frame = std::move(deferred_.front());

@@ -10,18 +10,18 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 4 | OGL1 framing | Implemented |
 | 5 | HELLO + SCENE_JOIN | Implemented over portable TCP session |
 | 6 | Full Scene snapshot | Implemented into authoritative WorldModel |
-| 7 | Region / terrain / object rendering | Progressive non-blocking terrain refinement + OpenGL proxy rendering implemented |
-| 8 | Avatar rendering | Visible proxy rendering implemented; full visual avatar system planned |
+| 7 | Region / terrain / object rendering | Terrain/water/live entities implemented; arbitrary object mesh/material visuals remain Server-contract-limited |
+| 8 | Avatar rendering | Procedural humanoid fallback + Appearance height/wearable/attachment proxies implemented; final asset visuals pending format contract |
 | 9 | Avatar reconciliation | First server-authoritative WASD/reconcile path implemented |
 | 10 | Scene deltas / reconnect recovery | Delta polling + sequence-based reconnect implemented |
 | 11 | Asset fetch / cache | Authenticated fetch + bounded in-memory cache foundation implemented |
-| 12 | Appearance / wearables | Bootstrap model + read-only inspector + dependencies implemented; visual decode pending |
-| 13 | Inventory UI | Read-only paged bootstrap Inventory inspector implemented; mutations planned |
-| 14 | Chat / social | Planned |
-| 15 | Object editing / build tools | Planned |
-| 16 | Parcel / land UI | Planned |
-| 17 | Teleport / handoff | Planned |
-| 18 | Groups / notifications | Planned |
+| 12 | Appearance / wearables | Live refresh + wearable/attachment mutations + procedural visual fallback implemented; asset decode pending format contract |
+| 13 | Inventory UI | Inspector + live refresh + folder/item creation implemented; unsupported mutations remain gated by Server endpoints |
+| 14 | Chat / social | Local Chat + DM + friends + presence + block/mute command workflows implemented |
+| 15 | Object editing / build tools | Create/delete/transform/link/text/permissions/motion/interaction/Physics command workflows implemented |
+| 16 | Parcel / land UI | Region parcels, create/policy/access and terrain editing workflows implemented |
+| 17 | Teleport / handoff | Native OGL teleport + transactional adjacent handoff/reserve/complete/rollback implemented |
+| 18 | Groups / notifications | Groups, members, roles, invites, channel posts and notifications implemented |
 | 19 | Economy / Marketplace | Planned |
 | 20 | Atlas bridge | Planned |
 | 21 | Voice provider bridge | Planned |
@@ -204,17 +204,35 @@ The 0.12 development path makes the already typed bootstrap data inspectable ins
 - Scene synchronization, terrain refinement, Asset prefetch and world rendering continue behind the inspector
 - the inspector is intentionally read-only; no Inventory or Appearance mutation endpoint is assumed
 
+## 0.13 alpha feature completion
+
+The 0.13 development path adds the first broad in-world workflow layer on top of the authoritative Core/Scene foundation:
+
+- bounded Local Chat history sourced from Scene events
+- Enter-activated chat/command bar with parser/unit tests
+- Core PlatformClient for Appearance, Inventory, Presence/Social, Groups, Notifications, Parcels and Travel
+- Appearance refresh and wearable/attachment mutations
+- Inventory refresh plus released folder/item creation operations
+- direct messages, friend request/accept/remove, block and mute
+- group membership/roles/invites/channel posts and notification read state
+- Scene-authoritative Build Tools: create/delete/transform/link/text/permissions/motion/interaction and released Physics actions
+- Parcel list/create/policy/access plus authenticated terrain height modification
+- native OpenGenesisLINK teleport
+- adjacent Region Crossing v3 flow: destination Scene accept -> reserve -> complete, with explicit rollback and source recovery
+- procedural humanoid Avatar fallback driven by authoritative Avatar height plus wearable/attachment metadata
+- arbitrary object mesh/material rendering remains intentionally unresolved because the current Server visual-state contract does not publish enough canonical render data
+- Hypergrid travel into OpenSimulator/OSGrid is not part of the native teleport implementation
+
 ## Immediate next block
 
-Move from bootstrap-only inspection toward live user-content workflows that the Server explicitly supports:
+Prepare the first installable alpha test build and close the remaining first-alpha acceptance gap:
 
-- authenticated Appearance refresh after the initial bootstrap
-- authenticated Inventory refresh after the initial bootstrap
-- detect Appearance revision changes and rebuild Appearance Asset dependency prefetch
-- detect Inventory changes without requiring a full Region reconnect
-- define read-only item/folder selection details before adding mutations
-- add mutation actions only where a released Server endpoint and permission model exist
-- coordinate the first canonical texture/mesh MIME and payload contracts with the Server before visual decoding
-- keep unsupported Asset types on explicit proxy/placeholder rendering
+- complete Linux x86_64 / ARM64 / Windows CI for 0.13
+- package Linux and Windows test artifacts
+- run a real Server ↔ Viewer login/world-entry/travel smoke test
+- add Atlas destination/open handling
+- define the canonical visual Asset/mesh/material payload contract with the Server
+- implement Hypergrid/OpenSimulator travel as a separate interoperability milestone
+- later: Economy/Marketplace and Voice provider bridge
 
 No final UDP/QUIC transport is assumed.

@@ -48,10 +48,13 @@ struct LoginLayout {
     Rect button;
 };
 
-struct LoginInputContext {
-    LoginFormState* form = nullptr;
-    bool* visible = nullptr;
-    bool* submit_requested = nullptr;
+struct ViewerInputContext {
+    LoginFormState* login_form = nullptr;
+    bool* login_visible = nullptr;
+    bool* login_submit_requested = nullptr;
+    std::string* console_input = nullptr;
+    bool* console_visible = nullptr;
+    bool* console_submit_requested = nullptr;
 };
 
 constexpr render::UiColor kPanel{
@@ -86,19 +89,30 @@ void glfw_error_callback(int code, const char* description) {
 void login_character_callback(
     GLFWwindow* window,
     unsigned int codepoint) {
-    auto* context = static_cast<LoginInputContext*>(
+    auto* context = static_cast<ViewerInputContext*>(
         glfwGetWindowUserPointer(window));
     if (context == nullptr ||
-        context->form == nullptr ||
-        context->visible == nullptr ||
-        !*context->visible ||
-        context->form->connecting ||
         codepoint > 126U) {
         return;
     }
 
-    context->form->append_ascii(
-        static_cast<char>(codepoint));
+    if (context->login_form != nullptr &&
+        context->login_visible != nullptr &&
+        *context->login_visible &&
+        !context->login_form->connecting) {
+        context->login_form->append_ascii(
+            static_cast<char>(codepoint));
+        return;
+    }
+
+    if (context->console_input != nullptr &&
+        context->console_visible != nullptr &&
+        *context->console_visible &&
+        codepoint >= 32U &&
+        context->console_input->size() < 2048U) {
+        context->console_input->push_back(
+            static_cast<char>(codepoint));
+    }
 }
 
 void login_key_callback(
@@ -107,38 +121,53 @@ void login_key_callback(
     int,
     int action,
     int mods) {
-    auto* context = static_cast<LoginInputContext*>(
+    auto* context = static_cast<ViewerInputContext*>(
         glfwGetWindowUserPointer(window));
     if (context == nullptr ||
-        context->form == nullptr ||
-        context->visible == nullptr ||
-        context->submit_requested == nullptr ||
-        !*context->visible ||
-        context->form->connecting) {
+        (action != GLFW_PRESS &&
+         action != GLFW_REPEAT)) {
         return;
     }
 
-    if (action != GLFW_PRESS &&
-        action != GLFW_REPEAT) {
+    if (context->login_form != nullptr &&
+        context->login_visible != nullptr &&
+        context->login_submit_requested != nullptr &&
+        *context->login_visible &&
+        !context->login_form->connecting) {
+        if (key == GLFW_KEY_BACKSPACE) {
+            context->login_form->backspace();
+            return;
+        }
+        if (key == GLFW_KEY_TAB &&
+            action == GLFW_PRESS) {
+            context->login_form->focus_next(
+                (mods & GLFW_MOD_SHIFT) != 0);
+            return;
+        }
+        if ((key == GLFW_KEY_ENTER ||
+             key == GLFW_KEY_KP_ENTER) &&
+            action == GLFW_PRESS) {
+            *context->login_submit_requested = true;
+        }
         return;
     }
 
-    if (key == GLFW_KEY_BACKSPACE) {
-        context->form->backspace();
-        return;
-    }
-
-    if (key == GLFW_KEY_TAB &&
-        action == GLFW_PRESS) {
-        context->form->focus_next(
-            (mods & GLFW_MOD_SHIFT) != 0);
-        return;
-    }
-
-    if ((key == GLFW_KEY_ENTER ||
-         key == GLFW_KEY_KP_ENTER) &&
-        action == GLFW_PRESS) {
-        *context->submit_requested = true;
+    if (context->console_input != nullptr &&
+        context->console_visible != nullptr &&
+        context->console_submit_requested != nullptr &&
+        *context->console_visible) {
+        if (key == GLFW_KEY_BACKSPACE) {
+            if (!context->console_input->empty()) {
+                context->console_input->pop_back();
+            }
+            return;
+        }
+        if ((key == GLFW_KEY_ENTER ||
+             key == GLFW_KEY_KP_ENTER) &&
+            action == GLFW_PRESS) {
+            *context->console_submit_requested = true;
+            return;
+        }
     }
 }
 
@@ -853,6 +882,199 @@ void draw_content_inspector(
     ui.render();
 }
 
+std::vector<std::string> display_lines(
+    std::string_view value,
+    std::size_t max_lines) {
+    std::vector<std::string> lines;
+    std::size_t start = 0U;
+    while (start <= value.size()) {
+        const auto end =
+            value.find('\n', start);
+        lines.emplace_back(
+            value.substr(
+                start,
+                end == std::string_view::npos
+                    ? std::string_view::npos
+                    : end - start));
+        if (end == std::string_view::npos) {
+            break;
+        }
+        start = end + 1U;
+    }
+
+    if (lines.size() > max_lines) {
+        lines.erase(
+            lines.begin(),
+            lines.begin() +
+                static_cast<std::ptrdiff_t>(
+                    lines.size() - max_lines));
+    }
+    return lines;
+}
+
+void draw_chat_and_command_bar(
+    render::UiRenderer& ui,
+    const ViewerRuntime& runtime,
+    bool command_visible,
+    const std::string& command_input,
+    int framebuffer_width,
+    int framebuffer_height) {
+    const auto width =
+        static_cast<float>(
+            std::max(framebuffer_width, 1));
+    const auto height =
+        static_cast<float>(
+            std::max(framebuffer_height, 1));
+
+    const auto panel_width =
+        std::min(width - 28.0F, 760.0F);
+    const auto x = 14.0F;
+    const auto input_height =
+        command_visible ? 54.0F : 28.0F;
+    const auto bottom = height - 18.0F;
+    const auto input_y =
+        bottom - input_height;
+
+    ui.begin();
+
+    const auto& chat =
+        runtime.world_model().chat_history();
+    const auto chat_count =
+        std::min<std::size_t>(
+            6U,
+            chat.size());
+    if (chat_count > 0U) {
+        const auto chat_height =
+            static_cast<float>(
+                chat_count) *
+                22.0F +
+            18.0F;
+        const auto chat_y =
+            input_y - chat_height - 8.0F;
+        ui.rectangle(
+            x,
+            chat_y,
+            panel_width,
+            chat_height,
+            kPanel);
+
+        const auto first =
+            chat.size() - chat_count;
+        float line_y = chat_y + 10.0F;
+        for (std::size_t index = first;
+             index < chat.size();
+             ++index) {
+            const auto& message = chat[index];
+            const auto prefix =
+                message.kind == "chat_whisper"
+                    ? "[WHISPER] "
+                    : message.kind == "chat_shout"
+                          ? "[SHOUT] "
+                          : "";
+            ui.text(
+                x + 12.0F,
+                line_y,
+                1.0F,
+                visible_tail(
+                    prefix +
+                        message.sender_name +
+                        ": " +
+                        message.text,
+                    108U),
+                kText);
+            line_y += 22.0F;
+        }
+    }
+
+    const auto command =
+        runtime.command_state();
+    const auto result_lines =
+        display_lines(
+            command.last_result,
+            5U);
+    if (!result_lines.empty()) {
+        const auto result_height =
+            static_cast<float>(
+                result_lines.size()) *
+                20.0F +
+            14.0F;
+        const auto result_y =
+            input_y -
+            (chat_count > 0U
+                 ? static_cast<float>(
+                       chat_count) *
+                       22.0F +
+                       40.0F
+                 : 8.0F) -
+            result_height;
+        ui.rectangle(
+            x,
+            result_y,
+            panel_width,
+            result_height,
+            kPanel);
+        float line_y =
+            result_y + 8.0F;
+        for (const auto& line :
+             result_lines) {
+            ui.text(
+                x + 12.0F,
+                line_y,
+                0.95F,
+                visible_tail(line, 112U),
+                command.pending
+                    ? kAccent
+                    : kMuted);
+            line_y += 20.0F;
+        }
+    }
+
+    if (command_visible) {
+        ui.rectangle(
+            x - 2.0F,
+            input_y - 2.0F,
+            panel_width + 4.0F,
+            input_height + 4.0F,
+            kAccent);
+        ui.rectangle(
+            x,
+            input_y,
+            panel_width,
+            input_height,
+            kPanelInner);
+        ui.text(
+            x + 12.0F,
+            input_y + 8.0F,
+            1.0F,
+            "CHAT / VIEWER COMMAND  |  /HELP",
+            kMuted);
+        ui.text(
+            x + 12.0F,
+            input_y + 29.0F,
+            1.2F,
+            "> " +
+                visible_tail(
+                    command_input,
+                    98U),
+            kText);
+    } else {
+        ui.rectangle(
+            x,
+            input_y,
+            330.0F,
+            input_height,
+            kPanel);
+        ui.text(
+            x + 10.0F,
+            input_y + 9.0F,
+            1.0F,
+            "ENTER: CHAT / COMMANDS   I: CONTENT",
+            kMuted);
+    }
+
+    ui.render();
+}
+
 } // namespace
 
 int DesktopApplication::run(
@@ -934,14 +1156,22 @@ int DesktopApplication::run(
         bool submit_requested = false;
         bool previous_mouse_pressed = false;
 
-        LoginInputContext login_input{
-            .form = &login_form,
-            .visible = &show_login,
-            .submit_requested = &submit_requested,
+        std::string command_input;
+        bool command_visible = false;
+        bool command_submit_requested = false;
+
+        ViewerInputContext input_context{
+            .login_form = &login_form,
+            .login_visible = &show_login,
+            .login_submit_requested = &submit_requested,
+            .console_input = &command_input,
+            .console_visible = &command_visible,
+            .console_submit_requested =
+                &command_submit_requested,
         };
         glfwSetWindowUserPointer(
             window,
-            &login_input);
+            &input_context);
         glfwSetCharCallback(
             window,
             &login_character_callback);
@@ -986,6 +1216,8 @@ int DesktopApplication::run(
         bool previous_section_key = false;
         bool previous_page_up_key = false;
         bool previous_page_down_key = false;
+        bool previous_enter_key = false;
+        bool previous_escape_key = false;
 
         int previous_width = 0;
         int previous_height = 0;
@@ -993,9 +1225,23 @@ int DesktopApplication::run(
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
             glfwPollEvents();
 
-            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
+            const bool escape_key =
+                glfwGetKey(window, GLFW_KEY_ESCAPE) ==
+                GLFW_PRESS;
+            if (escape_key &&
+                !previous_escape_key) {
+                if (command_visible) {
+                    command_visible = false;
+                    command_input.clear();
+                } else if (content_inspector_visible) {
+                    content_inspector_visible = false;
+                } else {
+                    glfwSetWindowShouldClose(
+                        window,
+                        GLFW_TRUE);
+                }
             }
+            previous_escape_key = escape_key;
 
             const auto current_time = glfwGetTime();
             const auto delta_seconds =
@@ -1038,11 +1284,37 @@ int DesktopApplication::run(
             const bool page_down_key =
                 glfwGetKey(window, GLFW_KEY_PAGE_DOWN) ==
                 GLFW_PRESS;
+            const bool enter_key =
+                glfwGetKey(window, GLFW_KEY_ENTER) ==
+                    GLFW_PRESS ||
+                glfwGetKey(window, GLFW_KEY_KP_ENTER) ==
+                    GLFW_PRESS;
 
             if (!show_login &&
                 live_mode &&
                 live_runtime.world_model().initialized()) {
-                if (inspector_key &&
+                if (!command_visible &&
+                    enter_key &&
+                    !previous_enter_key) {
+                    command_visible = true;
+                    content_inspector_visible = false;
+                    command_input.clear();
+
+                    if (avatar_was_moving &&
+                        live_runtime.connected()) {
+                        input::AvatarControlInput stop;
+                        stop.heading_degrees =
+                            camera.yaw_degrees;
+                        stop.speed = 4.0;
+                        stop.command_seconds = 0.1;
+                        (void)live_runtime
+                            .queue_avatar_control(stop);
+                        avatar_was_moving = false;
+                    }
+                }
+
+                if (!command_visible &&
+                    inspector_key &&
                     !previous_inspector_key) {
                     content_inspector_visible =
                         !content_inspector_visible;
@@ -1061,7 +1333,8 @@ int DesktopApplication::run(
                     }
                 }
 
-                if (content_inspector_visible &&
+                if (!command_visible &&
+                    content_inspector_visible &&
                     section_key &&
                     !previous_section_key) {
                     content_inspector_section =
@@ -1070,17 +1343,30 @@ int DesktopApplication::run(
                     content_inspector_page = 0U;
                 }
 
-                if (content_inspector_visible &&
+                if (!command_visible &&
+                    content_inspector_visible &&
                     page_up_key &&
                     !previous_page_up_key &&
                     content_inspector_page > 0U) {
                     --content_inspector_page;
                 }
 
-                if (content_inspector_visible &&
+                if (!command_visible &&
+                    content_inspector_visible &&
                     page_down_key &&
                     !previous_page_down_key) {
                     ++content_inspector_page;
+                }
+            }
+
+            if (command_visible &&
+                command_submit_requested) {
+                command_submit_requested = false;
+                if (!command_input.empty()) {
+                    (void)live_runtime.submit_command(
+                        command_input);
+                    command_input.clear();
+                    command_visible = false;
                 }
             }
 
@@ -1092,6 +1378,8 @@ int DesktopApplication::run(
                 page_up_key;
             previous_page_down_key =
                 page_down_key;
+            previous_enter_key =
+                enter_key;
 
             if (show_login &&
                 submit_requested &&
@@ -1149,6 +1437,8 @@ int DesktopApplication::run(
                     live_mode = true;
                     content_inspector_visible = false;
                     content_inspector_page = 0U;
+                    command_visible = false;
+                    command_input.clear();
                     reconnect_pending = false;
                     next_scene_poll = current_time + 0.5;
                     next_avatar_command = current_time;
@@ -1239,7 +1529,8 @@ int DesktopApplication::run(
                 if (live_mode &&
                     live_runtime.connected() &&
                     !reconnect_pending) {
-                    if (!content_inspector_visible) {
+                    if (!content_inspector_visible &&
+                        !command_visible) {
                         const auto camera_input =
                             read_camera_look_input(
                                 window,
@@ -1318,6 +1609,14 @@ int DesktopApplication::run(
                         width,
                         height);
                 }
+
+                draw_chat_and_command_bar(
+                    ui_renderer,
+                    live_runtime,
+                    command_visible,
+                    command_input,
+                    width,
+                    height);
             }
 
             glfwSwapBuffers(window);

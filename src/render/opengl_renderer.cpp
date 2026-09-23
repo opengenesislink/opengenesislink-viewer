@@ -9,7 +9,9 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+#include <algorithm>
 #include <array>
+#include <cctype>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -116,6 +118,132 @@ glm::mat4 world_transform(const world::Transform& transform) {
             static_cast<float>(transform.scale.x),
             static_cast<float>(transform.scale.y),
             static_cast<float>(transform.scale.z)});
+}
+
+glm::mat4 transform_basis(
+    const world::Transform& transform) {
+    auto matrix = glm::mat4{1.0F};
+    matrix = glm::translate(
+        matrix,
+        glm::vec3{
+            static_cast<float>(transform.position.x),
+            static_cast<float>(transform.position.y),
+            static_cast<float>(transform.position.z)});
+    matrix = glm::rotate(
+        matrix,
+        glm::radians(
+            static_cast<float>(
+                transform.rotation.z)),
+        glm::vec3{0.0F, 0.0F, 1.0F});
+    matrix = glm::rotate(
+        matrix,
+        glm::radians(
+            static_cast<float>(
+                transform.rotation.y)),
+        glm::vec3{0.0F, 1.0F, 0.0F});
+    matrix = glm::rotate(
+        matrix,
+        glm::radians(
+            static_cast<float>(
+                transform.rotation.x)),
+        glm::vec3{1.0F, 0.0F, 0.0F});
+    return matrix;
+}
+
+glm::mat4 avatar_part_transform(
+    const world::RenderInstance& instance,
+    double local_x,
+    double local_y,
+    double local_z,
+    double size_x,
+    double size_y,
+    double size_z) {
+    auto matrix =
+        transform_basis(instance.transform);
+    matrix = glm::translate(
+        matrix,
+        glm::vec3{
+            static_cast<float>(local_x),
+            static_cast<float>(local_y),
+            static_cast<float>(local_z)});
+    return glm::scale(
+        matrix,
+        glm::vec3{
+            static_cast<float>(size_x),
+            static_cast<float>(size_y),
+            static_cast<float>(size_z)});
+}
+
+bool list_contains_case_insensitive(
+    const std::vector<std::string>& values,
+    std::string_view wanted) {
+    const auto normalize =
+        [](std::string value) {
+            std::transform(
+                value.begin(),
+                value.end(),
+                value.begin(),
+                [](unsigned char character) {
+                    return static_cast<char>(
+                        std::tolower(character));
+                });
+            return value;
+        };
+
+    const auto normalized_wanted =
+        normalize(std::string(wanted));
+    return std::any_of(
+        values.begin(),
+        values.end(),
+        [&](const std::string& value) {
+            return normalize(value) ==
+                   normalized_wanted;
+        });
+}
+
+glm::vec3 attachment_offset(
+    std::string point,
+    double height) {
+    std::transform(
+        point.begin(),
+        point.end(),
+        point.begin(),
+        [](unsigned char character) {
+            return static_cast<char>(
+                std::tolower(character));
+        });
+
+    if (point.find("head") != std::string::npos) {
+        return {
+            0.0F,
+            0.0F,
+            static_cast<float>(0.5 * height)};
+    }
+    if (point.find("right") != std::string::npos &&
+        point.find("hand") != std::string::npos) {
+        return {
+            static_cast<float>(-0.34 * height),
+            0.0F,
+            static_cast<float>(0.08 * height)};
+    }
+    if (point.find("left") != std::string::npos &&
+        point.find("hand") != std::string::npos) {
+        return {
+            static_cast<float>(0.34 * height),
+            0.0F,
+            static_cast<float>(0.08 * height)};
+    }
+    if (point.find("pelvis") != std::string::npos ||
+        point.find("hip") != std::string::npos) {
+        return {
+            0.0F,
+            static_cast<float>(-0.13 * height),
+            static_cast<float>(-0.16 * height)};
+    }
+    return {
+        0.0F,
+        static_cast<float>(-0.16 * height),
+        static_cast<float>(0.14 * height)};
 }
 
 glm::mat4 view_projection(
@@ -420,14 +548,159 @@ void OpenGlRenderer::render(
 
     for (const auto& [id, instance] : region->instances) {
         (void)id;
-        const auto mvp = vp * world_transform(instance.transform);
+
+        if (instance.geometry ==
+            world::RenderGeometry::avatar_humanoid) {
+            const auto height =
+                std::clamp(
+                    instance.avatar_height,
+                    1.2,
+                    2.5);
+
+            const auto has_top =
+                list_contains_case_insensitive(
+                    instance.wearable_slots,
+                    "shirt") ||
+                list_contains_case_insensitive(
+                    instance.wearable_slots,
+                    "jacket") ||
+                list_contains_case_insensitive(
+                    instance.wearable_slots,
+                    "top");
+            const auto has_bottom =
+                list_contains_case_insensitive(
+                    instance.wearable_slots,
+                    "pants") ||
+                list_contains_case_insensitive(
+                    instance.wearable_slots,
+                    "skirt");
+
+            const auto draw_part =
+                [&](double x,
+                    double y,
+                    double z,
+                    double sx,
+                    double sy,
+                    double sz,
+                    const glm::vec4& color) {
+                    const auto mvp =
+                        vp *
+                        avatar_part_transform(
+                            instance,
+                            x, y, z,
+                            sx, sy, sz);
+                    glUniformMatrix4fv(
+                        impl_->mvp_location,
+                        1,
+                        GL_FALSE,
+                        &mvp[0][0]);
+                    glUniform4f(
+                        impl_->color_location,
+                        color.r,
+                        color.g,
+                        color.b,
+                        color.a);
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        36,
+                        GL_UNSIGNED_INT,
+                        nullptr);
+                };
+
+            const glm::vec4 skin{
+                0.78F, 0.62F, 0.52F, 1.0F};
+            const glm::vec4 torso{
+                has_top ? 0.08F : 0.34F,
+                has_top ? 0.48F : 0.48F,
+                has_top ? 0.88F : 0.58F,
+                1.0F};
+            const glm::vec4 lower{
+                has_bottom ? 0.12F : 0.3F,
+                has_bottom ? 0.18F : 0.38F,
+                has_bottom ? 0.34F : 0.46F,
+                1.0F};
+            const glm::vec4 attachment{
+                0.95F, 0.58F, 0.12F, 1.0F};
+
+            draw_part(
+                0.0, 0.0,
+                0.39 * height,
+                0.19 * height,
+                0.18 * height,
+                0.19 * height,
+                skin);
+            draw_part(
+                0.0, 0.0,
+                0.13 * height,
+                0.32 * height,
+                0.18 * height,
+                0.34 * height,
+                torso);
+            draw_part(
+                0.0, 0.0,
+                -0.12 * height,
+                0.28 * height,
+                0.17 * height,
+                0.16 * height,
+                lower);
+            draw_part(
+                -0.22 * height, 0.0,
+                0.10 * height,
+                0.09 * height,
+                0.10 * height,
+                0.37 * height,
+                skin);
+            draw_part(
+                0.22 * height, 0.0,
+                0.10 * height,
+                0.09 * height,
+                0.10 * height,
+                0.37 * height,
+                skin);
+            draw_part(
+                -0.08 * height, 0.0,
+                -0.36 * height,
+                0.12 * height,
+                0.13 * height,
+                0.38 * height,
+                lower);
+            draw_part(
+                0.08 * height, 0.0,
+                -0.36 * height,
+                0.12 * height,
+                0.13 * height,
+                0.38 * height,
+                lower);
+
+            for (const auto& point :
+                 instance.attachment_points) {
+                const auto offset =
+                    attachment_offset(
+                        point,
+                        height);
+                draw_part(
+                    offset.x,
+                    offset.y,
+                    offset.z,
+                    0.09 * height,
+                    0.09 * height,
+                    0.09 * height,
+                    attachment);
+            }
+            continue;
+        }
+
+        const auto mvp =
+            vp * world_transform(
+                instance.transform);
         glUniformMatrix4fv(
             impl_->mvp_location,
             1,
             GL_FALSE,
             &mvp[0][0]);
 
-        if (instance.geometry == world::RenderGeometry::avatar_capsule) {
+        if (instance.geometry ==
+            world::RenderGeometry::avatar_capsule) {
             glUniform4f(
                 impl_->color_location,
                 0.25F,
@@ -450,7 +723,11 @@ void OpenGlRenderer::render(
                 1.0F);
         }
 
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(
+            GL_TRIANGLES,
+            36,
+            GL_UNSIGNED_INT,
+            nullptr);
     }
 
     glBindVertexArray(0);

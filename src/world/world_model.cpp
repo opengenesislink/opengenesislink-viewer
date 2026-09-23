@@ -390,6 +390,41 @@ SyncApplyResult WorldModel::apply(const SceneSyncPayload& sync) {
 }
 
 bool WorldModel::apply_event(const SceneEvent& event) {
+    if (event.type == "chat" ||
+        event.type == "chat_whisper" ||
+        event.type == "chat_shout") {
+        std::string sender_name;
+        if (const auto sender =
+                region_.entities.find(event.entity_id);
+            sender != region_.entities.end()) {
+            sender_name = sender->second.name;
+        }
+        if (sender_name.empty()) {
+            sender_name = event.entity_id == 0U
+                ? std::string{"System"}
+                : std::string{"Avatar #"} +
+                      std::to_string(event.entity_id);
+        }
+
+        chat_history_.push_back({
+            .sequence = event.sequence,
+            .sender_entity_id = event.entity_id,
+            .sender_name = std::move(sender_name),
+            .kind = event.type,
+            .text = event.text,
+        });
+        constexpr std::size_t max_chat_messages = 100U;
+        if (chat_history_.size() > max_chat_messages) {
+            chat_history_.erase(
+                chat_history_.begin(),
+                chat_history_.begin() +
+                    static_cast<std::ptrdiff_t>(
+                        chat_history_.size() -
+                        max_chat_messages));
+        }
+        return true;
+    }
+
     if (event.type == "entity_deleted") {
         region_.entities.erase(event.entity_id);
         return true;
@@ -450,6 +485,11 @@ std::uint64_t WorldModel::sequence() const noexcept {
     return initialized_ ? region_.sequence : 0U;
 }
 
+const std::vector<ChatMessage>&
+WorldModel::chat_history() const noexcept {
+    return chat_history_;
+}
+
 bool WorldModel::apply_reconciled_avatar(
     std::uint64_t entity_id,
     const Transform& transform,
@@ -471,6 +511,7 @@ bool WorldModel::apply_reconciled_avatar(
 
 void WorldModel::clear() noexcept {
     region_ = {};
+    chat_history_.clear();
     initialized_ = false;
 }
 

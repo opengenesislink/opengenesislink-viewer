@@ -3,6 +3,7 @@
 #include "opengenesislink/viewer/scene/avatar_protocol.hpp"
 #include "opengenesislink/viewer/scene/session_protocol.hpp"
 #include "opengenesislink/viewer/scene/terrain_protocol.hpp"
+#include "opengenesislink/viewer/scene/world_actions.hpp"
 #include "opengenesislink/viewer/scene/transport.hpp"
 
 #include <cstdint>
@@ -36,6 +37,52 @@ public:
 
     [[nodiscard]] AvatarReconcileAck reconcile_avatar(
         const AvatarReconcileRequest& request);
+
+    [[nodiscard]] SceneCommandAck send_chat(
+        std::string_view text);
+
+    [[nodiscard]] SceneCommandAck create_object(
+        const ObjectCreateRequest& request);
+
+    [[nodiscard]] SceneCommandAck update_object(
+        std::uint64_t entity_id,
+        const SceneTransform& transform);
+
+    [[nodiscard]] SceneCommandAck delete_object(
+        std::uint64_t entity_id);
+
+    [[nodiscard]] SceneCommandAck update_object_permissions(
+        const ObjectPermissionsRequest& request);
+
+    [[nodiscard]] SceneCommandAck link_object(
+        std::uint64_t root_id,
+        std::uint64_t child_id,
+        bool unlink = false);
+
+    [[nodiscard]] SceneCommandAck set_object_text(
+        std::uint64_t entity_id,
+        std::string_view text);
+
+    [[nodiscard]] SceneCommandAck set_object_motion(
+        const ObjectMotionRequest& request);
+
+    [[nodiscard]] SceneCommandAck object_physics(
+        std::uint64_t entity_id,
+        std::string_view action,
+        std::string_view additional_fields = {});
+
+    [[nodiscard]] SceneCommandAck interact_object(
+        std::uint64_t entity_id,
+        std::string_view phase);
+
+    [[nodiscard]] ParcelInfoResult request_parcel_info(
+        std::optional<double> x = std::nullopt,
+        std::optional<double> y = std::nullopt);
+
+    [[nodiscard]] SceneCommandAck set_terrain_height(
+        std::size_t grid_x,
+        std::size_t grid_y,
+        double height);
 
     [[nodiscard]] Frame receive_next();
     void disconnect() noexcept;

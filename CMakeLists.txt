@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.12.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.13.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -27,6 +27,7 @@ add_library(opengenesis-viewer-core
     src/core/bootstrap_content.cpp
     src/core/asset_client.cpp
     src/core/asset_cache.cpp
+    src/core/platform_client.cpp
     src/core/viewer_bootstrap.cpp
     src/scene/frame.cpp
     src/scene/session_protocol.cpp
@@ -34,6 +35,7 @@ add_library(opengenesis-viewer-core
     src/scene/scene_session.cpp
     src/scene/terrain_protocol.cpp
     src/scene/avatar_protocol.cpp
+    src/scene/world_actions.cpp
     src/world/world_model.cpp
     src/world/render_world.cpp
     src/world/terrain_cache.cpp
@@ -47,6 +49,7 @@ add_library(opengenesis-viewer-core
     src/app/launch_options.cpp
     src/app/login_form.cpp
     src/app/content_inspector.cpp
+    src/app/command_console.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -222,6 +225,18 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-content-inspector-tests tests/content_inspector_tests.cpp)
     target_link_libraries(ogl-viewer-content-inspector-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-content-inspector COMMAND ogl-viewer-content-inspector-tests)
+
+    add_executable(ogl-viewer-world-actions-tests tests/world_actions_tests.cpp)
+    target_link_libraries(ogl-viewer-world-actions-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-world-actions COMMAND ogl-viewer-world-actions-tests)
+
+    add_executable(ogl-viewer-platform-client-tests tests/platform_client_tests.cpp)
+    target_link_libraries(ogl-viewer-platform-client-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-platform-client COMMAND ogl-viewer-platform-client-tests)
+
+    add_executable(ogl-viewer-command-console-tests tests/command_console_tests.cpp)
+    target_link_libraries(ogl-viewer-command-console-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-command-console COMMAND ogl-viewer-command-console-tests)
 
     add_test(NAME viewer-app-help COMMAND ogl-viewer --help)
 endif()

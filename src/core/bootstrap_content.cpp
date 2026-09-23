@@ -230,6 +230,40 @@ AssetMetadata parse_asset(
 
 } // namespace
 
+AvatarAppearanceSnapshot parse_appearance_snapshot(
+    std::string_view json) {
+    nlohmann::json doc;
+    try {
+        doc = nlohmann::json::parse(json);
+    } catch (const nlohmann::json::exception& ex) {
+        throw std::runtime_error(
+            std::string{"Appearance response is invalid JSON: "} +
+            ex.what());
+    }
+    if (!doc.is_object()) {
+        throw std::runtime_error(
+            "Appearance response must be an object");
+    }
+    return parse_appearance(doc);
+}
+
+InventorySnapshot parse_inventory_snapshot(
+    std::string_view json) {
+    nlohmann::json doc;
+    try {
+        doc = nlohmann::json::parse(json);
+    } catch (const nlohmann::json::exception& ex) {
+        throw std::runtime_error(
+            std::string{"Inventory response is invalid JSON: "} +
+            ex.what());
+    }
+    if (!doc.is_object()) {
+        throw std::runtime_error(
+            "Inventory response must be an object");
+    }
+    return parse_inventory(doc);
+}
+
 BootstrapContent parse_bootstrap_content(
     std::string_view json) {
     nlohmann::json doc;

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "opengenesislink/viewer/app/command_console.hpp"
 #include "opengenesislink/viewer/app/login_flow.hpp"
 #include "opengenesislink/viewer/core/asset_cache.hpp"
 #include "opengenesislink/viewer/core/asset_client.hpp"
 #include "opengenesislink/viewer/core/curl_http_transport.hpp"
+#include "opengenesislink/viewer/core/platform_client.hpp"
 #include "opengenesislink/viewer/input/avatar_controller.hpp"
 #include "opengenesislink/viewer/scene/scene_session.hpp"
 #include "opengenesislink/viewer/world/render_world.hpp"
@@ -35,6 +37,11 @@ struct ConnectionInfo {
     std::optional<core::SpawnPoint> spawn;
     std::uint64_t avatar_id = 0;
     bool avatar_reconcile_supported = false;
+};
+
+struct ViewerCommandState {
+    bool pending = false;
+    std::string last_result;
 };
 
 struct RuntimeBackgroundState {
@@ -75,6 +82,10 @@ public:
     [[nodiscard]] bool queue_avatar_control(
         const input::AvatarControlInput& input);
 
+    [[nodiscard]] bool submit_command(
+        std::string_view input);
+    [[nodiscard]] ViewerCommandState command_state() const;
+
     void disconnect() noexcept;
 
     [[nodiscard]] bool connected() const noexcept;
@@ -100,12 +111,28 @@ private:
         core::AssetBlob asset;
     };
 
+    struct CommandTaskResult {
+        std::string output;
+        std::optional<core::AvatarAppearanceSnapshot> appearance;
+        std::optional<core::InventorySnapshot> inventory;
+        std::optional<core::TravelSession> travel;
+        bool handoff = false;
+        bool scene_mutated = false;
+    };
+
     void rebuild_render_region();
     void prepare_asset_prefetch(
         const core::BootstrapContent& content);
     void launch_asset_fetch();
     void launch_terrain_sample();
     void launch_movement();
+    void apply_command_result(
+        CommandTaskResult result);
+    void apply_travel(
+        const core::TravelSession& travel,
+        bool handoff);
+    void recover_source_region(
+        std::string_view reason) noexcept;
     void wait_for_background() noexcept;
 
     [[nodiscard]] bool has_scene_capability(
@@ -115,6 +142,9 @@ private:
     CoreEntryCoordinator core_entry_;
     core::CurlHttpTransport asset_http_;
     core::AssetClient asset_client_;
+    core::CurlHttpTransport platform_http_;
+    core::PlatformClient platform_client_;
+    mutable std::mutex platform_io_mutex_;
     core::AssetCache asset_cache_;
     core::BootstrapContent bootstrap_content_;
     std::deque<core::AssetMetadata> asset_queue_;
@@ -140,6 +170,11 @@ private:
     std::future<scene::AvatarReconcileAck> movement_future_;
     bool movement_pending_ = false;
     std::optional<scene::AvatarReconcileRequest> queued_movement_;
+
+    std::future<CommandTaskResult> command_future_;
+    bool command_pending_ = false;
+    std::string command_result_;
+    bool command_sync_requested_ = false;
 
     std::optional<world::RenderRegion> render_region_;
     std::optional<ConnectionInfo> info_;
