@@ -13,7 +13,7 @@ This roadmap follows the canonical Viewer handover implementation order.
 | 7 | Region / terrain / object rendering | OpenGL desktop proxy renderer implemented; terrain mesh next |
 | 8 | Avatar rendering | Visible proxy rendering implemented; full visual avatar system planned |
 | 9 | Avatar reconciliation | Planned |
-| 10 | Scene deltas / reconnect recovery | Automatic snapshot recovery implemented; reconnect continuation next |
+| 10 | Scene deltas / reconnect recovery | Delta polling + sequence-based reconnect implemented |
 | 11 | Asset fetch / cache | Planned |
 | 12 | Appearance / wearables | Planned |
 | 13 | Inventory UI | Planned |
@@ -102,17 +102,29 @@ The Viewer now has its first actual desktop graphics backend:
 
 The renderer still uses box geometry for object/avatar proxy drawing. This is intentional until the server exposes enough visual primitive/avatar data; the Viewer does not infer unavailable visual state.
 
+## Live desktop world entry
+
+The 0.7 development path now joins the existing Core, Scene and OpenGL foundations:
+
+- strict release discovery before authentication
+- Core login and Viewer bootstrap
+- signed Scene Ticket connection using the returned endpoint
+- authoritative initial `SCENE_SYNC` application into WorldModel
+- RenderWorld rebuild from live Scene state
+- periodic Scene delta polling while the desktop loop runs
+- sequence-based reconnect using the last authoritative Scene sequence
+- server fallback to snapshot remains authoritative when history is too old
+- alpha CLI launch path keeps the password out of process arguments via `OGL_VIEWER_PASSWORD`
+
 ## Immediate next block
 
-Make the graphical Viewer usable against a live OpenGenesisLINK server:
+Make live entry usable without command-line configuration and improve world rendering:
 
-- graphical login/server form
-- Core release discovery before login
-- authenticated Core login and Viewer bootstrap
-- connect the returned Scene endpoint/ticket
-- feed initial `SCENE_SYNC` into WorldModel/RenderWorld
-- construct a sampled terrain patch instead of only the water plane
-- show connection/login/world-entry errors in the application UI
-- reconnect continuation using the last authoritative Scene sequence
+- graphical login/server form inside the Viewer window
+- connection/login/bootstrap/world-entry status and errors in the application UI
+- sampled terrain patch/mesh instead of only the water plane
+- progressive terrain sampling/cache refresh
+- first avatar-control path tied to server reconciliation
+- preserve the supplied Viewer logo throughout login/window/package branding
 
 No final UDP/QUIC transport is assumed.
