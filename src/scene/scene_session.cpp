@@ -91,6 +91,21 @@ Frame SceneSession::request_sync(
     return receive_correlated(MessageType::scene_sync, request_id);
 }
 
+TerrainSample SceneSession::request_terrain_sample(
+    double x,
+    double y) {
+    if (!joined_) {
+        throw std::runtime_error(
+            "Terrain sampling requires a joined Scene session");
+    }
+
+    const auto request_id = allocate_request_id();
+    channel_.send(make_terrain_sample_request(request_id, x, y));
+    const auto response =
+        receive_correlated(MessageType::terrain_sample, request_id);
+    return parse_terrain_sample(response, request_id);
+}
+
 Frame SceneSession::receive_next() {
     if (!deferred_.empty()) {
         auto frame = std::move(deferred_.front());

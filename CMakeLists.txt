@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(OpenGenesisLINKViewer VERSION 0.4.0 LANGUAGES CXX)
+project(OpenGenesisLINKViewer VERSION 0.5.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -25,7 +25,12 @@ add_library(opengenesis-viewer-core
     src/scene/session_protocol.cpp
     src/scene/transport.cpp
     src/scene/scene_session.cpp
+    src/scene/terrain_protocol.cpp
     src/world/world_model.cpp
+    src/world/render_world.cpp
+    src/world/terrain_cache.cpp
+    src/world/scene_synchronizer.cpp
+    src/input/camera.cpp
 )
 add_library(OpenGenesis::ViewerCore ALIAS opengenesis-viewer-core)
 
@@ -120,4 +125,8 @@ if(BUILD_TESTING AND OGL_VIEWER_BUILD_TESTS)
     add_executable(ogl-viewer-world-model-tests tests/world_model_tests.cpp)
     target_link_libraries(ogl-viewer-world-model-tests PRIVATE OpenGenesis::ViewerCore)
     add_test(NAME viewer-world-model COMMAND ogl-viewer-world-model-tests)
+
+    add_executable(ogl-viewer-render-world-tests tests/render_world_foundation_tests.cpp)
+    target_link_libraries(ogl-viewer-render-world-tests PRIVATE OpenGenesis::ViewerCore)
+    add_test(NAME viewer-render-world-foundation COMMAND ogl-viewer-render-world-tests)
 endif()

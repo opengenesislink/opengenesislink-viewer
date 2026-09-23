@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opengenesislink/viewer/scene/session_protocol.hpp"
+#include "opengenesislink/viewer/scene/terrain_protocol.hpp"
 #include "opengenesislink/viewer/scene/transport.hpp"
 
 #include <cstdint>
@@ -26,6 +27,10 @@ public:
     [[nodiscard]] Frame request_sync(
         std::uint64_t since,
         std::uint32_t max_events = 256U);
+
+    [[nodiscard]] TerrainSample request_terrain_sample(
+        double x,
+        double y);
 
     [[nodiscard]] Frame receive_next();
     void disconnect() noexcept;
