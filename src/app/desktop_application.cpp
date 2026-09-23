@@ -640,8 +640,8 @@ void draw_world_status(
     ui.rectangle(
         14.0F,
         14.0F,
-        430.0F,
-        112.0F,
+        500.0F,
+        158.0F,
         kPanel);
 
     ui.text(
@@ -692,19 +692,52 @@ void draw_world_status(
                        background.boundary),
         reconnect_pending ? kError : kAccent);
 
+    ui.text(
+        28.0F,
+        101.0F,
+        1.1F,
+        "APPEARANCE: " +
+            std::to_string(
+                background.appearance_revision) +
+            "  INVENTORY: " +
+            std::to_string(
+                background.inventory_folders) +
+            "F/" +
+            std::to_string(
+                background.inventory_items) +
+            "I",
+        kMuted);
+
+    ui.text(
+        28.0F,
+        123.0F,
+        1.1F,
+        "ASSETS: " +
+            std::to_string(
+                background.asset_cached) +
+            "/" +
+            std::to_string(
+                background.asset_dependencies) +
+            (background.asset_prefetch_pending
+                 ? "  PREFETCH"
+                 : "  READY"),
+        background.asset_prefetch_pending
+            ? kAccent
+            : kSuccess);
+
     if (!background.last_error.empty()) {
         ui.text(
             28.0F,
-            101.0F,
+            145.0F,
             1.0F,
             visible_tail(
                 background.last_error,
-                64U),
+                76U),
             kError);
     } else {
         ui.text(
             28.0F,
-            101.0F,
+            145.0F,
             1.0F,
             "WASD MOVE  |  ARROWS LOOK  |  ESC EXIT",
             kMuted);
