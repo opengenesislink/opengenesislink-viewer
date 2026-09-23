@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.1.0-dev
+## Current status — 0.2.0-dev
 
 The first foundation block contains:
 
@@ -31,6 +31,9 @@ The first foundation block contains:
 - additive-field-safe JSON parsing
 - unit tests with an injected fake transport
 - `ogl-viewer-contract-smoke` compatibility utility
+- byte-compatible OGL1 frame codec and bounded TCP stream decoder
+- Scene v2 HELLO / SCENE_JOIN protocol validation
+- initial SCENE_SYNC_REQUEST construction and request correlation
 
 There is deliberately no rendering engine or GUI dependency in this block. Networking/contracts stay independent from the future Render layer.
 
@@ -57,7 +60,7 @@ The utility calls both required discovery endpoints and exits non-zero if the re
 
 ## Next milestone
 
-The next development block is the OGL1 framed Scene transport: bounded frame parsing, connection lifecycle, HELLO negotiation, Scene Ticket join and deterministic disconnect cleanup. See `docs/ROADMAP.md`.
+The next development block binds the completed OGL1/Scene protocol layer to the portable TCP session: endpoint connection, partial I/O handling, live HELLO + SCENE_JOIN, initial full Scene sync and deterministic disconnect cleanup. See `docs/ROADMAP.md`.
 
 ## License
 
