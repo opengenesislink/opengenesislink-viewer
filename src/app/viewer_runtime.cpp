@@ -62,6 +62,46 @@ void ViewerRuntime::rebuild_render_region() {
     render_region_ = std::move(next);
 }
 
+void ViewerRuntime::prepare_asset_prefetch(
+    const core::BootstrapContent& content) {
+    bootstrap_content_ = content;
+    asset_queue_.clear();
+    asset_dependency_count_ = 0U;
+    asset_error_.clear();
+
+    if (!bootstrap_content_.appearance.has_value()) {
+        return;
+    }
+
+    const auto dependencies =
+        core::appearance_asset_dependencies(
+            *bootstrap_content_.appearance);
+    asset_dependency_count_ =
+        dependencies.size();
+
+    std::size_t missing_metadata = 0U;
+    for (const auto& asset_id : dependencies) {
+        const auto* metadata =
+            core::find_asset_metadata(
+                bootstrap_content_,
+                asset_id);
+        if (metadata == nullptr) {
+            ++missing_metadata;
+            continue;
+        }
+
+        if (asset_cache_.find(*metadata) == nullptr) {
+            asset_queue_.push_back(*metadata);
+        }
+    }
+
+    if (missing_metadata != 0U) {
+        asset_error_ =
+            std::to_string(missing_metadata) +
+            " Appearance Asset dependencies are missing bootstrap metadata";
+    }
+}
+
 ConnectionInfo ViewerRuntime::connect(
     const LoginRequest& request) {
     disconnect();
@@ -97,6 +137,8 @@ ConnectionInfo ViewerRuntime::connect(
             contains_capability(
                 entry.bootstrap.capabilities,
                 "scene.avatar.reconcile");
+        prepare_asset_prefetch(
+            entry.bootstrap.content);
         terrain_suspended_ = false;
         background_error_.clear();
         last_boundary_.clear();
@@ -219,6 +261,8 @@ ConnectionInfo ViewerRuntime::reconnect() {
             contains_capability(
                 bootstrap.capabilities,
                 "scene.avatar.reconcile");
+        prepare_asset_prefetch(
+            bootstrap.content);
         terrain_suspended_ = false;
         background_error_.clear();
         last_boundary_.clear();
@@ -255,6 +299,40 @@ ConnectionInfo ViewerRuntime::reconnect() {
         scene_.disconnect();
         throw;
     }
+}
+
+void ViewerRuntime::launch_asset_fetch() {
+    if (asset_pending_ ||
+        asset_queue_.empty() ||
+        bearer_token_.empty() ||
+        core_base_url_.empty()) {
+        return;
+    }
+
+    const auto expected =
+        asset_queue_.front();
+    asset_queue_.pop_front();
+
+    const auto base_url = core_base_url_;
+    const auto token = bearer_token_;
+    asset_pending_ = true;
+
+    asset_future_ = std::async(
+        std::launch::async,
+        [this,
+         expected,
+         base_url,
+         token]() {
+            auto asset =
+                asset_client_.fetch(
+                    base_url,
+                    token,
+                    expected.id);
+            return AssetTaskResult{
+                .expected = expected,
+                .asset = std::move(asset),
+            };
+        });
 }
 
 void ViewerRuntime::launch_terrain_sample() {
@@ -325,6 +403,41 @@ void ViewerRuntime::launch_movement() {
 
 void ViewerRuntime::service_background() {
     using namespace std::chrono_literals;
+
+    if (asset_pending_ &&
+        asset_future_.valid() &&
+        asset_future_.wait_for(0s) ==
+            std::future_status::ready) {
+        asset_pending_ = false;
+        try {
+            auto result =
+                asset_future_.get();
+
+            if (!result.expected.content_hash.empty() &&
+                result.asset.metadata.content_hash !=
+                    result.expected.content_hash) {
+                throw std::runtime_error(
+                    "Fetched Asset content hash differs from bootstrap metadata");
+            }
+            if (result.expected.size != 0U &&
+                result.asset.metadata.size !=
+                    result.expected.size) {
+                throw std::runtime_error(
+                    "Fetched Asset size differs from bootstrap metadata");
+            }
+            if (!asset_cache_.put(
+                    std::move(result.asset))) {
+                throw std::runtime_error(
+                    "Fetched Asset exceeds Viewer cache limits");
+            }
+
+            if (asset_queue_.empty()) {
+                asset_error_.clear();
+            }
+        } catch (const std::exception& ex) {
+            asset_error_ = ex.what();
+        }
+    }
 
     if (movement_pending_ &&
         movement_future_.valid() &&
@@ -416,6 +529,8 @@ void ViewerRuntime::service_background() {
         }
     }
 
+    launch_asset_fetch();
+
     if (queued_movement_.has_value() &&
         !movement_pending_) {
         launch_movement();
@@ -475,6 +590,14 @@ void ViewerRuntime::wait_for_background() noexcept {
         }
     }
     terrain_pending_ = false;
+
+    if (asset_future_.valid()) {
+        try {
+            (void)asset_future_.get();
+        } catch (...) {
+        }
+    }
+    asset_pending_ = false;
 }
 
 void ViewerRuntime::disconnect() noexcept {
@@ -488,6 +611,11 @@ void ViewerRuntime::disconnect() noexcept {
     world_.clear();
     terrain_refinement_ = {};
     terrain_suspended_ = false;
+    asset_queue_.clear();
+    asset_cache_.clear();
+    bootstrap_content_ = {};
+    asset_dependency_count_ = 0U;
+    asset_error_.clear();
     render_region_.reset();
     info_.reset();
     core_base_url_.clear();
@@ -561,9 +689,50 @@ ViewerRuntime::background_state() const {
     state.movement_pending =
         movement_pending_ ||
         queued_movement_.has_value();
+    state.asset_dependencies =
+        asset_dependency_count_;
+    state.asset_cached =
+        asset_cache_.entries();
+    state.asset_cache_bytes =
+        asset_cache_.bytes();
+    state.asset_prefetch_pending =
+        asset_pending_ ||
+        !asset_queue_.empty();
+
+    if (bootstrap_content_.appearance.has_value()) {
+        state.appearance_revision =
+            bootstrap_content_.appearance->revision;
+    }
+    if (bootstrap_content_.inventory.has_value()) {
+        state.inventory_folders =
+            bootstrap_content_.inventory->folders.size();
+        state.inventory_items =
+            bootstrap_content_.inventory->items.size();
+    }
+
     state.boundary = last_boundary_;
-    state.last_error = background_error_;
+    state.last_error =
+        !background_error_.empty()
+            ? background_error_
+            : asset_error_;
     return state;
+}
+
+const core::BootstrapContent&
+ViewerRuntime::bootstrap_content() const noexcept {
+    return bootstrap_content_;
+}
+
+const core::AssetBlob* ViewerRuntime::cached_asset(
+    std::string_view asset_id) {
+    if (const auto* metadata =
+            core::find_asset_metadata(
+                bootstrap_content_,
+                asset_id);
+        metadata != nullptr) {
+        return asset_cache_.find(*metadata);
+    }
+    return asset_cache_.find_by_id(asset_id);
 }
 
 bool ViewerRuntime::has_scene_capability(
