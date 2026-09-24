@@ -556,6 +556,224 @@ void draw_outline(
         color);
 }
 
+void draw_reference_backdrop(
+    render::UiRenderer& ui,
+    float width,
+    float height,
+    float s) {
+    ui.vertical_gradient(
+        0.0F,
+        0.0F,
+        width,
+        height,
+        render::UiColor{
+            0.008F, 0.028F, 0.065F, 1.0F},
+        render::UiColor{
+            0.006F, 0.055F, 0.10F, 1.0F});
+
+    constexpr std::array<std::array<float, 3>, 28> stars{{
+        {72.0F, 92.0F, 1.4F}, {132.0F, 62.0F, 1.0F},
+        {196.0F, 118.0F, 1.6F}, {260.0F, 78.0F, 1.1F},
+        {330.0F, 164.0F, 1.3F}, {390.0F, 104.0F, 1.0F},
+        {470.0F, 74.0F, 1.5F}, {548.0F, 126.0F, 1.0F},
+        {618.0F, 86.0F, 1.3F}, {710.0F, 58.0F, 1.0F},
+        {884.0F, 82.0F, 1.4F}, {950.0F, 120.0F, 1.0F},
+        {1016.0F, 72.0F, 1.2F}, {1090.0F, 148.0F, 1.0F},
+        {1160.0F, 96.0F, 1.5F}, {1230.0F, 62.0F, 1.0F},
+        {1308.0F, 132.0F, 1.4F}, {1388.0F, 84.0F, 1.0F},
+        {1470.0F, 152.0F, 1.2F}, {1532.0F, 104.0F, 1.0F},
+        {520.0F, 210.0F, 1.0F}, {590.0F, 176.0F, 1.2F},
+        {1030.0F, 220.0F, 1.0F}, {1120.0F, 192.0F, 1.2F},
+        {1280.0F, 232.0F, 1.0F}, {1410.0F, 206.0F, 1.3F},
+        {360.0F, 248.0F, 1.0F}, {1510.0F, 248.0F, 1.0F},
+    }};
+    for (const auto& star : stars) {
+        const auto size = star[2] * s;
+        ui.rectangle(
+            star[0] * s,
+            star[1] * s,
+            size,
+            size,
+            render::UiColor{
+                0.66F, 0.84F, 1.0F, 0.75F});
+    }
+
+    ui.circle(
+        48.0F * s,
+        270.0F * s,
+        270.0F * s,
+        render::UiColor{
+            0.04F, 0.22F, 0.42F, 0.24F},
+        128U);
+    ui.circle(
+        48.0F * s,
+        270.0F * s,
+        255.0F * s,
+        render::UiColor{
+            0.025F, 0.115F, 0.245F, 0.95F},
+        128U);
+    ui.circle(
+        395.0F * s,
+        126.0F * s,
+        37.0F * s,
+        render::UiColor{
+            0.12F, 0.22F, 0.36F, 0.92F},
+        48U);
+
+    ui.vertical_gradient(
+        0.0F,
+        420.0F * s,
+        width,
+        280.0F * s,
+        render::UiColor{
+            0.03F, 0.18F, 0.27F, 0.22F},
+        render::UiColor{
+            0.005F, 0.035F, 0.07F, 0.92F});
+
+    constexpr std::array<std::array<float, 3>, 9> mountains{{
+        {0.0F, 470.0F, 180.0F},
+        {130.0F, 430.0F, 180.0F},
+        {270.0F, 458.0F, 160.0F},
+        {390.0F, 420.0F, 195.0F},
+        {1040.0F, 452.0F, 190.0F},
+        {1160.0F, 410.0F, 220.0F},
+        {1310.0F, 455.0F, 185.0F},
+        {1440.0F, 418.0F, 210.0F},
+        {1540.0F, 465.0F, 150.0F},
+    }};
+    for (const auto& mountain : mountains) {
+        const auto x = mountain[0] * s;
+        const auto peak_y = mountain[1] * s;
+        const auto half = mountain[2] * 0.5F * s;
+        ui.triangle(
+            x - half,
+            570.0F * s,
+            x,
+            peak_y,
+            x + half,
+            570.0F * s,
+            render::UiColor{
+                0.015F, 0.07F, 0.12F, 0.92F});
+    }
+
+    ui.vertical_gradient(
+        0.0F,
+        505.0F * s,
+        width,
+        190.0F * s,
+        render::UiColor{
+            0.015F, 0.17F, 0.25F, 0.46F},
+        render::UiColor{
+            0.004F, 0.035F, 0.065F, 0.94F});
+
+    for (int index = 0; index < 14; ++index) {
+        const auto x =
+            (1080.0F +
+             static_cast<float>(index) * 31.0F) *
+            s;
+        const auto tower_height =
+            (70.0F +
+             static_cast<float>((index * 23) % 105)) *
+            s;
+        const auto tower_width =
+            (15.0F +
+             static_cast<float>((index * 7) % 18)) *
+            s;
+        const auto base_y = 555.0F * s;
+
+        ui.rectangle(
+            x,
+            base_y - tower_height,
+            tower_width,
+            tower_height,
+            render::UiColor{
+                0.018F, 0.07F, 0.12F, 0.97F});
+        ui.rectangle(
+            x + 3.0F * s,
+            base_y - tower_height + 10.0F * s,
+            std::max(2.0F * s, tower_width - 6.0F * s),
+            2.0F * s,
+            render::UiColor{
+                0.10F, 0.52F, 0.82F, 0.55F});
+        if ((index % 3) == 0) {
+            ui.triangle(
+                x + tower_width * 0.5F,
+                base_y - tower_height - 34.0F * s,
+                x + 3.0F * s,
+                base_y - tower_height,
+                x + tower_width - 3.0F * s,
+                base_y - tower_height,
+                render::UiColor{
+                    0.025F, 0.10F, 0.17F, 0.98F});
+        }
+    }
+
+    for (int index = 0; index < 8; ++index) {
+        const auto x =
+            (255.0F +
+             static_cast<float>(index) * 38.0F) *
+            s;
+        const auto tower_height =
+            (46.0F +
+             static_cast<float>((index * 19) % 70)) *
+            s;
+        const auto base_y = 515.0F * s;
+        ui.rectangle(
+            x,
+            base_y - tower_height,
+            18.0F * s,
+            tower_height,
+            render::UiColor{
+                0.02F, 0.09F, 0.15F, 0.90F});
+        if ((index % 2) == 0) {
+            ui.triangle(
+                x + 9.0F * s,
+                base_y - tower_height - 24.0F * s,
+                x + 2.0F * s,
+                base_y - tower_height,
+                x + 16.0F * s,
+                base_y - tower_height,
+                render::UiColor{
+                    0.03F, 0.13F, 0.22F, 0.92F});
+        }
+    }
+
+    ui.rectangle(
+        0.0F,
+        548.0F * s,
+        width,
+        1.0F * s,
+        render::UiColor{
+            0.14F, 0.62F, 0.90F, 0.26F});
+
+    ui.triangle(
+        270.0F * s,
+        540.0F * s,
+        430.0F * s,
+        540.0F * s,
+        350.0F * s,
+        620.0F * s,
+        render::UiColor{
+            0.012F, 0.06F, 0.09F, 0.96F});
+    ui.rectangle(
+        292.0F * s,
+        525.0F * s,
+        118.0F * s,
+        18.0F * s,
+        render::UiColor{
+            0.03F, 0.15F, 0.22F, 0.95F});
+
+    ui.vertical_gradient(
+        0.0F,
+        620.0F * s,
+        width,
+        std::max(1.0F, height - 620.0F * s),
+        render::UiColor{
+            0.004F, 0.025F, 0.05F, 0.62F},
+        render::UiColor{
+            0.003F, 0.015F, 0.035F, 0.98F});
+}
+
 void draw_field(
     render::UiRenderer& ui,
     const Rect& rect,
@@ -607,50 +825,11 @@ void draw_login_form(
 
     ui.begin();
 
-    ui.vertical_gradient(
-        0.0F,
-        0.0F,
+    draw_reference_backdrop(
+        ui,
         width,
         height,
-        kBackgroundTop,
-        kBackgroundBottom);
-
-    ui.circle(
-        80.0F * s,
-        250.0F * s,
-        255.0F * s,
-        kPlanetEdge,
-        96U);
-    ui.circle(
-        80.0F * s,
-        250.0F * s,
-        244.0F * s,
-        kPlanet,
-        96U);
-    ui.circle(
-        405.0F * s,
-        128.0F * s,
-        40.0F * s,
-        render::UiColor{
-            0.07F, 0.17F, 0.31F, 0.9F},
-        48U);
-
-    ui.rectangle(
-        0.0F,
-        430.0F * s,
-        width,
-        2.0F * s,
-        render::UiColor{
-            0.06F, 0.28F, 0.5F, 0.28F});
-    ui.vertical_gradient(
-        0.0F,
-        430.0F * s,
-        width,
-        250.0F * s,
-        render::UiColor{
-            0.01F, 0.08F, 0.15F, 0.08F},
-        render::UiColor{
-            0.005F, 0.02F, 0.045F, 0.9F});
+        s);
 
     ui.rectangle(
         layout.top_bar.x,
