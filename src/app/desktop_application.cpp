@@ -664,26 +664,26 @@ void draw_login_form(
         width,
         1.0F,
         kLine);
-    ui.text(
+    ui.modern_text(
         22.0F * s,
         17.0F * s,
         1.45F * s,
         "OPENGENESISLINK VIEWER",
         kText);
-    ui.text(
+    ui.modern_text(
         265.0F * s,
         18.0F * s,
         1.0F * s,
         std::string{"V"} + OGL_VIEWER_VERSION,
         kMuted);
 
-    ui.text(
+    ui.modern_text(
         44.0F * s,
         120.0F * s,
         1.55F * s,
         "MORE THAN A WORLD...",
         kText);
-    ui.text(
+    ui.modern_text(
         64.0F * s,
         146.0F * s,
         1.35F * s,
@@ -694,18 +694,18 @@ void draw_login_form(
     const auto title_right = std::string_view{"LINK"};
     const auto title_scale = 4.6F * s;
     const auto title_width =
-        ui.text_width(title_left, title_scale) +
-        ui.text_width(title_right, title_scale);
+        ui.modern_text_width(title_left, title_scale) +
+        ui.modern_text_width(title_right, title_scale);
     const auto title_x = (width - title_width) * 0.5F;
-    ui.text(
+    ui.modern_text(
         title_x,
         92.0F * s,
         title_scale,
         title_left,
         kText);
-    ui.text(
+    ui.modern_text(
         title_x +
-            ui.text_width(title_left, title_scale),
+            ui.modern_text_width(title_left, title_scale),
         92.0F * s,
         title_scale,
         title_right,
@@ -713,9 +713,9 @@ void draw_login_form(
 
     const auto viewer_label = std::string_view{"V I E W E R"};
     const auto viewer_scale = 2.1F * s;
-    ui.text(
+    ui.modern_text(
         (width -
-         ui.text_width(
+         ui.modern_text_width(
              viewer_label,
              viewer_scale)) *
             0.5F,
@@ -727,9 +727,9 @@ void draw_login_form(
     const auto claim =
         std::string_view{
             "EXPLORE  -  CREATE  -  CONNECT  -  BELONG"};
-    ui.text(
+    ui.modern_text(
         (width -
-         ui.text_width(
+         ui.modern_text_width(
              claim,
              1.25F * s)) *
             0.5F,
@@ -740,9 +740,9 @@ void draw_login_form(
     const auto subclaim =
         std::string_view{
             "A VIRTUAL WORLD, REBUILT FROM THE CORE."};
-    ui.text(
+    ui.modern_text(
         (width -
-         ui.text_width(
+         ui.modern_text_width(
              subclaim,
              1.0F * s)) *
             0.5F,
@@ -758,13 +758,13 @@ void draw_login_form(
         102.0F * s,
         render::UiColor{
             0.005F, 0.04F, 0.09F, 0.38F});
-    ui.text(
+    ui.modern_text(
         width - 310.0F * s,
         105.0F * s,
         1.4F * s,
         "REAL PEOPLE.",
         kText);
-    ui.text(
+    ui.modern_text(
         width - 310.0F * s,
         132.0F * s,
         1.4F * s,
@@ -817,25 +817,25 @@ void draw_login_form(
         3.0F * s,
         kAccent);
 
-    ui.text(
+    ui.modern_text(
         layout.tab_login.x + 46.0F * s,
         layout.tab_login.y + 16.0F * s,
         1.15F * s,
         "LOGIN",
         kText);
-    ui.text(
+    ui.modern_text(
         layout.tab_grids.x + 46.0F * s,
         layout.tab_grids.y + 16.0F * s,
         1.15F * s,
         "GRIDS",
         kMuted);
-    ui.text(
+    ui.modern_text(
         layout.tab_settings.x + 25.0F * s,
         layout.tab_settings.y + 16.0F * s,
         1.05F * s,
         "EINSTELLUNGEN",
         kMuted);
-    ui.text(
+    ui.modern_text(
         layout.tab_advanced.x + 34.0F * s,
         layout.tab_advanced.y + 16.0F * s,
         1.05F * s,
@@ -881,7 +881,7 @@ void draw_login_form(
         16.0F * s,
         16.0F * s,
         kAccent);
-    ui.text(
+    ui.modern_text(
         layout.panel.x + 55.0F * s,
         layout.panel.y + 282.0F * s,
         0.95F * s,
@@ -896,7 +896,7 @@ void draw_login_form(
             16.0F * s},
         std::max(1.0F, s),
         kBorder);
-    ui.text(
+    ui.modern_text(
         layout.panel.x + 385.0F * s,
         layout.panel.y + 282.0F * s,
         0.95F * s,
@@ -923,10 +923,10 @@ void draw_login_form(
             ? "VERBINDUNG WIRD HERGESTELLT..."
             : "EINLOGGEN IN DIE WELT";
     const auto button_text_width =
-        ui.text_width(
+        ui.modern_text_width(
             button_text,
             1.55F * s);
-    ui.text(
+    ui.modern_text(
         layout.button.x +
             (layout.button.width -
              button_text_width) *
@@ -936,7 +936,7 @@ void draw_login_form(
         button_text,
         kText);
 
-    ui.text(
+    ui.modern_text(
         layout.panel.x + 88.0F * s,
         layout.panel.y + 372.0F * s,
         0.9F * s,
@@ -944,14 +944,14 @@ void draw_login_form(
         kAccent);
 
     if (!form.error.empty()) {
-        ui.text(
+        ui.modern_text(
             layout.panel.x + 30.0F * s,
             layout.panel.y + 405.0F * s,
             0.9F * s,
             visible_tail(form.error, 86U),
             kError);
     } else if (!form.status.empty()) {
-        ui.text(
+        ui.modern_text(
             layout.panel.x + 30.0F * s,
             layout.panel.y + 405.0F * s,
             0.9F * s,
@@ -980,31 +980,31 @@ void draw_login_form(
             0.03F, 0.16F, 0.28F, 0.88F},
         render::UiColor{
             0.015F, 0.07F, 0.12F, 0.92F});
-    ui.text(
+    ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 35.0F * s,
         1.15F * s,
         "VIRTUELLE WELTEN",
         kAccent);
-    ui.text(
+    ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 64.0F * s,
         2.05F * s,
         "ENTDECKEN",
         kText);
-    ui.text(
+    ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 101.0F * s,
         1.0F * s,
         "DEINE REISE BEGINNT HIER.",
         kMuted);
-    ui.text(
+    ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 182.0F * s,
         1.6F * s,
         "OPEN WORLDS",
         kText);
-    ui.text(
+    ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 215.0F * s,
         0.95F * s,
@@ -1023,13 +1023,13 @@ void draw_login_form(
         std::max(1.0F, s),
         render::UiColor{
             0.12F, 0.29F, 0.48F, 0.85F});
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 26.0F * s,
         1.55F * s,
         "NEUIGKEITEN",
         kText);
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 285.0F * s,
         layout.right_news.y + 28.0F * s,
         0.85F * s,
@@ -1042,13 +1042,13 @@ void draw_login_form(
         50.0F * s,
         render::UiColor{
             0.05F, 0.17F, 0.29F, 1.0F});
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 68.0F * s,
         1.0F * s,
         "0.13.0-ALPHA.1",
         kText);
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 91.0F * s,
         0.82F * s,
@@ -1061,13 +1061,13 @@ void draw_login_form(
         50.0F * s,
         render::UiColor{
             0.04F, 0.13F, 0.23F, 1.0F});
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 132.0F * s,
         1.0F * s,
         "ALPHA TEST",
         kText);
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 155.0F * s,
         0.82F * s,
@@ -1080,13 +1080,13 @@ void draw_login_form(
         50.0F * s,
         render::UiColor{
             0.035F, 0.11F, 0.2F, 1.0F});
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 196.0F * s,
         1.0F * s,
         "ROADMAP",
         kText);
-    ui.text(
+    ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 219.0F * s,
         0.82F * s,
@@ -1124,7 +1124,7 @@ void draw_login_form(
                 42.0F * s},
             std::max(1.0F, 1.5F * s),
             index == 2U ? kAccent : kText);
-        ui.text(
+        ui.modern_text(
             x,
             feature_y + 55.0F * s,
             0.85F * s,
@@ -1144,7 +1144,7 @@ void draw_login_form(
         width,
         1.0F,
         kLine);
-    ui.text(
+    ui.modern_text(
         24.0F * s,
         layout.footer.y + 17.0F * s,
         0.9F * s,
@@ -1153,9 +1153,9 @@ void draw_login_form(
     const auto powered =
         std::string_view{
             "POWERED BY NEXVORTEX.DE  |  OPENGENESISLINK"};
-    ui.text(
+    ui.modern_text(
         width -
-            ui.text_width(
+            ui.modern_text_width(
                 powered,
                 0.9F * s) -
             24.0F * s,
