@@ -7,6 +7,7 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
+#include <cmath>
 #include <limits>
 #include <memory>
 #include <stdexcept>
@@ -188,6 +189,84 @@ void append_rectangle(
         {a, b, c, a, c, d});
 }
 
+void append_vertical_gradient(
+    std::vector<UiVertex>& vertices,
+    float x,
+    float y,
+    float width,
+    float height,
+    UiColor top,
+    UiColor bottom) {
+    if (width <= 0.0F || height <= 0.0F) {
+        return;
+    }
+
+    const UiVertex a{x, y, top.r, top.g, top.b, top.a};
+    const UiVertex b{x + width, y, top.r, top.g, top.b, top.a};
+    const UiVertex c{
+        x + width,
+        y + height,
+        bottom.r,
+        bottom.g,
+        bottom.b,
+        bottom.a};
+    const UiVertex d{
+        x,
+        y + height,
+        bottom.r,
+        bottom.g,
+        bottom.b,
+        bottom.a};
+
+    vertices.insert(vertices.end(), {a, b, c, a, c, d});
+}
+
+void append_circle(
+    std::vector<UiVertex>& vertices,
+    float center_x,
+    float center_y,
+    float radius,
+    UiColor color,
+    unsigned int segments) {
+    if (radius <= 0.0F || segments < 3U) {
+        return;
+    }
+
+    constexpr float tau = 6.28318530717958647692F;
+    const UiVertex center{
+        center_x,
+        center_y,
+        color.r,
+        color.g,
+        color.b,
+        color.a};
+
+    for (unsigned int index = 0U; index < segments; ++index) {
+        const auto angle_a =
+            tau * static_cast<float>(index) /
+            static_cast<float>(segments);
+        const auto angle_b =
+            tau * static_cast<float>(index + 1U) /
+            static_cast<float>(segments);
+
+        const UiVertex a{
+            center_x + std::cos(angle_a) * radius,
+            center_y + std::sin(angle_a) * radius,
+            color.r,
+            color.g,
+            color.b,
+            color.a};
+        const UiVertex b{
+            center_x + std::cos(angle_b) * radius,
+            center_y + std::sin(angle_b) * radius,
+            color.r,
+            color.g,
+            color.b,
+            color.a};
+        vertices.insert(vertices.end(), {center, a, b});
+    }
+}
+
 } // namespace
 
 struct UiRenderer::Impl {
@@ -292,6 +371,38 @@ void UiRenderer::rectangle(
         width,
         height,
         color);
+}
+
+void UiRenderer::vertical_gradient(
+    float x,
+    float y,
+    float width,
+    float height,
+    UiColor top,
+    UiColor bottom) {
+    append_vertical_gradient(
+        impl_->vertices,
+        x,
+        y,
+        width,
+        height,
+        top,
+        bottom);
+}
+
+void UiRenderer::circle(
+    float center_x,
+    float center_y,
+    float radius,
+    UiColor color,
+    unsigned int segments) {
+    append_circle(
+        impl_->vertices,
+        center_x,
+        center_y,
+        radius,
+        color,
+        segments);
 }
 
 void UiRenderer::text(
