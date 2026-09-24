@@ -393,7 +393,7 @@ LoginLayout login_layout(
     const auto panel_height = 430.0F * scale;
     const auto panel_x =
         (safe_width - panel_width) * 0.5F;
-    const auto panel_y = 270.0F * scale;
+    const auto panel_y = 335.0F * scale;
 
     const auto inner_x = panel_x + 30.0F * scale;
     const auto inner_width = panel_width - 60.0F * scale;
@@ -405,7 +405,7 @@ LoginLayout login_layout(
 
     const auto side_width = 420.0F * scale;
     const auto side_height = 260.0F * scale;
-    const auto side_y = 535.0F * scale;
+    const auto side_y = 565.0F * scale;
     const auto side_margin = 20.0F * scale;
 
     const auto footer_height = 48.0F * scale;
@@ -699,7 +699,7 @@ void draw_login_form(
     const auto title_x = (width - title_width) * 0.5F;
     ui.modern_text(
         title_x,
-        92.0F * s,
+        155.0F * s,
         title_scale,
         title_left,
         kText);
@@ -719,7 +719,7 @@ void draw_login_form(
              viewer_label,
              viewer_scale)) *
             0.5F,
-        145.0F * s,
+        220.0F * s,
         viewer_scale,
         viewer_label,
         kText);
@@ -733,7 +733,7 @@ void draw_login_form(
              claim,
              1.05F * s)) *
             0.5F,
-        184.0F * s,
+        260.0F * s,
         1.05F * s,
         claim,
         kMuted);
@@ -746,7 +746,7 @@ void draw_login_form(
              subclaim,
              1.0F * s)) *
             0.5F,
-        211.0F * s,
+        285.0F * s,
         0.95F * s,
         subclaim,
         kText);
