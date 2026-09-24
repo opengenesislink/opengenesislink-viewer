@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.13.0-dev
+## Current status — 0.13.0-alpha.2
 
 The first foundation block contains:
 
@@ -63,6 +63,8 @@ The first foundation block contains:
 - live 9×9 terrain sampling through authenticated `TERRAIN_SAMPLE` requests
 - terrain patch reuse while the authoritative terrain revision is unchanged
 - dynamic OpenGL terrain VAO/VBO/EBO path rendered below water/objects/avatars
+- cinematic responsive login landing screen aligned with the Viewer target design
+- scalable Sans UI typography through FreeType with bitmap fallback
 - in-window graphical login form for Core URL, username, password and Region
 - mouse and keyboard form navigation with masked password input
 - asynchronous Core discovery/login/bootstrap so the GLFW event loop remains responsive
