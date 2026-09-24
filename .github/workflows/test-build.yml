@@ -23,6 +23,10 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
+      - name: Read Viewer version
+        id: meta
+        shell: bash
+        run: echo "version=$(tr -d '\\r\\n' < VERSION)" >> "$GITHUB_OUTPUT"
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -67,7 +71,7 @@ jobs:
       - name: Upload Linux test artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: OpenGenesisLINK-Viewer-0.13.0-alpha.1-${{ matrix.arch }}
+          name: OpenGenesisLINK-Viewer-${{ steps.meta.outputs.version }}-${{ matrix.arch }}
           path: |
             artifacts/*.tar.gz
             artifacts/*.deb
@@ -78,6 +82,12 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+      - name: Read Viewer version
+        id: meta
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Prepare vcpkg binary cache
         shell: pwsh
@@ -127,7 +137,7 @@ jobs:
       - name: Upload Windows test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OpenGenesisLINK-Viewer-0.13.0-alpha.1-windows-x86_64
+          name: OpenGenesisLINK-Viewer-${{ steps.meta.outputs.version }}-windows-x86_64
           path: artifacts/*.zip
           if-no-files-found: error
           retention-days: 30
