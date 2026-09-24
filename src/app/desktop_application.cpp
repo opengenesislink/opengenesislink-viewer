@@ -499,7 +499,7 @@ LoginLayout login_layout(
         },
         .button = {
             inner_x + 72.0F * scale,
-            panel_y + 290.0F * scale,
+            panel_y + 300.0F * scale,
             inner_width - 144.0F * scale,
             50.0F * scale,
         },
@@ -624,7 +624,7 @@ void draw_reference_backdrop(
         0.0F,
         420.0F * s,
         width,
-        280.0F * s,
+        291.0F * s,
         render::UiColor{
             0.03F, 0.18F, 0.27F, 0.22F},
         render::UiColor{
@@ -905,28 +905,28 @@ void draw_login_form(
 
     ui.modern_text(
         44.0F * s,
-        120.0F * s,
-        1.55F * s,
+        150.0F * s,
+        1.40F * s,
         "More than a World ...",
         kText);
     ui.modern_text(
         64.0F * s,
-        146.0F * s,
-        1.35F * s,
+        181.0F * s,
+        1.22F * s,
         "A new Beginning.",
         kMuted);
 
     const auto logo_x = width * 0.5F;
-    const auto logo_top = 58.0F * s;
-    const auto logo_mid = 94.0F * s;
-    const auto logo_bottom = 138.0F * s;
-    const auto logo_half = 42.0F * s;
+    const auto logo_top = 68.0F * s;
+    const auto logo_mid = 110.0F * s;
+    const auto logo_bottom = 158.0F * s;
+    const auto logo_half = 44.0F * s;
 
     ui.triangle(
         logo_x,
         logo_top,
         logo_x - logo_half,
-        80.0F * s,
+        91.0F * s,
         logo_x,
         logo_mid,
         render::UiColor{
@@ -937,21 +937,21 @@ void draw_login_form(
         logo_x,
         logo_mid,
         logo_x + logo_half,
-        80.0F * s,
+        91.0F * s,
         render::UiColor{
             0.34F, 0.70F, 1.0F, 1.0F});
     ui.triangle(
         logo_x - logo_half,
         80.0F * s,
         logo_x - logo_half,
-        116.0F * s,
+        132.0F * s,
         logo_x,
         logo_mid,
         render::UiColor{
             0.06F, 0.30F, 0.62F, 1.0F});
     ui.triangle(
         logo_x - logo_half,
-        116.0F * s,
+        132.0F * s,
         logo_x,
         logo_bottom,
         logo_x,
@@ -964,14 +964,14 @@ void draw_login_form(
         logo_x + logo_half,
         80.0F * s,
         logo_x + logo_half,
-        116.0F * s,
+        132.0F * s,
         render::UiColor{
             0.08F, 0.38F, 0.76F, 1.0F});
     ui.triangle(
         logo_x,
         logo_mid,
         logo_x + logo_half,
-        116.0F * s,
+        132.0F * s,
         logo_x,
         logo_bottom,
         render::UiColor{
@@ -986,14 +986,14 @@ void draw_login_form(
     const auto title_x = (width - title_width) * 0.5F;
     ui.modern_text(
         title_x,
-        155.0F * s,
+        188.0F * s,
         title_scale,
         title_left,
         kText);
     ui.modern_text(
         title_x +
             ui.modern_text_width(title_left, title_scale),
-        155.0F * s,
+        188.0F * s,
         title_scale,
         title_right,
         kAccent);
@@ -1006,7 +1006,7 @@ void draw_login_form(
              viewer_label,
              viewer_scale)) *
             0.5F,
-        220.0F * s,
+        239.0F * s,
         viewer_scale,
         viewer_label,
         kText);
@@ -1020,7 +1020,7 @@ void draw_login_form(
              claim,
              1.05F * s)) *
             0.5F,
-        260.0F * s,
+        276.0F * s,
         1.05F * s,
         claim,
         kMuted);
@@ -1033,7 +1033,7 @@ void draw_login_form(
              subclaim,
              1.0F * s)) *
             0.5F,
-        285.0F * s,
+        304.0F * s,
         0.95F * s,
         subclaim,
         kText);
@@ -1047,14 +1047,14 @@ void draw_login_form(
             0.005F, 0.04F, 0.09F, 0.38F});
     ui.modern_text(
         width - 310.0F * s,
-        105.0F * s,
-        1.4F * s,
+        94.0F * s,
+        1.35F * s,
         "Real people.",
         kText);
     ui.modern_text(
         width - 310.0F * s,
-        132.0F * s,
-        1.4F * s,
+        122.0F * s,
+        1.35F * s,
         "Endless possibilities.",
         kAccent);
 
@@ -1180,13 +1180,13 @@ void draw_login_form(
 
     ui.rectangle(
         layout.panel.x + 30.0F * s,
-        layout.panel.y + 281.0F * s,
+        layout.panel.y + 274.0F * s,
         16.0F * s,
         16.0F * s,
         kAccent);
     ui.modern_text(
         layout.panel.x + 55.0F * s,
-        layout.panel.y + 282.0F * s,
+        layout.panel.y + 275.0F * s,
         0.95F * s,
         "Zugangsdaten speichern",
         kText);
@@ -1194,14 +1194,14 @@ void draw_login_form(
         ui,
         Rect{
             layout.panel.x + 360.0F * s,
-            layout.panel.y + 281.0F * s,
+            layout.panel.y + 274.0F * s,
             16.0F * s,
             16.0F * s},
         std::max(1.0F, s),
         kBorder);
     ui.modern_text(
         layout.panel.x + 385.0F * s,
-        layout.panel.y + 282.0F * s,
+        layout.panel.y + 275.0F * s,
         0.95F * s,
         "Beim Start einloggen",
         kMuted);
@@ -1248,7 +1248,7 @@ void draw_login_form(
 
     ui.modern_text(
         layout.panel.x + 88.0F * s,
-        layout.panel.y + 372.0F * s,
+        layout.panel.y + 357.0F * s,
         0.9F * s,
         "Account erstellen   |   Passwort vergessen?   |   Grid hinzufügen",
         kAccent);
@@ -1256,14 +1256,14 @@ void draw_login_form(
     if (!form.error.empty()) {
         ui.modern_text(
             layout.panel.x + 30.0F * s,
-            layout.panel.y + 405.0F * s,
+            layout.panel.y + 379.0F * s,
             0.9F * s,
             visible_tail(form.error, 86U),
             kError);
     } else if (!form.status.empty()) {
         ui.modern_text(
             layout.panel.x + 30.0F * s,
-            layout.panel.y + 405.0F * s,
+            layout.panel.y + 379.0F * s,
             0.9F * s,
             visible_tail(form.status, 86U),
             kSuccess);
@@ -1285,53 +1285,118 @@ void draw_login_form(
         12.0F * s,
         render::UiColor{
             0.018F, 0.06F, 0.105F, 0.91F});
+
+    const auto preview_x =
+        layout.left_feature.x + 10.0F * s;
+    const auto preview_y =
+        layout.left_feature.y + 10.0F * s;
+    const auto preview_width =
+        layout.left_feature.width - 20.0F * s;
+    const auto preview_height = 154.0F * s;
+
     ui.rounded_rectangle(
-        layout.left_feature.x + 10.0F * s,
-        layout.left_feature.y + 10.0F * s,
-        layout.left_feature.width - 20.0F * s,
-        145.0F * s,
+        preview_x,
+        preview_y,
+        preview_width,
+        preview_height,
         9.0F * s,
         render::UiColor{
-            0.025F, 0.14F, 0.23F, 0.92F});
+            0.025F, 0.15F, 0.25F, 0.96F});
     ui.vertical_gradient(
-        layout.left_feature.x + 16.0F * s,
-        layout.left_feature.y + 16.0F * s,
-        layout.left_feature.width - 32.0F * s,
-        133.0F * s,
+        preview_x + 5.0F * s,
+        preview_y + 5.0F * s,
+        preview_width - 10.0F * s,
+        preview_height - 10.0F * s,
         render::UiColor{
-            0.03F, 0.16F, 0.28F, 0.88F},
+            0.06F, 0.24F, 0.39F, 0.96F},
         render::UiColor{
-            0.015F, 0.07F, 0.12F, 0.92F});
+            0.015F, 0.075F, 0.12F, 0.98F});
+
+    ui.circle(
+        preview_x + 82.0F * s,
+        preview_y + 48.0F * s,
+        34.0F * s,
+        render::UiColor{
+            0.08F, 0.28F, 0.48F, 0.65F},
+        48U);
+
+    for (int index = 0; index < 9; ++index) {
+        const auto building_x =
+            preview_x +
+            (165.0F +
+             static_cast<float>(index) * 24.0F) *
+                s;
+        const auto building_height =
+            (38.0F +
+             static_cast<float>((index * 17) % 62)) *
+            s;
+        const auto base_y =
+            preview_y + 131.0F * s;
+
+        ui.rectangle(
+            building_x,
+            base_y - building_height,
+            13.0F * s,
+            building_height,
+            render::UiColor{
+                0.018F, 0.08F, 0.14F, 0.98F});
+        ui.rectangle(
+            building_x + 3.0F * s,
+            base_y - building_height + 9.0F * s,
+            7.0F * s,
+            1.5F * s,
+            render::UiColor{
+                0.10F, 0.58F, 0.92F, 0.62F});
+    }
+
+    ui.triangle(
+        preview_x + 15.0F * s,
+        preview_y + 129.0F * s,
+        preview_x + 115.0F * s,
+        preview_y + 72.0F * s,
+        preview_x + 205.0F * s,
+        preview_y + 129.0F * s,
+        render::UiColor{
+            0.02F, 0.09F, 0.13F, 0.92F});
+    ui.rectangle(
+        preview_x + 5.0F * s,
+        preview_y + 130.0F * s,
+        preview_width - 10.0F * s,
+        1.5F * s,
+        render::UiColor{
+            0.12F, 0.60F, 0.88F, 0.32F});
+
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 35.0F * s,
-        1.15F * s,
-        "Virtuelle Welten",
-        kAccent);
-    ui.modern_text(
-        layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 64.0F * s,
-        2.05F * s,
-        "Entdecken",
+        layout.left_feature.y + 184.0F * s,
+        1.75F * s,
+        "NexVerse",
         kText);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 101.0F * s,
-        1.0F * s,
+        layout.left_feature.y + 216.0F * s,
+        0.98F * s,
         "Deine Reise beginnt hier.",
         kMuted);
-    ui.modern_text(
-        layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 182.0F * s,
-        1.6F * s,
-        "Open Worlds",
-        kText);
-    ui.modern_text(
-        layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 215.0F * s,
-        0.95F * s,
-        "Frei  ·  Offen  ·  Verbunden",
-        kMuted);
+
+    ui.circle(
+        layout.left_feature.x + 172.0F * s,
+        layout.left_feature.y + 236.0F * s,
+        4.0F * s,
+        kAccent,
+        20U);
+    for (int dot = 1; dot < 6; ++dot) {
+        ui.circle(
+            layout.left_feature.x +
+                (172.0F +
+                 static_cast<float>(dot) * 18.0F) *
+                    s,
+            layout.left_feature.y + 236.0F * s,
+            3.0F * s,
+            render::UiColor{
+                0.30F, 0.47F, 0.64F, 0.85F},
+            20U);
+    }
 
     ui.rounded_rectangle(
         layout.right_news.x + 6.0F * s,
