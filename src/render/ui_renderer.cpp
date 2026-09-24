@@ -15,6 +15,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -59,8 +60,110 @@ constexpr float kModernOutputHeight = 13.0F;
 constexpr int kFontAtlasWidth = 1024;
 constexpr int kFontAtlasHeight = 256;
 
+std::vector<char32_t> modern_font_codepoints() {
+    std::vector<char32_t> result;
+    result.reserve(112U);
+
+    for (char32_t code = 32U;
+         code <= 126U;
+         ++code) {
+        result.push_back(code);
+    }
+
+    constexpr std::array<char32_t, 12> extras{
+        U'ä', U'ö', U'ü',
+        U'Ä', U'Ö', U'Ü',
+        U'ß', U'·', U'→',
+        U'–', U'…', U'€',
+    };
+    result.insert(
+        result.end(),
+        extras.begin(),
+        extras.end());
+    return result;
+}
+
+std::vector<char32_t> decode_utf8(
+    std::string_view value) {
+    std::vector<char32_t> result;
+    result.reserve(value.size());
+
+    std::size_t index = 0U;
+    while (index < value.size()) {
+        const auto first =
+            static_cast<unsigned char>(
+                value[index]);
+
+        if ((first & 0x80U) == 0U) {
+            result.push_back(
+                static_cast<char32_t>(first));
+            ++index;
+            continue;
+        }
+
+        auto continuation =
+            [&value](std::size_t offset) {
+                return static_cast<unsigned char>(
+                    value[offset]);
+            };
+
+        if ((first & 0xE0U) == 0xC0U &&
+            index + 1U < value.size()) {
+            const auto b1 = continuation(index + 1U);
+            if ((b1 & 0xC0U) == 0x80U) {
+                result.push_back(
+                    static_cast<char32_t>(
+                        ((first & 0x1FU) << 6U) |
+                        (b1 & 0x3FU)));
+                index += 2U;
+                continue;
+            }
+        }
+
+        if ((first & 0xF0U) == 0xE0U &&
+            index + 2U < value.size()) {
+            const auto b1 = continuation(index + 1U);
+            const auto b2 = continuation(index + 2U);
+            if ((b1 & 0xC0U) == 0x80U &&
+                (b2 & 0xC0U) == 0x80U) {
+                result.push_back(
+                    static_cast<char32_t>(
+                        ((first & 0x0FU) << 12U) |
+                        ((b1 & 0x3FU) << 6U) |
+                        (b2 & 0x3FU)));
+                index += 3U;
+                continue;
+            }
+        }
+
+        if ((first & 0xF8U) == 0xF0U &&
+            index + 3U < value.size()) {
+            const auto b1 = continuation(index + 1U);
+            const auto b2 = continuation(index + 2U);
+            const auto b3 = continuation(index + 3U);
+            if ((b1 & 0xC0U) == 0x80U &&
+                (b2 & 0xC0U) == 0x80U &&
+                (b3 & 0xC0U) == 0x80U) {
+                result.push_back(
+                    static_cast<char32_t>(
+                        ((first & 0x07U) << 18U) |
+                        ((b1 & 0x3FU) << 12U) |
+                        ((b2 & 0x3FU) << 6U) |
+                        (b3 & 0x3FU)));
+                index += 4U;
+                continue;
+            }
+        }
+
+        result.push_back(U'?');
+        ++index;
+    }
+
+    return result;
+}
+
 bool load_modern_font(
-    std::array<ModernGlyph, 128>& glyphs) {
+    std::unordered_map<char32_t, ModernGlyph>& glyphs) {
     FT_Library library = nullptr;
     if (FT_Init_FreeType(&library) != 0) {
         return false;
@@ -107,12 +210,11 @@ bool load_modern_font(
         return false;
     }
 
-    for (unsigned int code = 32U;
-         code <= 126U;
-         ++code) {
+    for (const auto code :
+         modern_font_codepoints()) {
         if (FT_Load_Char(
                 face,
-                code,
+                static_cast<FT_ULong>(code),
                 FT_LOAD_RENDER) != 0) {
             continue;
         }
@@ -187,7 +289,7 @@ bool load_modern_font(
 }
 
 GLuint build_font_atlas(
-    std::array<ModernGlyph, 128>& glyphs) {
+    std::unordered_map<char32_t, ModernGlyph>& glyphs) {
     std::vector<std::uint8_t> atlas(
         static_cast<std::size_t>(kFontAtlasWidth) *
             static_cast<std::size_t>(kFontAtlasHeight),
@@ -197,10 +299,8 @@ GLuint build_font_atlas(
     int pen_y = 1;
     int row_height = 0;
 
-    for (unsigned int code = 32U;
-         code <= 126U;
-         ++code) {
-        auto& glyph = glyphs[code];
+    for (auto& [code, glyph] : glyphs) {
+        (void)code;
 
         if (glyph.width <= 0 ||
             glyph.height <= 0 ||
@@ -299,7 +399,8 @@ GLuint build_font_atlas(
         GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    for (auto& glyph : glyphs) {
+    for (auto& [code, glyph] : glyphs) {
+        (void)code;
         glyph.alpha.clear();
         glyph.alpha.shrink_to_fit();
     }
@@ -645,7 +746,7 @@ struct UiRenderer::Impl {
     int height = 720;
     bool initialized = false;
     bool modern_font_ready = false;
-    std::array<ModernGlyph, 128> modern_glyphs{};
+    std::unordered_map<char32_t, ModernGlyph> modern_glyphs;
     std::vector<UiVertex> vertices;
     std::vector<TextVertex> text_vertices;
 
@@ -687,9 +788,7 @@ struct UiRenderer::Impl {
         vertices.clear();
         text_vertices.clear();
 
-        for (auto& glyph : modern_glyphs) {
-            glyph.alpha.clear();
-        }
+        modern_glyphs.clear();
     }
 };
 
