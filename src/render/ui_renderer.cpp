@@ -727,6 +727,25 @@ void append_circle(
     }
 }
 
+void append_triangle(
+    std::vector<UiVertex>& vertices,
+    float ax,
+    float ay,
+    float bx,
+    float by,
+    float cx,
+    float cy,
+    UiColor color) {
+    vertices.insert(
+        vertices.end(),
+        {
+            UiVertex{ax, ay, color.r, color.g, color.b, color.a},
+            UiVertex{bx, by, color.r, color.g, color.b, color.a},
+            UiVertex{cx, cy, color.r, color.g, color.b, color.a},
+        });
+}
+
+
 } // namespace
 
 struct UiRenderer::Impl {
@@ -982,6 +1001,25 @@ void UiRenderer::circle(
         radius,
         color,
         segments);
+}
+
+void UiRenderer::triangle(
+    float ax,
+    float ay,
+    float bx,
+    float by,
+    float cx,
+    float cy,
+    UiColor color) {
+    append_triangle(
+        impl_->vertices,
+        ax,
+        ay,
+        bx,
+        by,
+        cx,
+        cy,
+        color);
 }
 
 void UiRenderer::text(
