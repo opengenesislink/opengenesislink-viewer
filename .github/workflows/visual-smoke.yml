@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev libfreetype6-dev xvfb xdotool ffmpeg
+          sudo apt-get install -y ninja-build libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev libfreetype6-dev xvfb xdotool ffmpeg openbox
       - name: Configure
         run: cmake --preset release -DOGL_VIEWER_BUILD_TESTS=OFF
       - name: Build Viewer
@@ -32,6 +32,10 @@ jobs:
           Xvfb :99 -screen 0 1600x900x24 -ac >/tmp/ogl-xvfb.log 2>&1 &
           XVFB_PID=$!
           export DISPLAY=:99
+          export LIBGL_ALWAYS_SOFTWARE=1
+          sleep 1
+          openbox >/tmp/ogl-openbox.log 2>&1 &
+          WM_PID=$!
           sleep 1
           build/release/ogl-viewer >/tmp/ogl-viewer.log 2>&1 &
           VIEWER_PID=$!
@@ -49,12 +53,18 @@ jobs:
             kill "$XVFB_PID" || true
             exit 1
           fi
+          WINDOW_ID="$(xdotool search --name 'OpenGenesisLINK Viewer' | head -n 1)"
+          xdotool windowmove "$WINDOW_ID" 0 0 || true
+          xdotool windowsize "$WINDOW_ID" 1600 900 || true
+          xdotool windowactivate --sync "$WINDOW_ID" || true
           sleep 1
           ffmpeg -hide_banner -loglevel error -y \
             -f x11grab -draw_mouse 0 -video_size 1600x900 \
             -i :99.0 -frames:v 1 artifacts/login-screen.png
           cp /tmp/ogl-viewer.log artifacts/viewer.log || true
+          cp /tmp/ogl-openbox.log artifacts/openbox.log || true
           kill "$VIEWER_PID" || true
+          kill "$WM_PID" || true
           kill "$XVFB_PID" || true
       - name: Upload login visual
         uses: actions/upload-artifact@v4
@@ -63,5 +73,6 @@ jobs:
           path: |
             artifacts/login-screen.png
             artifacts/viewer.log
+            artifacts/openbox.log
           if-no-files-found: error
           retention-days: 14
