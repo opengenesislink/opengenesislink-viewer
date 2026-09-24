@@ -1,6 +1,6 @@
 {
   "name": "opengenesislink-viewer",
-  "version-string": "0.13.0-alpha.1",
+  "version-string": "0.13.0-alpha.2",
   "dependencies": [
     "curl",
     "nlohmann-json",
