@@ -1,0 +1,65 @@
+name: Viewer Login Visual Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'src/app/**'
+      - 'src/render/**'
+      - 'include/opengenesislink/viewer/render/**'
+      - '.github/workflows/visual-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  login-screenshot:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev libfreetype6-dev xvfb xdotool scrot
+      - name: Configure
+        run: cmake --preset release -DOGL_VIEWER_BUILD_TESTS=OFF
+      - name: Build Viewer
+        run: cmake --build --preset release --target ogl-viewer
+      - name: Capture login screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          Xvfb :99 -screen 0 1600x900x24 -ac >/tmp/ogl-xvfb.log 2>&1 &
+          XVFB_PID=$!
+          export DISPLAY=:99
+          sleep 1
+          build/release/ogl-viewer >/tmp/ogl-viewer.log 2>&1 &
+          VIEWER_PID=$!
+          found=0
+          for attempt in $(seq 1 30); do
+            if xdotool search --name 'OpenGenesisLINK Viewer' >/dev/null 2>&1; then
+              found=1
+              break
+            fi
+            sleep 0.25
+          done
+          if [ "$found" -ne 1 ]; then
+            cat /tmp/ogl-viewer.log || true
+            kill "$VIEWER_PID" || true
+            kill "$XVFB_PID" || true
+            exit 1
+          fi
+          sleep 1
+          scrot artifacts/login-screen.png
+          cp /tmp/ogl-viewer.log artifacts/viewer.log || true
+          kill "$VIEWER_PID" || true
+          kill "$XVFB_PID" || true
+      - name: Upload login visual
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenGenesisLINK-Viewer-login-visual
+          path: |
+            artifacts/login-screen.png
+            artifacts/viewer.log
+          if-no-files-found: error
+          retention-days: 14
