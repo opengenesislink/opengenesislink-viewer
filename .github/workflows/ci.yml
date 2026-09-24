@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev
+          sudo apt-get install -y ninja-build libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev libfreetype6-dev
       - name: Configure release
         run: cmake --preset release -DOGL_VIEWER_ENABLE_WERROR=ON
       - name: Build

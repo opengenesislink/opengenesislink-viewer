@@ -33,6 +33,21 @@ public:
         float height,
         UiColor color);
 
+    void vertical_gradient(
+        float x,
+        float y,
+        float width,
+        float height,
+        UiColor top,
+        UiColor bottom);
+
+    void circle(
+        float center_x,
+        float center_y,
+        float radius,
+        UiColor color,
+        unsigned int segments = 64U);
+
     void text(
         float x,
         float y,
@@ -40,7 +55,18 @@ public:
         std::string_view value,
         UiColor color);
 
+    void modern_text(
+        float x,
+        float y,
+        float scale,
+        std::string_view value,
+        UiColor color);
+
     [[nodiscard]] float text_width(
+        std::string_view value,
+        float scale) const noexcept;
+
+    [[nodiscard]] float modern_text_width(
         std::string_view value,
         float scale) const noexcept;
 

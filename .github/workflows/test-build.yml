@@ -26,7 +26,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build dpkg-dev libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev
+          sudo apt-get install -y ninja-build dpkg-dev libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev libfreetype6-dev
       - name: Configure
         run: cmake --preset release -DOGL_VIEWER_BUILD_TESTS=OFF
       - name: Build
@@ -59,7 +59,7 @@ jobs:
           Priority: optional
           Architecture: ${{ matrix.deb_arch }}
           Maintainer: OpenGenesisLINK
-          Depends: libc6, libstdc++6, libcurl4t64, libglfw3, libglew2.2, libopengl0, libglx0
+          Depends: libc6, libstdc++6, libcurl4t64, libglfw3, libglew2.2, libopengl0, libglx0, libfreetype6
           Description: OpenGenesisLINK first-party virtual world Viewer alpha test build
           EOF
           dpkg-deb --build "$PKGROOT" "artifacts/opengenesislink-viewer_${DEB_VERSION}_${{ matrix.deb_arch }}.deb"

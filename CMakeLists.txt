@@ -19,6 +19,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
 
 add_library(opengenesis-viewer-core
     src/core/curl_http_transport.cpp
@@ -103,6 +104,7 @@ target_link_libraries(opengenesis-viewer-graphics PUBLIC
     glfw
     GLEW::GLEW
     glm::glm
+    Freetype::Freetype
 )
 
 if(MSVC)
