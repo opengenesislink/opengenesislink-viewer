@@ -668,7 +668,7 @@ void draw_login_form(
         22.0F * s,
         17.0F * s,
         1.45F * s,
-        "OPENGENESISLINK VIEWER",
+        "OpenGenesisLINK Viewer",
         kText);
     ui.modern_text(
         265.0F * s,
@@ -681,16 +681,16 @@ void draw_login_form(
         44.0F * s,
         120.0F * s,
         1.55F * s,
-        "MORE THAN A WORLD...",
+        "More than a World ...",
         kText);
     ui.modern_text(
         64.0F * s,
         146.0F * s,
         1.35F * s,
-        "A NEW BEGINNING.",
+        "A new Beginning.",
         kMuted);
 
-    const auto title_left = std::string_view{"OPENGENESIS"};
+    const auto title_left = std::string_view{"OpenGenesis"};
     const auto title_right = std::string_view{"LINK"};
     const auto title_scale = 4.6F * s;
     const auto title_width =
@@ -726,20 +726,20 @@ void draw_login_form(
 
     const auto claim =
         std::string_view{
-            "EXPLORE  -  CREATE  -  CONNECT  -  BELONG"};
+            "Explore  ·  Create  ·  Connect  ·  Belong"};
     ui.modern_text(
         (width -
          ui.modern_text_width(
              claim,
-             1.25F * s)) *
+             1.05F * s)) *
             0.5F,
         184.0F * s,
-        1.25F * s,
+        1.05F * s,
         claim,
         kMuted);
     const auto subclaim =
         std::string_view{
-            "A VIRTUAL WORLD, REBUILT FROM THE CORE."};
+            "A virtual world, rebuilt from the core."};
     ui.modern_text(
         (width -
          ui.modern_text_width(
@@ -747,7 +747,7 @@ void draw_login_form(
              1.0F * s)) *
             0.5F,
         211.0F * s,
-        1.0F * s,
+        0.95F * s,
         subclaim,
         kText);
 
@@ -762,13 +762,13 @@ void draw_login_form(
         width - 310.0F * s,
         105.0F * s,
         1.4F * s,
-        "REAL PEOPLE.",
+        "Real people.",
         kText);
     ui.modern_text(
         width - 310.0F * s,
         132.0F * s,
         1.4F * s,
-        "ENDLESS POSSIBILITIES.",
+        "Endless possibilities.",
         kAccent);
 
     ui.rectangle(
@@ -821,58 +821,58 @@ void draw_login_form(
         layout.tab_login.x + 46.0F * s,
         layout.tab_login.y + 16.0F * s,
         1.15F * s,
-        "LOGIN",
+        "Login",
         kText);
     ui.modern_text(
         layout.tab_grids.x + 46.0F * s,
         layout.tab_grids.y + 16.0F * s,
         1.15F * s,
-        "GRIDS",
+        "Grids",
         kMuted);
     ui.modern_text(
         layout.tab_settings.x + 25.0F * s,
         layout.tab_settings.y + 16.0F * s,
         1.05F * s,
-        "EINSTELLUNGEN",
+        "Einstellungen",
         kMuted);
     ui.modern_text(
         layout.tab_advanced.x + 34.0F * s,
         layout.tab_advanced.y + 16.0F * s,
         1.05F * s,
-        "ERWEITERT",
+        "Erweitert",
         kMuted);
 
     draw_field(
         ui,
         layout.server,
         form.active_field == LoginField::server,
-        "GRID / WELT",
+        "Grid / Welt",
         form.server,
-        "CORE URL",
+        "NexVerse (mynexverse.de)",
         s);
     draw_field(
         ui,
         layout.region,
         form.active_field == LoginField::region,
-        "STARTREGION",
+        "Startregion",
         form.region,
-        "REGION",
+        "Region",
         s);
     draw_field(
         ui,
         layout.username,
         form.active_field == LoginField::username,
-        "BENUTZERNAME",
+        "Benutzername",
         form.username,
-        "BENUTZERNAME ODER E-MAIL",
+        "Benutzername oder E-Mail",
         s);
     draw_field(
         ui,
         layout.password,
         form.active_field == LoginField::password,
-        "PASSWORT",
+        "Passwort",
         form.masked_password(),
-        "PASSWORT",
+        "Passwort",
         s);
 
     ui.rectangle(
@@ -885,7 +885,7 @@ void draw_login_form(
         layout.panel.x + 55.0F * s,
         layout.panel.y + 282.0F * s,
         0.95F * s,
-        "ZUGANGSDATEN SPEICHERN",
+        "Zugangsdaten speichern",
         kText);
     draw_outline(
         ui,
@@ -900,7 +900,7 @@ void draw_login_form(
         layout.panel.x + 385.0F * s,
         layout.panel.y + 282.0F * s,
         0.95F * s,
-        "BEIM START EINLOGGEN",
+        "Beim Start einloggen",
         kMuted);
 
     const auto button_color =
@@ -920,8 +920,8 @@ void draw_login_form(
             button_color.a});
     const std::string_view button_text =
         form.connecting
-            ? "VERBINDUNG WIRD HERGESTELLT..."
-            : "EINLOGGEN IN DIE WELT";
+            ? "Verbindung wird hergestellt ..."
+            : "Einloggen in die Welt";
     const auto button_text_width =
         ui.modern_text_width(
             button_text,
@@ -940,7 +940,7 @@ void draw_login_form(
         layout.panel.x + 88.0F * s,
         layout.panel.y + 372.0F * s,
         0.9F * s,
-        "ACCOUNT ERSTELLEN  |  PASSWORT VERGESSEN?  |  GRID HINZUFUEGEN",
+        "Account erstellen   |   Passwort vergessen?   |   Grid hinzufügen",
         kAccent);
 
     if (!form.error.empty()) {
@@ -984,31 +984,31 @@ void draw_login_form(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 35.0F * s,
         1.15F * s,
-        "VIRTUELLE WELTEN",
+        "Virtuelle Welten",
         kAccent);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 64.0F * s,
         2.05F * s,
-        "ENTDECKEN",
+        "Entdecken",
         kText);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 101.0F * s,
         1.0F * s,
-        "DEINE REISE BEGINNT HIER.",
+        "Deine Reise beginnt hier.",
         kMuted);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 182.0F * s,
         1.6F * s,
-        "OPEN WORLDS",
+        "Open Worlds",
         kText);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 215.0F * s,
         0.95F * s,
-        "FREI  -  OFFEN  -  VERBUNDEN",
+        "Frei  ·  Offen  ·  Verbunden",
         kMuted);
 
     ui.rectangle(
@@ -1027,13 +1027,13 @@ void draw_login_form(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 26.0F * s,
         1.55F * s,
-        "NEUIGKEITEN",
+        "Neuigkeiten",
         kText);
     ui.modern_text(
         layout.right_news.x + 285.0F * s,
         layout.right_news.y + 28.0F * s,
         0.85F * s,
-        "ALLE ANZEIGEN >",
+        "Alle anzeigen  →",
         kAccent);
     ui.rectangle(
         layout.right_news.x + 24.0F * s,
@@ -1046,13 +1046,13 @@ void draw_login_form(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 68.0F * s,
         1.0F * s,
-        "0.13.0-ALPHA.1",
+        "OpenGenesisLINK 0.13.0-alpha.3",
         kText);
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 91.0F * s,
         0.82F * s,
-        "ERSTER TESTBUILD BEREIT",
+        "Neuer UI-Testbuild",
         kMuted);
     ui.rectangle(
         layout.right_news.x + 24.0F * s,
@@ -1065,13 +1065,13 @@ void draw_login_form(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 132.0F * s,
         1.0F * s,
-        "ALPHA TEST",
+        "Viewer Alpha",
         kText);
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 155.0F * s,
         0.82F * s,
-        "LOGIN, WORLD, SOCIAL, BUILD",
+        "Login, Welt, Social & Build",
         kMuted);
     ui.rectangle(
         layout.right_news.x + 24.0F * s,
@@ -1084,13 +1084,13 @@ void draw_login_form(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 196.0F * s,
         1.0F * s,
-        "ROADMAP",
+        "Entwickler-Blog",
         kText);
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 219.0F * s,
         0.82F * s,
-        "ATLAS UND VISUAL ASSETS ALS NAECHSTES",
+        "Atlas und visuelle Assets als Nächstes",
         kMuted);
 
     const auto feature_y =
@@ -1102,11 +1102,11 @@ void draw_login_form(
     const auto feature_start =
         width * 0.5F - 300.0F * s;
     constexpr std::array<std::string_view, 5> feature_titles{
-        "MENSCHEN",
-        "WELTEN",
-        "BAUEN",
-        "HANDEL",
-        "EVENTS",
+        "Menschen",
+        "Virtuelle Welten",
+        "Bauen & Gestalten",
+        "Kreieren & Handeln",
+        "Events & Community",
     };
     for (std::size_t index = 0U;
          index < feature_titles.size();
@@ -1148,11 +1148,11 @@ void draw_login_form(
         24.0F * s,
         layout.footer.y + 17.0F * s,
         0.9F * s,
-        "SPRACHE: DEUTSCH  |  BARRIEREFREIHEIT  |  SUPPORT  |  WEBSEITE",
+        "Sprache: Deutsch   |   Barrierefreiheit   |   Support   |   Webseite",
         kMuted);
     const auto powered =
         std::string_view{
-            "POWERED BY NEXVORTEX.DE  |  OPENGENESISLINK"};
+            "Powered by NexVortex.de   |   OpenGenesisLINK"};
     ui.modern_text(
         width -
             ui.modern_text_width(
@@ -1737,7 +1737,7 @@ int DesktopApplication::run(
 
         LoginFormState login_form;
         login_form.status =
-            "SERVER, ZUGANGSDATEN UND STARTREGION EINGEBEN";
+            "Server, Zugangsdaten und Startregion eingeben";
         bool show_login = graphical_login;
         bool submit_requested = false;
         bool previous_mouse_pressed = false;
@@ -1975,13 +1975,13 @@ int DesktopApplication::run(
 
                 if (!login_form.complete()) {
                     login_form.error =
-                        "ALL FOUR LOGIN FIELDS ARE REQUIRED";
+                        "Bitte Server, Benutzername, Passwort und Region ausfüllen";
                 } else {
                     auto request = login_form.request();
                     login_form.clear_password();
                     login_form.error.clear();
                     login_form.status =
-                        "DISCOVERING SERVER AND AUTHENTICATING";
+                        "Server wird geprüft und Anmeldung vorbereitet ...";
                     login_form.connecting = true;
                     glfwSetWindowTitle(
                         window,
