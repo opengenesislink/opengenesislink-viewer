@@ -976,7 +976,7 @@ void UiRenderer::modern_text(
     for (const char raw_character : value) {
         if (raw_character == '\n') {
             x = start_x;
-            y += 9.0F * scale;
+            y += 17.0F * scale;
             baseline =
                 y + kModernOutputHeight * scale;
             continue;
@@ -992,53 +992,76 @@ void UiRenderer::modern_text(
         const auto& glyph =
             impl_->modern_glyphs[code];
 
-        const auto glyph_x =
-            x +
-            static_cast<float>(
-                glyph.bearing_x) *
-                unit;
-        const auto glyph_y =
-            baseline -
-            static_cast<float>(
-                glyph.bearing_y) *
-                unit;
+        if (glyph.width > 0 &&
+            glyph.height > 0) {
+            const auto left =
+                x +
+                static_cast<float>(
+                    glyph.bearing_x) *
+                    unit;
+            const auto top =
+                baseline -
+                static_cast<float>(
+                    glyph.bearing_y) *
+                    unit;
+            const auto right =
+                left +
+                static_cast<float>(
+                    glyph.width) *
+                    unit;
+            const auto bottom =
+                top +
+                static_cast<float>(
+                    glyph.height) *
+                    unit;
 
-        for (int row = 0;
-             row < glyph.height;
-             ++row) {
-            for (int column = 0;
-                 column < glyph.width;
-                 ++column) {
-                const auto alpha =
-                    glyph.alpha[
-                        static_cast<std::size_t>(row) *
-                            static_cast<std::size_t>(
-                                glyph.width) +
-                        static_cast<std::size_t>(
-                            column)];
-                if (alpha < 8U) {
-                    continue;
-                }
+            const TextVertex top_left{
+                left,
+                top,
+                glyph.u0,
+                glyph.v1,
+                color.r,
+                color.g,
+                color.b,
+                color.a};
+            const TextVertex top_right{
+                right,
+                top,
+                glyph.u1,
+                glyph.v1,
+                color.r,
+                color.g,
+                color.b,
+                color.a};
+            const TextVertex bottom_right{
+                right,
+                bottom,
+                glyph.u1,
+                glyph.v0,
+                color.r,
+                color.g,
+                color.b,
+                color.a};
+            const TextVertex bottom_left{
+                left,
+                bottom,
+                glyph.u0,
+                glyph.v0,
+                color.r,
+                color.g,
+                color.b,
+                color.a};
 
-                auto pixel_color = color;
-                pixel_color.a *=
-                    static_cast<float>(alpha) /
-                    255.0F;
-
-                append_rectangle(
-                    impl_->vertices,
-                    glyph_x +
-                        static_cast<float>(
-                            column) *
-                            unit,
-                    glyph_y +
-                        static_cast<float>(
-                            row) *
-                            unit,
-                    std::max(unit, 0.35F),
-                    std::max(unit, 0.35F),
-                    pixel_color);
-            }
+            impl_->text_vertices.insert(
+                impl_->text_vertices.end(),
+                {
+                    top_left,
+                    top_right,
+                    bottom_right,
+                    top_left,
+                    bottom_right,
+                    bottom_left,
+                });
         }
 
         x += glyph.advance * unit;
@@ -1095,42 +1118,94 @@ void UiRenderer::render() {
         throw std::runtime_error(
             "UI renderer is not initialized");
     }
-    if (impl_->vertices.empty()) {
+    if (impl_->vertices.empty() &&
+        impl_->text_vertices.empty()) {
         return;
     }
+
     if (impl_->vertices.size() >
+        static_cast<std::size_t>(
+            std::numeric_limits<GLsizei>::max()) ||
+        impl_->text_vertices.size() >
         static_cast<std::size_t>(
             std::numeric_limits<GLsizei>::max())) {
         throw std::runtime_error(
             "UI vertex count exceeds OpenGL draw range");
     }
 
-    glUseProgram(impl_->program);
-    glUniform2f(
-        impl_->viewport_location,
-        static_cast<float>(impl_->width),
-        static_cast<float>(impl_->height));
-
-    glBindVertexArray(impl_->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, impl_->vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        static_cast<GLsizeiptr>(
-            impl_->vertices.size() *
-            sizeof(UiVertex)),
-        impl_->vertices.data(),
-        GL_DYNAMIC_DRAW);
-
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(
+        GL_SRC_ALPHA,
+        GL_ONE_MINUS_SRC_ALPHA);
 
-    glDrawArrays(
-        GL_TRIANGLES,
-        0,
-        static_cast<GLsizei>(
-            impl_->vertices.size()));
+    if (!impl_->vertices.empty()) {
+        glUseProgram(impl_->program);
+        glUniform2f(
+            impl_->viewport_location,
+            static_cast<float>(impl_->width),
+            static_cast<float>(impl_->height));
+
+        glBindVertexArray(impl_->vao);
+        glBindBuffer(
+            GL_ARRAY_BUFFER,
+            impl_->vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            static_cast<GLsizeiptr>(
+                impl_->vertices.size() *
+                sizeof(UiVertex)),
+            impl_->vertices.data(),
+            GL_DYNAMIC_DRAW);
+
+        glDrawArrays(
+            GL_TRIANGLES,
+            0,
+            static_cast<GLsizei>(
+                impl_->vertices.size()));
+    }
+
+    if (impl_->modern_font_ready &&
+        !impl_->text_vertices.empty()) {
+        glUseProgram(
+            impl_->text_program);
+        glUniform2f(
+            impl_->text_viewport_location,
+            static_cast<float>(impl_->width),
+            static_cast<float>(impl_->height));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(
+            GL_TEXTURE_2D,
+            impl_->font_atlas);
+        glUniform1i(
+            impl_->text_sampler_location,
+            0);
+
+        glBindVertexArray(
+            impl_->text_vao);
+        glBindBuffer(
+            GL_ARRAY_BUFFER,
+            impl_->text_vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            static_cast<GLsizeiptr>(
+                impl_->text_vertices.size() *
+                sizeof(TextVertex)),
+            impl_->text_vertices.data(),
+            GL_DYNAMIC_DRAW);
+
+        glDrawArrays(
+            GL_TRIANGLES,
+            0,
+            static_cast<GLsizei>(
+                impl_->text_vertices.size()));
+
+        glBindTexture(
+            GL_TEXTURE_2D,
+            0);
+    }
 
     glDisable(GL_BLEND);
     glEnable(GL_CULL_FACE);
