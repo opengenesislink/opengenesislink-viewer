@@ -393,7 +393,7 @@ LoginLayout login_layout(
     const auto panel_height = 430.0F * scale;
     const auto panel_x =
         (safe_width - panel_width) * 0.5F;
-    const auto panel_y = 270.0F * scale;
+    const auto panel_y = 335.0F * scale;
 
     const auto inner_x = panel_x + 30.0F * scale;
     const auto inner_width = panel_width - 60.0F * scale;
@@ -405,7 +405,7 @@ LoginLayout login_layout(
 
     const auto side_width = 420.0F * scale;
     const auto side_height = 260.0F * scale;
-    const auto side_y = 535.0F * scale;
+    const auto side_y = 565.0F * scale;
     const auto side_margin = 20.0F * scale;
 
     const auto footer_height = 48.0F * scale;
@@ -664,49 +664,150 @@ void draw_login_form(
         width,
         1.0F,
         kLine);
+    const auto app_icon_x = 25.0F * s;
+    const auto app_icon_y = 24.0F * s;
+    const auto app_icon_size = 13.0F * s;
+    ui.triangle(
+        app_icon_x,
+        app_icon_y - app_icon_size,
+        app_icon_x - app_icon_size,
+        app_icon_y - 3.0F * s,
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        render::UiColor{
+            0.20F, 0.56F, 0.96F, 1.0F});
+    ui.triangle(
+        app_icon_x,
+        app_icon_y - app_icon_size,
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        app_icon_x + app_icon_size,
+        app_icon_y - 3.0F * s,
+        render::UiColor{
+            0.34F, 0.72F, 1.0F, 1.0F});
+    ui.triangle(
+        app_icon_x - app_icon_size,
+        app_icon_y - 3.0F * s,
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        app_icon_x,
+        app_icon_y + app_icon_size,
+        render::UiColor{
+            0.05F, 0.28F, 0.60F, 1.0F});
+    ui.triangle(
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        app_icon_x + app_icon_size,
+        app_icon_y - 3.0F * s,
+        app_icon_x,
+        app_icon_y + app_icon_size,
+        render::UiColor{
+            0.07F, 0.38F, 0.78F, 1.0F});
+
     ui.modern_text(
-        22.0F * s,
-        17.0F * s,
-        1.45F * s,
-        "OPENGENESISLINK VIEWER",
+        50.0F * s,
+        15.0F * s,
+        1.25F * s,
+        "OpenGenesisLINK Viewer",
         kText);
     ui.modern_text(
-        265.0F * s,
-        18.0F * s,
-        1.0F * s,
-        std::string{"V"} + OGL_VIEWER_VERSION,
+        236.0F * s,
+        17.0F * s,
+        0.86F * s,
+        std::string{"v"} + OGL_VIEWER_VERSION,
         kMuted);
 
     ui.modern_text(
         44.0F * s,
         120.0F * s,
         1.55F * s,
-        "MORE THAN A WORLD...",
+        "More than a World ...",
         kText);
     ui.modern_text(
         64.0F * s,
         146.0F * s,
         1.35F * s,
-        "A NEW BEGINNING.",
+        "A new Beginning.",
         kMuted);
 
-    const auto title_left = std::string_view{"OPENGENESIS"};
+    const auto logo_x = width * 0.5F;
+    const auto logo_top = 58.0F * s;
+    const auto logo_mid = 94.0F * s;
+    const auto logo_bottom = 138.0F * s;
+    const auto logo_half = 42.0F * s;
+
+    ui.triangle(
+        logo_x,
+        logo_top,
+        logo_x - logo_half,
+        80.0F * s,
+        logo_x,
+        logo_mid,
+        render::UiColor{
+            0.18F, 0.52F, 0.92F, 1.0F});
+    ui.triangle(
+        logo_x,
+        logo_top,
+        logo_x,
+        logo_mid,
+        logo_x + logo_half,
+        80.0F * s,
+        render::UiColor{
+            0.34F, 0.70F, 1.0F, 1.0F});
+    ui.triangle(
+        logo_x - logo_half,
+        80.0F * s,
+        logo_x - logo_half,
+        116.0F * s,
+        logo_x,
+        logo_mid,
+        render::UiColor{
+            0.06F, 0.30F, 0.62F, 1.0F});
+    ui.triangle(
+        logo_x - logo_half,
+        116.0F * s,
+        logo_x,
+        logo_bottom,
+        logo_x,
+        logo_mid,
+        render::UiColor{
+            0.035F, 0.20F, 0.46F, 1.0F});
+    ui.triangle(
+        logo_x,
+        logo_mid,
+        logo_x + logo_half,
+        80.0F * s,
+        logo_x + logo_half,
+        116.0F * s,
+        render::UiColor{
+            0.08F, 0.38F, 0.76F, 1.0F});
+    ui.triangle(
+        logo_x,
+        logo_mid,
+        logo_x + logo_half,
+        116.0F * s,
+        logo_x,
+        logo_bottom,
+        render::UiColor{
+            0.045F, 0.25F, 0.58F, 1.0F});
+
+    const auto title_left = std::string_view{"OpenGenesis"};
     const auto title_right = std::string_view{"LINK"};
-    const auto title_scale = 4.6F * s;
+    const auto title_scale = 4.15F * s;
     const auto title_width =
         ui.modern_text_width(title_left, title_scale) +
         ui.modern_text_width(title_right, title_scale);
     const auto title_x = (width - title_width) * 0.5F;
     ui.modern_text(
         title_x,
-        92.0F * s,
+        155.0F * s,
         title_scale,
         title_left,
         kText);
     ui.modern_text(
         title_x +
             ui.modern_text_width(title_left, title_scale),
-        92.0F * s,
+        155.0F * s,
         title_scale,
         title_right,
         kAccent);
@@ -719,35 +820,35 @@ void draw_login_form(
              viewer_label,
              viewer_scale)) *
             0.5F,
-        145.0F * s,
+        220.0F * s,
         viewer_scale,
         viewer_label,
         kText);
 
     const auto claim =
         std::string_view{
-            "EXPLORE  -  CREATE  -  CONNECT  -  BELONG"};
+            "Explore  ·  Create  ·  Connect  ·  Belong"};
     ui.modern_text(
         (width -
          ui.modern_text_width(
              claim,
-             1.25F * s)) *
+             1.05F * s)) *
             0.5F,
-        184.0F * s,
-        1.25F * s,
+        260.0F * s,
+        1.05F * s,
         claim,
         kMuted);
     const auto subclaim =
         std::string_view{
-            "A VIRTUAL WORLD, REBUILT FROM THE CORE."};
+            "A virtual world, rebuilt from the core."};
     ui.modern_text(
         (width -
          ui.modern_text_width(
              subclaim,
              1.0F * s)) *
             0.5F,
-        211.0F * s,
-        1.0F * s,
+        285.0F * s,
+        0.95F * s,
         subclaim,
         kText);
 
@@ -762,13 +863,13 @@ void draw_login_form(
         width - 310.0F * s,
         105.0F * s,
         1.4F * s,
-        "REAL PEOPLE.",
+        "Real people.",
         kText);
     ui.modern_text(
         width - 310.0F * s,
         132.0F * s,
         1.4F * s,
-        "ENDLESS POSSIBILITIES.",
+        "Endless possibilities.",
         kAccent);
 
     ui.rectangle(
@@ -821,58 +922,58 @@ void draw_login_form(
         layout.tab_login.x + 46.0F * s,
         layout.tab_login.y + 16.0F * s,
         1.15F * s,
-        "LOGIN",
+        "Login",
         kText);
     ui.modern_text(
         layout.tab_grids.x + 46.0F * s,
         layout.tab_grids.y + 16.0F * s,
         1.15F * s,
-        "GRIDS",
+        "Grids",
         kMuted);
     ui.modern_text(
         layout.tab_settings.x + 25.0F * s,
         layout.tab_settings.y + 16.0F * s,
         1.05F * s,
-        "EINSTELLUNGEN",
+        "Einstellungen",
         kMuted);
     ui.modern_text(
         layout.tab_advanced.x + 34.0F * s,
         layout.tab_advanced.y + 16.0F * s,
         1.05F * s,
-        "ERWEITERT",
+        "Erweitert",
         kMuted);
 
     draw_field(
         ui,
         layout.server,
         form.active_field == LoginField::server,
-        "GRID / WELT",
+        "Grid / Welt",
         form.server,
-        "CORE URL",
+        "NexVerse (mynexverse.de)",
         s);
     draw_field(
         ui,
         layout.region,
         form.active_field == LoginField::region,
-        "STARTREGION",
+        "Startregion",
         form.region,
-        "REGION",
+        "Region",
         s);
     draw_field(
         ui,
         layout.username,
         form.active_field == LoginField::username,
-        "BENUTZERNAME",
+        "Benutzername",
         form.username,
-        "BENUTZERNAME ODER E-MAIL",
+        "Benutzername oder E-Mail",
         s);
     draw_field(
         ui,
         layout.password,
         form.active_field == LoginField::password,
-        "PASSWORT",
+        "Passwort",
         form.masked_password(),
-        "PASSWORT",
+        "Passwort",
         s);
 
     ui.rectangle(
@@ -885,7 +986,7 @@ void draw_login_form(
         layout.panel.x + 55.0F * s,
         layout.panel.y + 282.0F * s,
         0.95F * s,
-        "ZUGANGSDATEN SPEICHERN",
+        "Zugangsdaten speichern",
         kText);
     draw_outline(
         ui,
@@ -900,7 +1001,7 @@ void draw_login_form(
         layout.panel.x + 385.0F * s,
         layout.panel.y + 282.0F * s,
         0.95F * s,
-        "BEIM START EINLOGGEN",
+        "Beim Start einloggen",
         kMuted);
 
     const auto button_color =
@@ -920,8 +1021,8 @@ void draw_login_form(
             button_color.a});
     const std::string_view button_text =
         form.connecting
-            ? "VERBINDUNG WIRD HERGESTELLT..."
-            : "EINLOGGEN IN DIE WELT";
+            ? "Verbindung wird hergestellt ..."
+            : "Einloggen in die Welt";
     const auto button_text_width =
         ui.modern_text_width(
             button_text,
@@ -940,7 +1041,7 @@ void draw_login_form(
         layout.panel.x + 88.0F * s,
         layout.panel.y + 372.0F * s,
         0.9F * s,
-        "ACCOUNT ERSTELLEN  |  PASSWORT VERGESSEN?  |  GRID HINZUFUEGEN",
+        "Account erstellen   |   Passwort vergessen?   |   Grid hinzufügen",
         kAccent);
 
     if (!form.error.empty()) {
@@ -984,31 +1085,31 @@ void draw_login_form(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 35.0F * s,
         1.15F * s,
-        "VIRTUELLE WELTEN",
+        "Virtuelle Welten",
         kAccent);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 64.0F * s,
         2.05F * s,
-        "ENTDECKEN",
+        "Entdecken",
         kText);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 101.0F * s,
         1.0F * s,
-        "DEINE REISE BEGINNT HIER.",
+        "Deine Reise beginnt hier.",
         kMuted);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 182.0F * s,
         1.6F * s,
-        "OPEN WORLDS",
+        "Open Worlds",
         kText);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
         layout.left_feature.y + 215.0F * s,
         0.95F * s,
-        "FREI  -  OFFEN  -  VERBUNDEN",
+        "Frei  ·  Offen  ·  Verbunden",
         kMuted);
 
     ui.rectangle(
@@ -1027,13 +1128,13 @@ void draw_login_form(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 26.0F * s,
         1.55F * s,
-        "NEUIGKEITEN",
+        "Neuigkeiten",
         kText);
     ui.modern_text(
         layout.right_news.x + 285.0F * s,
         layout.right_news.y + 28.0F * s,
         0.85F * s,
-        "ALLE ANZEIGEN >",
+        "Alle anzeigen  →",
         kAccent);
     ui.rectangle(
         layout.right_news.x + 24.0F * s,
@@ -1046,13 +1147,14 @@ void draw_login_form(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 68.0F * s,
         1.0F * s,
-        "0.13.0-ALPHA.1",
+        std::string{"OpenGenesisLINK "} +
+            OGL_VIEWER_VERSION,
         kText);
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 91.0F * s,
         0.82F * s,
-        "ERSTER TESTBUILD BEREIT",
+        "Neuer UI-Testbuild",
         kMuted);
     ui.rectangle(
         layout.right_news.x + 24.0F * s,
@@ -1065,13 +1167,13 @@ void draw_login_form(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 132.0F * s,
         1.0F * s,
-        "ALPHA TEST",
+        "Viewer Alpha",
         kText);
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 155.0F * s,
         0.82F * s,
-        "LOGIN, WORLD, SOCIAL, BUILD",
+        "Login, Welt, Social & Build",
         kMuted);
     ui.rectangle(
         layout.right_news.x + 24.0F * s,
@@ -1084,13 +1186,13 @@ void draw_login_form(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 196.0F * s,
         1.0F * s,
-        "ROADMAP",
+        "Entwickler-Blog",
         kText);
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 219.0F * s,
         0.82F * s,
-        "ATLAS UND VISUAL ASSETS ALS NAECHSTES",
+        "Atlas und visuelle Assets als Nächstes",
         kMuted);
 
     const auto feature_y =
@@ -1102,11 +1204,11 @@ void draw_login_form(
     const auto feature_start =
         width * 0.5F - 300.0F * s;
     constexpr std::array<std::string_view, 5> feature_titles{
-        "MENSCHEN",
-        "WELTEN",
-        "BAUEN",
-        "HANDEL",
-        "EVENTS",
+        "Menschen",
+        "Virtuelle Welten",
+        "Bauen & Gestalten",
+        "Kreieren & Handeln",
+        "Events & Community",
     };
     for (std::size_t index = 0U;
          index < feature_titles.size();
@@ -1115,21 +1217,156 @@ void draw_login_form(
             feature_start +
             static_cast<float>(index) *
                 150.0F * s;
-        draw_outline(
-            ui,
-            Rect{
-                x + 32.0F * s,
-                feature_y,
-                42.0F * s,
-                42.0F * s},
-            std::max(1.0F, 1.5F * s),
-            index == 2U ? kAccent : kText);
+        const auto icon_x =
+            x + 53.0F * s;
+        const auto icon_y =
+            feature_y + 21.0F * s;
+        const auto icon_color =
+            index == 2U ? kAccent : kText;
+
+        if (index == 0U) {
+            ui.circle(
+                icon_x - 9.0F * s,
+                icon_y - 8.0F * s,
+                6.0F * s,
+                icon_color,
+                24U);
+            ui.circle(
+                icon_x + 8.0F * s,
+                icon_y - 6.0F * s,
+                5.0F * s,
+                icon_color,
+                24U);
+            ui.rectangle(
+                icon_x - 19.0F * s,
+                icon_y + 1.0F * s,
+                21.0F * s,
+                14.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x + 1.0F * s,
+                icon_y + 3.0F * s,
+                17.0F * s,
+                12.0F * s,
+                icon_color);
+        } else if (index == 1U) {
+            ui.circle(
+                icon_x,
+                icon_y,
+                18.0F * s,
+                icon_color,
+                40U);
+            ui.rectangle(
+                icon_x - 18.0F * s,
+                icon_y - 1.0F * s,
+                36.0F * s,
+                2.0F * s,
+                kPanel);
+            ui.rectangle(
+                icon_x - 1.0F * s,
+                icon_y - 18.0F * s,
+                2.0F * s,
+                36.0F * s,
+                kPanel);
+        } else if (index == 2U) {
+            const auto half = 17.0F * s;
+            ui.triangle(
+                icon_x,
+                icon_y - 18.0F * s,
+                icon_x - half,
+                icon_y - 7.0F * s,
+                icon_x,
+                icon_y + 1.0F * s,
+                render::UiColor{
+                    0.20F, 0.60F, 1.0F, 1.0F});
+            ui.triangle(
+                icon_x,
+                icon_y - 18.0F * s,
+                icon_x,
+                icon_y + 1.0F * s,
+                icon_x + half,
+                icon_y - 7.0F * s,
+                render::UiColor{
+                    0.38F, 0.75F, 1.0F, 1.0F});
+            ui.triangle(
+                icon_x - half,
+                icon_y - 7.0F * s,
+                icon_x,
+                icon_y + 1.0F * s,
+                icon_x,
+                icon_y + 18.0F * s,
+                render::UiColor{
+                    0.06F, 0.33F, 0.68F, 1.0F});
+            ui.triangle(
+                icon_x,
+                icon_y + 1.0F * s,
+                icon_x + half,
+                icon_y - 7.0F * s,
+                icon_x,
+                icon_y + 18.0F * s,
+                render::UiColor{
+                    0.08F, 0.43F, 0.84F, 1.0F});
+        } else if (index == 3U) {
+            ui.rectangle(
+                icon_x - 15.0F * s,
+                icon_y - 7.0F * s,
+                29.0F * s,
+                18.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x - 21.0F * s,
+                icon_y - 14.0F * s,
+                8.0F * s,
+                3.0F * s,
+                icon_color);
+            ui.circle(
+                icon_x - 8.0F * s,
+                icon_y + 16.0F * s,
+                4.0F * s,
+                icon_color,
+                18U);
+            ui.circle(
+                icon_x + 10.0F * s,
+                icon_y + 16.0F * s,
+                4.0F * s,
+                icon_color,
+                18U);
+        } else {
+            draw_outline(
+                ui,
+                Rect{
+                    icon_x - 18.0F * s,
+                    icon_y - 16.0F * s,
+                    36.0F * s,
+                    34.0F * s},
+                std::max(1.0F, 2.0F * s),
+                icon_color);
+            ui.rectangle(
+                icon_x - 18.0F * s,
+                icon_y - 7.0F * s,
+                36.0F * s,
+                2.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x - 10.0F * s,
+                icon_y - 20.0F * s,
+                4.0F * s,
+                9.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x + 6.0F * s,
+                icon_y - 20.0F * s,
+                4.0F * s,
+                9.0F * s,
+                icon_color);
+        }
+
         ui.modern_text(
             x,
             feature_y + 55.0F * s,
-            0.85F * s,
+            0.82F * s,
             feature_titles[index],
-            index == 2U ? kAccent : kText);
+            icon_color);
     }
 
     ui.rectangle(
@@ -1148,11 +1385,11 @@ void draw_login_form(
         24.0F * s,
         layout.footer.y + 17.0F * s,
         0.9F * s,
-        "SPRACHE: DEUTSCH  |  BARRIEREFREIHEIT  |  SUPPORT  |  WEBSEITE",
+        "Sprache: Deutsch   |   Barrierefreiheit   |   Support   |   Webseite",
         kMuted);
     const auto powered =
         std::string_view{
-            "POWERED BY NEXVORTEX.DE  |  OPENGENESISLINK"};
+            "Powered by NexVortex.de   |   OpenGenesisLINK"};
     ui.modern_text(
         width -
             ui.modern_text_width(
@@ -1737,7 +1974,7 @@ int DesktopApplication::run(
 
         LoginFormState login_form;
         login_form.status =
-            "SERVER, ZUGANGSDATEN UND STARTREGION EINGEBEN";
+            "Server, Zugangsdaten und Startregion eingeben";
         bool show_login = graphical_login;
         bool submit_requested = false;
         bool previous_mouse_pressed = false;
@@ -1975,13 +2212,13 @@ int DesktopApplication::run(
 
                 if (!login_form.complete()) {
                     login_form.error =
-                        "ALL FOUR LOGIN FIELDS ARE REQUIRED";
+                        "Bitte Server, Benutzername, Passwort und Region ausfüllen";
                 } else {
                     auto request = login_form.request();
                     login_form.clear_password();
                     login_form.error.clear();
                     login_form.status =
-                        "DISCOVERING SERVER AND AUTHENTICATING";
+                        "Server wird geprüft und Anmeldung vorbereitet ...";
                     login_form.connecting = true;
                     glfwSetWindowTitle(
                         window,
