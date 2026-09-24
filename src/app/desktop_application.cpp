@@ -389,11 +389,11 @@ LoginLayout login_layout(
             0.72F,
             1.35F);
 
-    const auto panel_width = 640.0F * scale;
-    const auto panel_height = 430.0F * scale;
+    const auto panel_width = 600.0F * scale;
+    const auto panel_height = 390.0F * scale;
     const auto panel_x =
         (safe_width - panel_width) * 0.5F;
-    const auto panel_y = 335.0F * scale;
+    const auto panel_y = 350.0F * scale;
 
     const auto inner_x = panel_x + 30.0F * scale;
     const auto inner_width = panel_width - 60.0F * scale;
@@ -403,10 +403,10 @@ LoginLayout login_layout(
         inner_width - region_width - row_gap;
     const auto field_height = 44.0F * scale;
 
-    const auto side_width = 420.0F * scale;
-    const auto side_height = 260.0F * scale;
-    const auto side_y = 565.0F * scale;
-    const auto side_margin = 20.0F * scale;
+    const auto side_width = 430.0F * scale;
+    const auto side_height = 255.0F * scale;
+    const auto side_y = 575.0F * scale;
+    const auto side_margin = 18.0F * scale;
 
     const auto footer_height = 48.0F * scale;
     const auto tab_width = panel_width / 4.0F;
@@ -475,33 +475,33 @@ LoginLayout login_layout(
         },
         .server = {
             inner_x,
-            panel_y + 78.0F * scale,
+            panel_y + 74.0F * scale,
             server_width,
             field_height,
         },
         .region = {
             inner_x + server_width + row_gap,
-            panel_y + 78.0F * scale,
+            panel_y + 74.0F * scale,
             region_width,
             field_height,
         },
         .username = {
             inner_x,
-            panel_y + 151.0F * scale,
+            panel_y + 142.0F * scale,
             inner_width,
             field_height,
         },
         .password = {
             inner_x,
-            panel_y + 220.0F * scale,
+            panel_y + 207.0F * scale,
             inner_width,
             field_height,
         },
         .button = {
-            inner_x + 82.0F * scale,
-            panel_y + 306.0F * scale,
-            inner_width - 164.0F * scale,
-            52.0F * scale,
+            inner_x + 72.0F * scale,
+            panel_y + 300.0F * scale,
+            inner_width - 144.0F * scale,
+            50.0F * scale,
         },
         .scale = scale,
     };
@@ -556,6 +556,275 @@ void draw_outline(
         color);
 }
 
+void draw_reference_backdrop(
+    render::UiRenderer& ui,
+    float width,
+    float height,
+    float s) {
+    ui.vertical_gradient(
+        0.0F,
+        0.0F,
+        width,
+        height,
+        render::UiColor{
+            0.008F, 0.028F, 0.065F, 1.0F},
+        render::UiColor{
+            0.006F, 0.055F, 0.10F, 1.0F});
+
+    constexpr std::array<std::array<float, 3>, 28> stars{{
+        {72.0F, 92.0F, 1.4F}, {132.0F, 62.0F, 1.0F},
+        {196.0F, 118.0F, 1.6F}, {260.0F, 78.0F, 1.1F},
+        {330.0F, 164.0F, 1.3F}, {390.0F, 104.0F, 1.0F},
+        {470.0F, 74.0F, 1.5F}, {548.0F, 126.0F, 1.0F},
+        {618.0F, 86.0F, 1.3F}, {710.0F, 58.0F, 1.0F},
+        {884.0F, 82.0F, 1.4F}, {950.0F, 120.0F, 1.0F},
+        {1016.0F, 72.0F, 1.2F}, {1090.0F, 148.0F, 1.0F},
+        {1160.0F, 96.0F, 1.5F}, {1230.0F, 62.0F, 1.0F},
+        {1308.0F, 132.0F, 1.4F}, {1388.0F, 84.0F, 1.0F},
+        {1470.0F, 152.0F, 1.2F}, {1532.0F, 104.0F, 1.0F},
+        {520.0F, 210.0F, 1.0F}, {590.0F, 176.0F, 1.2F},
+        {1030.0F, 220.0F, 1.0F}, {1120.0F, 192.0F, 1.2F},
+        {1280.0F, 232.0F, 1.0F}, {1410.0F, 206.0F, 1.3F},
+        {360.0F, 248.0F, 1.0F}, {1510.0F, 248.0F, 1.0F},
+    }};
+    for (const auto& star : stars) {
+        const auto size = star[2] * s;
+        ui.rectangle(
+            star[0] * s,
+            star[1] * s,
+            size,
+            size,
+            render::UiColor{
+                0.66F, 0.84F, 1.0F, 0.75F});
+    }
+
+    ui.circle(
+        48.0F * s,
+        270.0F * s,
+        270.0F * s,
+        render::UiColor{
+            0.04F, 0.22F, 0.42F, 0.24F},
+        128U);
+    ui.circle(
+        48.0F * s,
+        270.0F * s,
+        255.0F * s,
+        render::UiColor{
+            0.025F, 0.115F, 0.245F, 0.95F},
+        128U);
+    ui.circle(
+        395.0F * s,
+        126.0F * s,
+        37.0F * s,
+        render::UiColor{
+            0.12F, 0.22F, 0.36F, 0.92F},
+        48U);
+
+    ui.vertical_gradient(
+        0.0F,
+        420.0F * s,
+        width,
+        291.0F * s,
+        render::UiColor{
+            0.03F, 0.18F, 0.27F, 0.22F},
+        render::UiColor{
+            0.005F, 0.035F, 0.07F, 0.92F});
+
+    constexpr std::array<std::array<float, 3>, 9> mountains{{
+        {0.0F, 470.0F, 180.0F},
+        {130.0F, 430.0F, 180.0F},
+        {270.0F, 458.0F, 160.0F},
+        {390.0F, 420.0F, 195.0F},
+        {1040.0F, 452.0F, 190.0F},
+        {1160.0F, 410.0F, 220.0F},
+        {1310.0F, 455.0F, 185.0F},
+        {1440.0F, 418.0F, 210.0F},
+        {1540.0F, 465.0F, 150.0F},
+    }};
+    for (const auto& mountain : mountains) {
+        const auto x = mountain[0] * s;
+        const auto peak_y = mountain[1] * s;
+        const auto half = mountain[2] * 0.5F * s;
+        ui.triangle(
+            x - half,
+            570.0F * s,
+            x,
+            peak_y,
+            x + half,
+            570.0F * s,
+            render::UiColor{
+                0.015F, 0.07F, 0.12F, 0.92F});
+    }
+
+    ui.vertical_gradient(
+        0.0F,
+        505.0F * s,
+        width,
+        190.0F * s,
+        render::UiColor{
+            0.015F, 0.17F, 0.25F, 0.46F},
+        render::UiColor{
+            0.004F, 0.035F, 0.065F, 0.94F});
+
+    for (int index = 0; index < 14; ++index) {
+        const auto x =
+            (1080.0F +
+             static_cast<float>(index) * 31.0F) *
+            s;
+        const auto tower_height =
+            (70.0F +
+             static_cast<float>((index * 23) % 105)) *
+            s;
+        const auto tower_width =
+            (15.0F +
+             static_cast<float>((index * 7) % 18)) *
+            s;
+        const auto base_y = 555.0F * s;
+
+        ui.rectangle(
+            x,
+            base_y - tower_height,
+            tower_width,
+            tower_height,
+            render::UiColor{
+                0.018F, 0.07F, 0.12F, 0.97F});
+        ui.rectangle(
+            x + 3.0F * s,
+            base_y - tower_height + 10.0F * s,
+            std::max(2.0F * s, tower_width - 6.0F * s),
+            2.0F * s,
+            render::UiColor{
+                0.10F, 0.52F, 0.82F, 0.55F});
+        if ((index % 3) == 0) {
+            ui.triangle(
+                x + tower_width * 0.5F,
+                base_y - tower_height - 34.0F * s,
+                x + 3.0F * s,
+                base_y - tower_height,
+                x + tower_width - 3.0F * s,
+                base_y - tower_height,
+                render::UiColor{
+                    0.025F, 0.10F, 0.17F, 0.98F});
+        }
+    }
+
+    for (int index = 0; index < 8; ++index) {
+        const auto x =
+            (255.0F +
+             static_cast<float>(index) * 38.0F) *
+            s;
+        const auto tower_height =
+            (46.0F +
+             static_cast<float>((index * 19) % 70)) *
+            s;
+        const auto base_y = 515.0F * s;
+        ui.rectangle(
+            x,
+            base_y - tower_height,
+            18.0F * s,
+            tower_height,
+            render::UiColor{
+                0.02F, 0.09F, 0.15F, 0.90F});
+        if ((index % 2) == 0) {
+            ui.triangle(
+                x + 9.0F * s,
+                base_y - tower_height - 24.0F * s,
+                x + 2.0F * s,
+                base_y - tower_height,
+                x + 16.0F * s,
+                base_y - tower_height,
+                render::UiColor{
+                    0.03F, 0.13F, 0.22F, 0.92F});
+        }
+    }
+
+    ui.rectangle(
+        0.0F,
+        548.0F * s,
+        width,
+        1.0F * s,
+        render::UiColor{
+            0.14F, 0.62F, 0.90F, 0.26F});
+
+    ui.triangle(
+        270.0F * s,
+        540.0F * s,
+        430.0F * s,
+        540.0F * s,
+        350.0F * s,
+        620.0F * s,
+        render::UiColor{
+            0.012F, 0.06F, 0.09F, 0.96F});
+    ui.rectangle(
+        292.0F * s,
+        525.0F * s,
+        118.0F * s,
+        18.0F * s,
+        render::UiColor{
+            0.03F, 0.15F, 0.22F, 0.95F});
+
+    ui.rounded_rectangle(
+        1324.0F * s,
+        292.0F * s,
+        138.0F * s,
+        142.0F * s,
+        8.0F * s,
+        render::UiColor{
+            0.018F, 0.07F, 0.12F, 0.92F});
+    ui.rounded_rectangle(
+        1327.0F * s,
+        295.0F * s,
+        132.0F * s,
+        136.0F * s,
+        6.0F * s,
+        render::UiColor{
+            0.025F, 0.10F, 0.17F, 0.94F});
+    ui.modern_text(
+        1344.0F * s,
+        314.0F * s,
+        1.05F * s,
+        "OPEN",
+        render::UiColor{
+            0.56F, 0.79F, 1.0F, 1.0F});
+    ui.modern_text(
+        1344.0F * s,
+        338.0F * s,
+        1.05F * s,
+        "VIRTUAL",
+        render::UiColor{
+            0.56F, 0.79F, 1.0F, 1.0F});
+    ui.modern_text(
+        1344.0F * s,
+        362.0F * s,
+        1.05F * s,
+        "WORLDS",
+        render::UiColor{
+            0.56F, 0.79F, 1.0F, 1.0F});
+    ui.modern_text(
+        1344.0F * s,
+        386.0F * s,
+        0.92F * s,
+        "FOR EVERYONE",
+        kAccent);
+    ui.rectangle(
+        1391.0F * s,
+        434.0F * s,
+        3.0F * s,
+        82.0F * s,
+        render::UiColor{
+            0.04F, 0.10F, 0.15F, 0.96F});
+
+    ui.vertical_gradient(
+        0.0F,
+        620.0F * s,
+        width,
+        std::max(1.0F, height - 620.0F * s),
+        render::UiColor{
+            0.004F, 0.025F, 0.05F, 0.62F},
+        render::UiColor{
+            0.003F, 0.015F, 0.035F, 0.98F});
+}
+
 void draw_field(
     render::UiRenderer& ui,
     const Rect& rect,
@@ -564,24 +833,31 @@ void draw_field(
     const std::string& value,
     std::string_view placeholder,
     float scale) {
-    ui.text(
+    ui.modern_text(
         rect.x,
-        rect.y - 17.0F * scale,
-        1.15F * scale,
+        rect.y - 18.0F * scale,
+        0.92F * scale,
         label,
         kText);
 
-    ui.rectangle(
+    const auto border_color =
+        active ? kAccent : kBorder;
+
+    ui.rounded_rectangle(
         rect.x,
         rect.y,
         rect.width,
         rect.height,
-        kField);
-    draw_outline(
-        ui,
-        rect,
-        std::max(1.0F, 1.4F * scale),
-        active ? kAccent : kBorder);
+        7.0F * scale,
+        border_color);
+    ui.rounded_rectangle(
+        rect.x + 1.2F * scale,
+        rect.y + 1.2F * scale,
+        rect.width - 2.4F * scale,
+        rect.height - 2.4F * scale,
+        6.0F * scale,
+        render::UiColor{
+            0.015F, 0.052F, 0.10F, 0.97F});
 
     const auto visible =
         visible_tail(value, 46U);
@@ -589,12 +865,115 @@ void draw_field(
         visible.empty()
             ? std::string{placeholder}
             : visible;
-    ui.text(
-        rect.x + 14.0F * scale,
-        rect.y + 15.0F * scale,
-        1.25F * scale,
+    ui.modern_text(
+        rect.x + 42.0F * scale,
+        rect.y + 13.0F * scale,
+        1.02F * scale,
         shown,
         visible.empty() ? kMuted : kText);
+}
+
+enum class LoginFieldIcon {
+    globe,
+    pin,
+    user,
+    lock,
+};
+
+void draw_login_field_icon(
+    render::UiRenderer& ui,
+    const Rect& rect,
+    LoginFieldIcon icon,
+    float s) {
+    const auto cx =
+        rect.x + 21.0F * s;
+    const auto cy =
+        rect.y + rect.height * 0.5F;
+    const auto color =
+        render::UiColor{
+            0.62F, 0.78F, 0.96F, 0.92F};
+
+    if (icon == LoginFieldIcon::globe) {
+        ui.circle(
+            cx,
+            cy,
+            9.0F * s,
+            color,
+            28U);
+        ui.rectangle(
+            cx - 9.0F * s,
+            cy - 0.8F * s,
+            18.0F * s,
+            1.6F * s,
+            kField);
+        ui.rectangle(
+            cx - 0.8F * s,
+            cy - 9.0F * s,
+            1.6F * s,
+            18.0F * s,
+            kField);
+    } else if (icon == LoginFieldIcon::pin) {
+        ui.circle(
+            cx,
+            cy - 3.0F * s,
+            7.5F * s,
+            color,
+            24U);
+        ui.circle(
+            cx,
+            cy - 3.0F * s,
+            3.2F * s,
+            kField,
+            20U);
+        ui.triangle(
+            cx - 4.5F * s,
+            cy + 2.0F * s,
+            cx + 4.5F * s,
+            cy + 2.0F * s,
+            cx,
+            cy + 10.0F * s,
+            color);
+    } else if (icon == LoginFieldIcon::user) {
+        ui.circle(
+            cx,
+            cy - 5.5F * s,
+            5.5F * s,
+            color,
+            24U);
+        ui.rounded_rectangle(
+            cx - 9.0F * s,
+            cy + 2.0F * s,
+            18.0F * s,
+            9.0F * s,
+            4.0F * s,
+            color);
+    } else {
+        ui.rounded_rectangle(
+            cx - 8.0F * s,
+            cy - 1.0F * s,
+            16.0F * s,
+            12.0F * s,
+            3.0F * s,
+            color);
+        ui.circle(
+            cx,
+            cy - 1.0F * s,
+            7.0F * s,
+            color,
+            24U);
+        ui.circle(
+            cx,
+            cy - 1.0F * s,
+            4.0F * s,
+            kField,
+            24U);
+        ui.rectangle(
+            cx - 8.0F * s,
+            cy - 1.0F * s,
+            16.0F * s,
+            6.0F * s,
+            color);
+    }
 }
 
 void draw_login_form(
@@ -607,50 +986,11 @@ void draw_login_form(
 
     ui.begin();
 
-    ui.vertical_gradient(
-        0.0F,
-        0.0F,
+    draw_reference_backdrop(
+        ui,
         width,
         height,
-        kBackgroundTop,
-        kBackgroundBottom);
-
-    ui.circle(
-        80.0F * s,
-        250.0F * s,
-        255.0F * s,
-        kPlanetEdge,
-        96U);
-    ui.circle(
-        80.0F * s,
-        250.0F * s,
-        244.0F * s,
-        kPlanet,
-        96U);
-    ui.circle(
-        405.0F * s,
-        128.0F * s,
-        40.0F * s,
-        render::UiColor{
-            0.07F, 0.17F, 0.31F, 0.9F},
-        48U);
-
-    ui.rectangle(
-        0.0F,
-        430.0F * s,
-        width,
-        2.0F * s,
-        render::UiColor{
-            0.06F, 0.28F, 0.5F, 0.28F});
-    ui.vertical_gradient(
-        0.0F,
-        430.0F * s,
-        width,
-        250.0F * s,
-        render::UiColor{
-            0.01F, 0.08F, 0.15F, 0.08F},
-        render::UiColor{
-            0.005F, 0.02F, 0.045F, 0.9F});
+        s);
 
     ui.rectangle(
         layout.top_bar.x,
@@ -719,28 +1059,28 @@ void draw_login_form(
 
     ui.modern_text(
         44.0F * s,
-        120.0F * s,
-        1.55F * s,
+        150.0F * s,
+        1.40F * s,
         "More than a World ...",
         kText);
     ui.modern_text(
         64.0F * s,
-        146.0F * s,
-        1.35F * s,
+        181.0F * s,
+        1.22F * s,
         "A new Beginning.",
         kMuted);
 
     const auto logo_x = width * 0.5F;
-    const auto logo_top = 58.0F * s;
-    const auto logo_mid = 94.0F * s;
-    const auto logo_bottom = 138.0F * s;
-    const auto logo_half = 42.0F * s;
+    const auto logo_top = 68.0F * s;
+    const auto logo_mid = 110.0F * s;
+    const auto logo_bottom = 158.0F * s;
+    const auto logo_half = 44.0F * s;
 
     ui.triangle(
         logo_x,
         logo_top,
         logo_x - logo_half,
-        80.0F * s,
+        91.0F * s,
         logo_x,
         logo_mid,
         render::UiColor{
@@ -751,21 +1091,21 @@ void draw_login_form(
         logo_x,
         logo_mid,
         logo_x + logo_half,
-        80.0F * s,
+        91.0F * s,
         render::UiColor{
             0.34F, 0.70F, 1.0F, 1.0F});
     ui.triangle(
         logo_x - logo_half,
         80.0F * s,
         logo_x - logo_half,
-        116.0F * s,
+        132.0F * s,
         logo_x,
         logo_mid,
         render::UiColor{
             0.06F, 0.30F, 0.62F, 1.0F});
     ui.triangle(
         logo_x - logo_half,
-        116.0F * s,
+        132.0F * s,
         logo_x,
         logo_bottom,
         logo_x,
@@ -778,14 +1118,14 @@ void draw_login_form(
         logo_x + logo_half,
         80.0F * s,
         logo_x + logo_half,
-        116.0F * s,
+        132.0F * s,
         render::UiColor{
             0.08F, 0.38F, 0.76F, 1.0F});
     ui.triangle(
         logo_x,
         logo_mid,
         logo_x + logo_half,
-        116.0F * s,
+        132.0F * s,
         logo_x,
         logo_bottom,
         render::UiColor{
@@ -800,14 +1140,14 @@ void draw_login_form(
     const auto title_x = (width - title_width) * 0.5F;
     ui.modern_text(
         title_x,
-        155.0F * s,
+        188.0F * s,
         title_scale,
         title_left,
         kText);
     ui.modern_text(
         title_x +
             ui.modern_text_width(title_left, title_scale),
-        155.0F * s,
+        188.0F * s,
         title_scale,
         title_right,
         kAccent);
@@ -820,7 +1160,7 @@ void draw_login_form(
              viewer_label,
              viewer_scale)) *
             0.5F,
-        220.0F * s,
+        239.0F * s,
         viewer_scale,
         viewer_label,
         kText);
@@ -834,7 +1174,7 @@ void draw_login_form(
              claim,
              1.05F * s)) *
             0.5F,
-        260.0F * s,
+        276.0F * s,
         1.05F * s,
         claim,
         kMuted);
@@ -847,7 +1187,7 @@ void draw_login_form(
              subclaim,
              1.0F * s)) *
             0.5F,
-        285.0F * s,
+        304.0F * s,
         0.95F * s,
         subclaim,
         kText);
@@ -861,53 +1201,69 @@ void draw_login_form(
             0.005F, 0.04F, 0.09F, 0.38F});
     ui.modern_text(
         width - 310.0F * s,
-        105.0F * s,
-        1.4F * s,
+        94.0F * s,
+        1.35F * s,
         "Real people.",
         kText);
     ui.modern_text(
         width - 310.0F * s,
-        132.0F * s,
-        1.4F * s,
+        122.0F * s,
+        1.35F * s,
         "Endless possibilities.",
         kAccent);
 
-    ui.rectangle(
+    ui.rounded_rectangle(
+        layout.panel.x + 8.0F * s,
+        layout.panel.y + 10.0F * s,
+        layout.panel.width,
+        layout.panel.height,
+        14.0F * s,
+        render::UiColor{
+            0.0F, 0.0F, 0.0F, 0.28F});
+    ui.rounded_rectangle(
         layout.panel.x,
         layout.panel.y,
         layout.panel.width,
         layout.panel.height,
-        kGlass);
-    draw_outline(
-        ui,
-        layout.panel,
-        std::max(1.0F, 1.0F * s),
+        14.0F * s,
         render::UiColor{
-            0.12F, 0.28F, 0.46F, 0.85F});
+            0.018F, 0.050F, 0.092F, 0.94F});
+    ui.rounded_rectangle(
+        layout.panel.x + 1.0F * s,
+        layout.panel.y + 1.0F * s,
+        layout.panel.width - 2.0F * s,
+        layout.panel.height - 2.0F * s,
+        13.0F * s,
+        render::UiColor{
+            0.018F, 0.055F, 0.105F, 0.90F});
 
-    ui.rectangle(
-        layout.tab_login.x,
-        layout.tab_login.y,
-        layout.tab_login.width,
-        layout.tab_login.height,
+    ui.rounded_rectangle(
+        layout.tab_login.x + 4.0F * s,
+        layout.tab_login.y + 4.0F * s,
+        layout.tab_login.width - 8.0F * s,
+        layout.tab_login.height - 4.0F * s,
+        8.0F * s,
         kPanelInner);
-    ui.rectangle(
-        layout.tab_grids.x,
-        layout.tab_grids.y,
-        layout.tab_grids.width,
-        layout.tab_grids.height,
+    ui.rounded_rectangle(
+        layout.tab_grids.x + 4.0F * s,
+        layout.tab_grids.y + 4.0F * s,
+        layout.tab_grids.width - 8.0F * s,
+        layout.tab_grids.height - 4.0F * s,
+        8.0F * s,
         kGlassSoft);
-    ui.rectangle(
-        layout.tab_settings.x,
-        layout.tab_settings.y,
-        layout.tab_settings.width,
-        layout.tab_settings.height,
+    ui.rounded_rectangle(
+        layout.tab_settings.x + 4.0F * s,
+        layout.tab_settings.y + 4.0F * s,
+        layout.tab_settings.width - 8.0F * s,
+        layout.tab_settings.height - 4.0F * s,
+        8.0F * s,
         kGlassSoft);
-    ui.rectangle(
-        layout.tab_advanced.x,
-        layout.tab_advanced.y,
-        layout.tab_advanced.width,
-        layout.tab_advanced.height,
+    ui.rounded_rectangle(
+        layout.tab_advanced.x + 4.0F * s,
+        layout.tab_advanced.y + 4.0F * s,
+        layout.tab_advanced.width - 8.0F * s,
+        layout.tab_advanced.height - 4.0F * s,
+        8.0F * s,
         kGlassSoft);
     ui.rectangle(
         layout.tab_login.x,
@@ -951,6 +1307,11 @@ void draw_login_form(
         form.server,
         "NexVerse (mynexverse.de)",
         s);
+    draw_login_field_icon(
+        ui,
+        layout.server,
+        LoginFieldIcon::globe,
+        s);
     draw_field(
         ui,
         layout.region,
@@ -958,6 +1319,11 @@ void draw_login_form(
         "Startregion",
         form.region,
         "Region",
+        s);
+    draw_login_field_icon(
+        ui,
+        layout.region,
+        LoginFieldIcon::pin,
         s);
     draw_field(
         ui,
@@ -967,6 +1333,11 @@ void draw_login_form(
         form.username,
         "Benutzername oder E-Mail",
         s);
+    draw_login_field_icon(
+        ui,
+        layout.username,
+        LoginFieldIcon::user,
+        s);
     draw_field(
         ui,
         layout.password,
@@ -975,16 +1346,21 @@ void draw_login_form(
         form.masked_password(),
         "Passwort",
         s);
+    draw_login_field_icon(
+        ui,
+        layout.password,
+        LoginFieldIcon::lock,
+        s);
 
     ui.rectangle(
         layout.panel.x + 30.0F * s,
-        layout.panel.y + 281.0F * s,
+        layout.panel.y + 274.0F * s,
         16.0F * s,
         16.0F * s,
         kAccent);
     ui.modern_text(
         layout.panel.x + 55.0F * s,
-        layout.panel.y + 282.0F * s,
+        layout.panel.y + 275.0F * s,
         0.95F * s,
         "Zugangsdaten speichern",
         kText);
@@ -992,14 +1368,14 @@ void draw_login_form(
         ui,
         Rect{
             layout.panel.x + 360.0F * s,
-            layout.panel.y + 281.0F * s,
+            layout.panel.y + 274.0F * s,
             16.0F * s,
             16.0F * s},
         std::max(1.0F, s),
         kBorder);
     ui.modern_text(
         layout.panel.x + 385.0F * s,
-        layout.panel.y + 282.0F * s,
+        layout.panel.y + 275.0F * s,
         0.95F * s,
         "Beim Start einloggen",
         kMuted);
@@ -1008,17 +1384,24 @@ void draw_login_form(
         form.connecting || !form.complete()
             ? kButtonDisabled
             : kButton;
-    ui.vertical_gradient(
+    ui.rounded_rectangle(
         layout.button.x,
         layout.button.y,
         layout.button.width,
         layout.button.height,
-        button_color,
+        8.0F * s,
         render::UiColor{
-            button_color.r * 0.72F,
-            button_color.g * 0.82F,
-            std::min(1.0F, button_color.b * 1.05F),
+            std::min(1.0F, button_color.r + 0.06F),
+            std::min(1.0F, button_color.g + 0.08F),
+            std::min(1.0F, button_color.b + 0.08F),
             button_color.a});
+    ui.rounded_rectangle(
+        layout.button.x + 1.5F * s,
+        layout.button.y + 1.5F * s,
+        layout.button.width - 3.0F * s,
+        layout.button.height - 3.0F * s,
+        7.0F * s,
+        button_color);
     const std::string_view button_text =
         form.connecting
             ? "Verbindung wird hergestellt ..."
@@ -1039,7 +1422,7 @@ void draw_login_form(
 
     ui.modern_text(
         layout.panel.x + 88.0F * s,
-        layout.panel.y + 372.0F * s,
+        layout.panel.y + 357.0F * s,
         0.9F * s,
         "Account erstellen   |   Passwort vergessen?   |   Grid hinzufügen",
         kAccent);
@@ -1047,83 +1430,164 @@ void draw_login_form(
     if (!form.error.empty()) {
         ui.modern_text(
             layout.panel.x + 30.0F * s,
-            layout.panel.y + 405.0F * s,
+            layout.panel.y + 379.0F * s,
             0.9F * s,
             visible_tail(form.error, 86U),
             kError);
     } else if (!form.status.empty()) {
         ui.modern_text(
             layout.panel.x + 30.0F * s,
-            layout.panel.y + 405.0F * s,
+            layout.panel.y + 379.0F * s,
             0.9F * s,
             visible_tail(form.status, 86U),
             kSuccess);
     }
 
-    ui.rectangle(
+    ui.rounded_rectangle(
+        layout.left_feature.x + 6.0F * s,
+        layout.left_feature.y + 8.0F * s,
+        layout.left_feature.width,
+        layout.left_feature.height,
+        12.0F * s,
+        render::UiColor{
+            0.0F, 0.0F, 0.0F, 0.24F});
+    ui.rounded_rectangle(
         layout.left_feature.x,
         layout.left_feature.y,
         layout.left_feature.width,
         layout.left_feature.height,
-        kGlassSoft);
-    draw_outline(
-        ui,
-        layout.left_feature,
-        std::max(1.0F, s),
+        12.0F * s,
         render::UiColor{
-            0.12F, 0.29F, 0.48F, 0.85F});
+            0.018F, 0.06F, 0.105F, 0.91F});
+
+    const auto preview_x =
+        layout.left_feature.x + 10.0F * s;
+    const auto preview_y =
+        layout.left_feature.y + 10.0F * s;
+    const auto preview_width =
+        layout.left_feature.width - 20.0F * s;
+    const auto preview_height = 154.0F * s;
+
+    ui.rounded_rectangle(
+        preview_x,
+        preview_y,
+        preview_width,
+        preview_height,
+        9.0F * s,
+        render::UiColor{
+            0.025F, 0.15F, 0.25F, 0.96F});
     ui.vertical_gradient(
-        layout.left_feature.x + 10.0F * s,
-        layout.left_feature.y + 10.0F * s,
-        layout.left_feature.width - 20.0F * s,
-        145.0F * s,
+        preview_x + 5.0F * s,
+        preview_y + 5.0F * s,
+        preview_width - 10.0F * s,
+        preview_height - 10.0F * s,
         render::UiColor{
-            0.03F, 0.16F, 0.28F, 0.88F},
+            0.06F, 0.24F, 0.39F, 0.96F},
         render::UiColor{
-            0.015F, 0.07F, 0.12F, 0.92F});
+            0.015F, 0.075F, 0.12F, 0.98F});
+
+    ui.circle(
+        preview_x + 82.0F * s,
+        preview_y + 48.0F * s,
+        34.0F * s,
+        render::UiColor{
+            0.08F, 0.28F, 0.48F, 0.65F},
+        48U);
+
+    for (int index = 0; index < 9; ++index) {
+        const auto building_x =
+            preview_x +
+            (165.0F +
+             static_cast<float>(index) * 24.0F) *
+                s;
+        const auto building_height =
+            (38.0F +
+             static_cast<float>((index * 17) % 62)) *
+            s;
+        const auto base_y =
+            preview_y + 131.0F * s;
+
+        ui.rectangle(
+            building_x,
+            base_y - building_height,
+            13.0F * s,
+            building_height,
+            render::UiColor{
+                0.018F, 0.08F, 0.14F, 0.98F});
+        ui.rectangle(
+            building_x + 3.0F * s,
+            base_y - building_height + 9.0F * s,
+            7.0F * s,
+            1.5F * s,
+            render::UiColor{
+                0.10F, 0.58F, 0.92F, 0.62F});
+    }
+
+    ui.triangle(
+        preview_x + 15.0F * s,
+        preview_y + 129.0F * s,
+        preview_x + 115.0F * s,
+        preview_y + 72.0F * s,
+        preview_x + 205.0F * s,
+        preview_y + 129.0F * s,
+        render::UiColor{
+            0.02F, 0.09F, 0.13F, 0.92F});
+    ui.rectangle(
+        preview_x + 5.0F * s,
+        preview_y + 130.0F * s,
+        preview_width - 10.0F * s,
+        1.5F * s,
+        render::UiColor{
+            0.12F, 0.60F, 0.88F, 0.32F});
+
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 35.0F * s,
-        1.15F * s,
-        "Virtuelle Welten",
-        kAccent);
-    ui.modern_text(
-        layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 64.0F * s,
-        2.05F * s,
-        "Entdecken",
+        layout.left_feature.y + 184.0F * s,
+        1.75F * s,
+        "NexVerse",
         kText);
     ui.modern_text(
         layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 101.0F * s,
-        1.0F * s,
+        layout.left_feature.y + 216.0F * s,
+        0.98F * s,
         "Deine Reise beginnt hier.",
         kMuted);
-    ui.modern_text(
-        layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 182.0F * s,
-        1.6F * s,
-        "Open Worlds",
-        kText);
-    ui.modern_text(
-        layout.left_feature.x + 24.0F * s,
-        layout.left_feature.y + 215.0F * s,
-        0.95F * s,
-        "Frei  ·  Offen  ·  Verbunden",
-        kMuted);
 
-    ui.rectangle(
+    ui.circle(
+        layout.left_feature.x + 172.0F * s,
+        layout.left_feature.y + 236.0F * s,
+        4.0F * s,
+        kAccent,
+        20U);
+    for (int dot = 1; dot < 6; ++dot) {
+        ui.circle(
+            layout.left_feature.x +
+                (172.0F +
+                 static_cast<float>(dot) * 18.0F) *
+                    s,
+            layout.left_feature.y + 236.0F * s,
+            3.0F * s,
+            render::UiColor{
+                0.30F, 0.47F, 0.64F, 0.85F},
+            20U);
+    }
+
+    ui.rounded_rectangle(
+        layout.right_news.x + 6.0F * s,
+        layout.right_news.y + 8.0F * s,
+        layout.right_news.width,
+        layout.right_news.height,
+        12.0F * s,
+        render::UiColor{
+            0.0F, 0.0F, 0.0F, 0.24F});
+    ui.rounded_rectangle(
         layout.right_news.x,
         layout.right_news.y,
         layout.right_news.width,
         layout.right_news.height,
-        kGlassSoft);
-    draw_outline(
-        ui,
-        layout.right_news,
-        std::max(1.0F, s),
+        12.0F * s,
         render::UiColor{
-            0.12F, 0.29F, 0.48F, 0.85F});
+            0.018F, 0.06F, 0.105F, 0.91F});
     ui.modern_text(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 26.0F * s,
@@ -1136,13 +1600,31 @@ void draw_login_form(
         0.85F * s,
         "Alle anzeigen  →",
         kAccent);
-    ui.rectangle(
+    ui.rounded_rectangle(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 62.0F * s,
         82.0F * s,
         50.0F * s,
+        6.0F * s,
         render::UiColor{
             0.05F, 0.17F, 0.29F, 1.0F});
+    ui.circle(
+        layout.right_news.x + 52.0F * s,
+        layout.right_news.y + 83.0F * s,
+        14.0F * s,
+        render::UiColor{
+            0.08F, 0.34F, 0.56F, 0.82F},
+        28U);
+    ui.triangle(
+        layout.right_news.x + 65.0F * s,
+        layout.right_news.y + 108.0F * s,
+        layout.right_news.x + 91.0F * s,
+        layout.right_news.y + 77.0F * s,
+        layout.right_news.x + 104.0F * s,
+        layout.right_news.y + 108.0F * s,
+        render::UiColor{
+            0.02F, 0.10F, 0.16F, 0.92F});
+
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 68.0F * s,
@@ -1156,13 +1638,29 @@ void draw_login_form(
         0.82F * s,
         "Neuer UI-Testbuild",
         kMuted);
-    ui.rectangle(
+    ui.rounded_rectangle(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 126.0F * s,
         82.0F * s,
         50.0F * s,
+        6.0F * s,
         render::UiColor{
             0.04F, 0.13F, 0.23F, 1.0F});
+    ui.rectangle(
+        layout.right_news.x + 39.0F * s,
+        layout.right_news.y + 145.0F * s,
+        51.0F * s,
+        2.0F * s,
+        render::UiColor{
+            0.12F, 0.58F, 0.92F, 0.70F});
+    ui.rectangle(
+        layout.right_news.x + 54.0F * s,
+        layout.right_news.y + 134.0F * s,
+        8.0F * s,
+        28.0F * s,
+        render::UiColor{
+            0.03F, 0.15F, 0.25F, 0.98F});
+
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 132.0F * s,
@@ -1175,13 +1673,31 @@ void draw_login_form(
         0.82F * s,
         "Login, Welt, Social & Build",
         kMuted);
-    ui.rectangle(
+    ui.rounded_rectangle(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 190.0F * s,
         82.0F * s,
         50.0F * s,
+        6.0F * s,
         render::UiColor{
             0.035F, 0.11F, 0.2F, 1.0F});
+    ui.triangle(
+        layout.right_news.x + 36.0F * s,
+        layout.right_news.y + 229.0F * s,
+        layout.right_news.x + 63.0F * s,
+        layout.right_news.y + 202.0F * s,
+        layout.right_news.x + 91.0F * s,
+        layout.right_news.y + 229.0F * s,
+        render::UiColor{
+            0.04F, 0.20F, 0.33F, 0.96F});
+    ui.circle(
+        layout.right_news.x + 88.0F * s,
+        layout.right_news.y + 207.0F * s,
+        6.0F * s,
+        render::UiColor{
+            0.16F, 0.62F, 0.94F, 0.82F},
+        20U);
+
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 196.0F * s,
@@ -1387,6 +1903,41 @@ void draw_login_form(
         0.9F * s,
         "Sprache: Deutsch   |   Barrierefreiheit   |   Support   |   Webseite",
         kMuted);
+    const auto social_y =
+        layout.footer.y + 23.0F * s;
+    const auto social_start =
+        width - 455.0F * s;
+    constexpr std::array<std::string_view, 4> social_labels{
+        "D", "GH", "YT", "X",
+    };
+    for (std::size_t social = 0U;
+         social < social_labels.size();
+         ++social) {
+        const auto x =
+            social_start +
+            static_cast<float>(social) *
+                38.0F * s;
+        ui.circle(
+            x,
+            social_y,
+            12.0F * s,
+            render::UiColor{
+                0.08F, 0.16F, 0.25F, 0.92F},
+            24U);
+        const auto label_scale =
+            social == 1U ? 0.58F * s : 0.68F * s;
+        const auto label_width =
+            ui.modern_text_width(
+                social_labels[social],
+                label_scale);
+        ui.modern_text(
+            x - label_width * 0.5F,
+            social_y - 5.0F * s,
+            label_scale,
+            social_labels[social],
+            kText);
+    }
+
     const auto powered =
         std::string_view{
             "Powered by NexVortex.de   |   OpenGenesisLINK"};

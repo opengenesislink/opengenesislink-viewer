@@ -33,6 +33,15 @@ public:
         float height,
         UiColor color);
 
+    void rounded_rectangle(
+        float x,
+        float y,
+        float width,
+        float height,
+        float radius,
+        UiColor color,
+        unsigned int segments = 24U);
+
     void vertical_gradient(
         float x,
         float y,
