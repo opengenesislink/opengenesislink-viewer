@@ -71,10 +71,10 @@ std::vector<char32_t> modern_font_codepoints() {
     }
 
     constexpr std::array<char32_t, 12> extras{
-        U'ä', U'ö', U'ü',
-        U'Ä', U'Ö', U'Ü',
-        U'ß', U'·', U'→',
-        U'–', U'…', U'€',
+        U'\u00E4', U'\u00F6', U'\u00FC',
+        U'\u00C4', U'\u00D6', U'\u00DC',
+        U'\u00DF', U'\u00B7', U'\u2192',
+        U'\u2013', U'\u2026', U'\u20AC',
     };
     result.insert(
         result.end(),
