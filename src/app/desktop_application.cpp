@@ -13,15 +13,91 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <fstream>
 #include <future>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace ogl::viewer::app {
 namespace {
+
+void capture_framebuffer_ppm(
+    const std::string& path,
+    int width,
+    int height) {
+    if (path.empty() ||
+        width <= 0 ||
+        height <= 0) {
+        throw std::invalid_argument(
+            "invalid login framebuffer capture request");
+    }
+
+    const auto row_bytes =
+        static_cast<std::size_t>(width) * 3U;
+    const auto byte_count =
+        row_bytes *
+        static_cast<std::size_t>(height);
+    std::vector<std::uint8_t> pixels(
+        byte_count,
+        static_cast<std::uint8_t>(0U));
+
+    glReadBuffer(GL_BACK);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glFinish();
+    glReadPixels(
+        0,
+        0,
+        width,
+        height,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        pixels.data());
+
+    if (glGetError() != GL_NO_ERROR) {
+        throw std::runtime_error(
+            "OpenGL framebuffer capture failed");
+    }
+
+    std::ofstream output(
+        path,
+        std::ios::binary |
+            std::ios::trunc);
+    if (!output) {
+        throw std::runtime_error(
+            "failed to open login capture output");
+    }
+
+    output
+        << "P6\n"
+        << width
+        << " "
+        << height
+        << "\n255\n";
+
+    for (int row = height - 1;
+         row >= 0;
+         --row) {
+        const auto offset =
+            static_cast<std::size_t>(row) *
+            row_bytes;
+        output.write(
+            reinterpret_cast<const char*>(
+                pixels.data() + offset),
+            static_cast<std::streamsize>(
+                row_bytes));
+    }
+
+    if (!output) {
+        throw std::runtime_error(
+            "failed to write login capture output");
+    }
+}
 
 struct Rect {
     float x = 0.0F;
@@ -2582,6 +2658,16 @@ int DesktopApplication::run(
         bool reconnect_pending = false;
         bool avatar_was_moving = false;
 
+        const auto* capture_environment =
+            std::getenv(
+                "OGL_VIEWER_CAPTURE_LOGIN");
+        const std::string login_capture_path =
+            capture_environment != nullptr
+                ? std::string{capture_environment}
+                : std::string{};
+        bool login_capture_pending =
+            !login_capture_path.empty();
+
         bool content_inspector_visible = false;
         ContentInspectorSection content_inspector_section =
             ContentInspectorSection::appearance;
@@ -2991,6 +3077,18 @@ int DesktopApplication::run(
                     command_input,
                     width,
                     height);
+            }
+
+            if (show_login &&
+                login_capture_pending) {
+                capture_framebuffer_ppm(
+                    login_capture_path,
+                    width,
+                    height);
+                login_capture_pending = false;
+                glfwSetWindowShouldClose(
+                    window,
+                    GLFW_TRUE);
             }
 
             glfwSwapBuffers(window);
