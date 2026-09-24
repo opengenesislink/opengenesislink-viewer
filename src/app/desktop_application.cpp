@@ -389,11 +389,11 @@ LoginLayout login_layout(
             0.72F,
             1.35F);
 
-    const auto panel_width = 640.0F * scale;
-    const auto panel_height = 430.0F * scale;
+    const auto panel_width = 600.0F * scale;
+    const auto panel_height = 390.0F * scale;
     const auto panel_x =
         (safe_width - panel_width) * 0.5F;
-    const auto panel_y = 335.0F * scale;
+    const auto panel_y = 350.0F * scale;
 
     const auto inner_x = panel_x + 30.0F * scale;
     const auto inner_width = panel_width - 60.0F * scale;
@@ -403,10 +403,10 @@ LoginLayout login_layout(
         inner_width - region_width - row_gap;
     const auto field_height = 44.0F * scale;
 
-    const auto side_width = 420.0F * scale;
-    const auto side_height = 260.0F * scale;
-    const auto side_y = 565.0F * scale;
-    const auto side_margin = 20.0F * scale;
+    const auto side_width = 430.0F * scale;
+    const auto side_height = 255.0F * scale;
+    const auto side_y = 575.0F * scale;
+    const auto side_margin = 18.0F * scale;
 
     const auto footer_height = 48.0F * scale;
     const auto tab_width = panel_width / 4.0F;
@@ -475,33 +475,33 @@ LoginLayout login_layout(
         },
         .server = {
             inner_x,
-            panel_y + 78.0F * scale,
+            panel_y + 74.0F * scale,
             server_width,
             field_height,
         },
         .region = {
             inner_x + server_width + row_gap,
-            panel_y + 78.0F * scale,
+            panel_y + 74.0F * scale,
             region_width,
             field_height,
         },
         .username = {
             inner_x,
-            panel_y + 151.0F * scale,
+            panel_y + 142.0F * scale,
             inner_width,
             field_height,
         },
         .password = {
             inner_x,
-            panel_y + 220.0F * scale,
+            panel_y + 207.0F * scale,
             inner_width,
             field_height,
         },
         .button = {
-            inner_x + 82.0F * scale,
-            panel_y + 306.0F * scale,
-            inner_width - 164.0F * scale,
-            52.0F * scale,
+            inner_x + 72.0F * scale,
+            panel_y + 290.0F * scale,
+            inner_width - 144.0F * scale,
+            50.0F * scale,
         },
         .scale = scale,
     };
