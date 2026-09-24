@@ -664,17 +664,57 @@ void draw_login_form(
         width,
         1.0F,
         kLine);
+    const auto app_icon_x = 25.0F * s;
+    const auto app_icon_y = 24.0F * s;
+    const auto app_icon_size = 13.0F * s;
+    ui.triangle(
+        app_icon_x,
+        app_icon_y - app_icon_size,
+        app_icon_x - app_icon_size,
+        app_icon_y - 3.0F * s,
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        render::UiColor{
+            0.20F, 0.56F, 0.96F, 1.0F});
+    ui.triangle(
+        app_icon_x,
+        app_icon_y - app_icon_size,
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        app_icon_x + app_icon_size,
+        app_icon_y - 3.0F * s,
+        render::UiColor{
+            0.34F, 0.72F, 1.0F, 1.0F});
+    ui.triangle(
+        app_icon_x - app_icon_size,
+        app_icon_y - 3.0F * s,
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        app_icon_x,
+        app_icon_y + app_icon_size,
+        render::UiColor{
+            0.05F, 0.28F, 0.60F, 1.0F});
+    ui.triangle(
+        app_icon_x,
+        app_icon_y + 3.0F * s,
+        app_icon_x + app_icon_size,
+        app_icon_y - 3.0F * s,
+        app_icon_x,
+        app_icon_y + app_icon_size,
+        render::UiColor{
+            0.07F, 0.38F, 0.78F, 1.0F});
+
     ui.modern_text(
-        22.0F * s,
-        17.0F * s,
-        1.45F * s,
+        50.0F * s,
+        15.0F * s,
+        1.25F * s,
         "OpenGenesisLINK Viewer",
         kText);
     ui.modern_text(
-        265.0F * s,
-        18.0F * s,
-        1.0F * s,
-        std::string{"V"} + OGL_VIEWER_VERSION,
+        236.0F * s,
+        17.0F * s,
+        0.86F * s,
+        std::string{"v"} + OGL_VIEWER_VERSION,
         kMuted);
 
     ui.modern_text(
@@ -1107,7 +1147,8 @@ void draw_login_form(
         layout.right_news.x + 122.0F * s,
         layout.right_news.y + 68.0F * s,
         1.0F * s,
-        "OpenGenesisLINK 0.13.0-alpha.3",
+        std::string{"OpenGenesisLINK "} +
+            OGL_VIEWER_VERSION,
         kText);
     ui.modern_text(
         layout.right_news.x + 122.0F * s,
@@ -1176,21 +1217,156 @@ void draw_login_form(
             feature_start +
             static_cast<float>(index) *
                 150.0F * s;
-        draw_outline(
-            ui,
-            Rect{
-                x + 32.0F * s,
-                feature_y,
-                42.0F * s,
-                42.0F * s},
-            std::max(1.0F, 1.5F * s),
-            index == 2U ? kAccent : kText);
+        const auto icon_x =
+            x + 53.0F * s;
+        const auto icon_y =
+            feature_y + 21.0F * s;
+        const auto icon_color =
+            index == 2U ? kAccent : kText;
+
+        if (index == 0U) {
+            ui.circle(
+                icon_x - 9.0F * s,
+                icon_y - 8.0F * s,
+                6.0F * s,
+                icon_color,
+                24U);
+            ui.circle(
+                icon_x + 8.0F * s,
+                icon_y - 6.0F * s,
+                5.0F * s,
+                icon_color,
+                24U);
+            ui.rectangle(
+                icon_x - 19.0F * s,
+                icon_y + 1.0F * s,
+                21.0F * s,
+                14.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x + 1.0F * s,
+                icon_y + 3.0F * s,
+                17.0F * s,
+                12.0F * s,
+                icon_color);
+        } else if (index == 1U) {
+            ui.circle(
+                icon_x,
+                icon_y,
+                18.0F * s,
+                icon_color,
+                40U);
+            ui.rectangle(
+                icon_x - 18.0F * s,
+                icon_y - 1.0F * s,
+                36.0F * s,
+                2.0F * s,
+                kPanel);
+            ui.rectangle(
+                icon_x - 1.0F * s,
+                icon_y - 18.0F * s,
+                2.0F * s,
+                36.0F * s,
+                kPanel);
+        } else if (index == 2U) {
+            const auto half = 17.0F * s;
+            ui.triangle(
+                icon_x,
+                icon_y - 18.0F * s,
+                icon_x - half,
+                icon_y - 7.0F * s,
+                icon_x,
+                icon_y + 1.0F * s,
+                render::UiColor{
+                    0.20F, 0.60F, 1.0F, 1.0F});
+            ui.triangle(
+                icon_x,
+                icon_y - 18.0F * s,
+                icon_x,
+                icon_y + 1.0F * s,
+                icon_x + half,
+                icon_y - 7.0F * s,
+                render::UiColor{
+                    0.38F, 0.75F, 1.0F, 1.0F});
+            ui.triangle(
+                icon_x - half,
+                icon_y - 7.0F * s,
+                icon_x,
+                icon_y + 1.0F * s,
+                icon_x,
+                icon_y + 18.0F * s,
+                render::UiColor{
+                    0.06F, 0.33F, 0.68F, 1.0F});
+            ui.triangle(
+                icon_x,
+                icon_y + 1.0F * s,
+                icon_x + half,
+                icon_y - 7.0F * s,
+                icon_x,
+                icon_y + 18.0F * s,
+                render::UiColor{
+                    0.08F, 0.43F, 0.84F, 1.0F});
+        } else if (index == 3U) {
+            ui.rectangle(
+                icon_x - 15.0F * s,
+                icon_y - 7.0F * s,
+                29.0F * s,
+                18.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x - 21.0F * s,
+                icon_y - 14.0F * s,
+                8.0F * s,
+                3.0F * s,
+                icon_color);
+            ui.circle(
+                icon_x - 8.0F * s,
+                icon_y + 16.0F * s,
+                4.0F * s,
+                icon_color,
+                18U);
+            ui.circle(
+                icon_x + 10.0F * s,
+                icon_y + 16.0F * s,
+                4.0F * s,
+                icon_color,
+                18U);
+        } else {
+            draw_outline(
+                ui,
+                Rect{
+                    icon_x - 18.0F * s,
+                    icon_y - 16.0F * s,
+                    36.0F * s,
+                    34.0F * s},
+                std::max(1.0F, 2.0F * s),
+                icon_color);
+            ui.rectangle(
+                icon_x - 18.0F * s,
+                icon_y - 7.0F * s,
+                36.0F * s,
+                2.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x - 10.0F * s,
+                icon_y - 20.0F * s,
+                4.0F * s,
+                9.0F * s,
+                icon_color);
+            ui.rectangle(
+                icon_x + 6.0F * s,
+                icon_y - 20.0F * s,
+                4.0F * s,
+                9.0F * s,
+                icon_color);
+        }
+
         ui.modern_text(
             x,
             feature_y + 55.0F * s,
-            0.85F * s,
+            0.82F * s,
             feature_titles[index],
-            index == 2U ? kAccent : kText);
+            icon_color);
     }
 
     ui.rectangle(
