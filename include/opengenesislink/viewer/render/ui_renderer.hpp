@@ -55,7 +55,18 @@ public:
         std::string_view value,
         UiColor color);
 
+    void modern_text(
+        float x,
+        float y,
+        float scale,
+        std::string_view value,
+        UiColor color);
+
     [[nodiscard]] float text_width(
+        std::string_view value,
+        float scale) const noexcept;
+
+    [[nodiscard]] float modern_text_width(
         std::string_view value,
         float scale) const noexcept;
 
