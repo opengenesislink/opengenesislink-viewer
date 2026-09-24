@@ -40,12 +40,22 @@ struct Rect {
 };
 
 struct LoginLayout {
+    Rect screen;
+    Rect top_bar;
     Rect panel;
+    Rect left_feature;
+    Rect right_news;
+    Rect footer;
+    Rect tab_login;
+    Rect tab_grids;
+    Rect tab_settings;
+    Rect tab_advanced;
     Rect server;
+    Rect region;
     Rect username;
     Rect password;
-    Rect region;
     Rect button;
+    float scale = 1.0F;
 };
 
 struct ViewerInputContext {
@@ -79,6 +89,22 @@ constexpr render::UiColor kError{
     1.0F, 0.34F, 0.34F, 1.0F};
 constexpr render::UiColor kSuccess{
     0.25F, 0.95F, 0.6F, 1.0F};
+constexpr render::UiColor kBackgroundTop{
+    0.005F, 0.018F, 0.045F, 1.0F};
+constexpr render::UiColor kBackgroundBottom{
+    0.008F, 0.045F, 0.085F, 1.0F};
+constexpr render::UiColor kTopBar{
+    0.01F, 0.035F, 0.07F, 0.97F};
+constexpr render::UiColor kGlass{
+    0.018F, 0.055F, 0.105F, 0.92F};
+constexpr render::UiColor kGlassSoft{
+    0.025F, 0.075F, 0.13F, 0.84F};
+constexpr render::UiColor kLine{
+    0.16F, 0.42F, 0.72F, 0.55F};
+constexpr render::UiColor kPlanet{
+    0.02F, 0.12F, 0.24F, 0.78F};
+constexpr render::UiColor kPlanetEdge{
+    0.07F, 0.28F, 0.52F, 0.42F};
 
 void glfw_error_callback(int code, const char* description) {
     std::cerr << "GLFW error " << code << ": "
@@ -355,61 +381,129 @@ LoginLayout login_layout(
         static_cast<float>(std::max(width, 1));
     const auto safe_height =
         static_cast<float>(std::max(height, 1));
-
-    const auto panel_width =
+    const auto scale =
         std::clamp(
-            safe_width - 80.0F,
-            380.0F,
-            620.0F);
-    constexpr float panel_height = 590.0F;
+            std::min(
+                safe_width / 1600.0F,
+                safe_height / 900.0F),
+            0.72F,
+            1.35F);
+
+    const auto panel_width = 640.0F * scale;
+    const auto panel_height = 430.0F * scale;
     const auto panel_x =
         (safe_width - panel_width) * 0.5F;
-    const auto panel_y =
-        std::max(
-            20.0F,
-            (safe_height - panel_height) * 0.5F);
+    const auto panel_y = 270.0F * scale;
 
-    const auto field_x = panel_x + 42.0F;
-    const auto field_width = panel_width - 84.0F;
-    constexpr float field_height = 48.0F;
+    const auto inner_x = panel_x + 30.0F * scale;
+    const auto inner_width = panel_width - 60.0F * scale;
+    const auto row_gap = 12.0F * scale;
+    const auto region_width = 150.0F * scale;
+    const auto server_width =
+        inner_width - region_width - row_gap;
+    const auto field_height = 44.0F * scale;
+
+    const auto side_width = 420.0F * scale;
+    const auto side_height = 260.0F * scale;
+    const auto side_y = 535.0F * scale;
+    const auto side_margin = 20.0F * scale;
+
+    const auto footer_height = 48.0F * scale;
+    const auto tab_width = panel_width / 4.0F;
+    const auto tab_height = 46.0F * scale;
 
     return {
+        .screen = {
+            0.0F,
+            0.0F,
+            safe_width,
+            safe_height,
+        },
+        .top_bar = {
+            0.0F,
+            0.0F,
+            safe_width,
+            48.0F * scale,
+        },
         .panel = {
             panel_x,
             panel_y,
             panel_width,
             panel_height,
         },
+        .left_feature = {
+            side_margin,
+            side_y,
+            side_width,
+            side_height,
+        },
+        .right_news = {
+            safe_width - side_margin - side_width,
+            side_y - 8.0F * scale,
+            side_width,
+            side_height + 8.0F * scale,
+        },
+        .footer = {
+            0.0F,
+            safe_height - footer_height,
+            safe_width,
+            footer_height,
+        },
+        .tab_login = {
+            panel_x,
+            panel_y,
+            tab_width,
+            tab_height,
+        },
+        .tab_grids = {
+            panel_x + tab_width,
+            panel_y,
+            tab_width,
+            tab_height,
+        },
+        .tab_settings = {
+            panel_x + tab_width * 2.0F,
+            panel_y,
+            tab_width,
+            tab_height,
+        },
+        .tab_advanced = {
+            panel_x + tab_width * 3.0F,
+            panel_y,
+            tab_width,
+            tab_height,
+        },
         .server = {
-            field_x,
-            panel_y + 165.0F,
-            field_width,
-            field_height,
-        },
-        .username = {
-            field_x,
-            panel_y + 245.0F,
-            field_width,
-            field_height,
-        },
-        .password = {
-            field_x,
-            panel_y + 325.0F,
-            field_width,
+            inner_x,
+            panel_y + 78.0F * scale,
+            server_width,
             field_height,
         },
         .region = {
-            field_x,
-            panel_y + 405.0F,
-            field_width,
+            inner_x + server_width + row_gap,
+            panel_y + 78.0F * scale,
+            region_width,
+            field_height,
+        },
+        .username = {
+            inner_x,
+            panel_y + 151.0F * scale,
+            inner_width,
+            field_height,
+        },
+        .password = {
+            inner_x,
+            panel_y + 220.0F * scale,
+            inner_width,
             field_height,
         },
         .button = {
-            field_x,
-            panel_y + 480.0F,
-            field_width,
-            54.0F,
+            inner_x + 82.0F * scale,
+            panel_y + 306.0F * scale,
+            inner_width - 164.0F * scale,
+            52.0F * scale,
         },
+        .scale = scale,
     };
 }
 
@@ -431,159 +525,644 @@ std::string visible_tail(
                    (max_characters - 3U)));
 }
 
+void draw_outline(
+    render::UiRenderer& ui,
+    const Rect& rect,
+    float thickness,
+    render::UiColor color) {
+    ui.rectangle(
+        rect.x,
+        rect.y,
+        rect.width,
+        thickness,
+        color);
+    ui.rectangle(
+        rect.x,
+        rect.y + rect.height - thickness,
+        rect.width,
+        thickness,
+        color);
+    ui.rectangle(
+        rect.x,
+        rect.y,
+        thickness,
+        rect.height,
+        color);
+    ui.rectangle(
+        rect.x + rect.width - thickness,
+        rect.y,
+        thickness,
+        rect.height,
+        color);
+}
+
 void draw_field(
     render::UiRenderer& ui,
     const Rect& rect,
     bool active,
     std::string_view label,
-    const std::string& value) {
+    const std::string& value,
+    std::string_view placeholder,
+    float scale) {
     ui.text(
         rect.x,
-        rect.y - 22.0F,
-        2.0F,
+        rect.y - 17.0F * scale,
+        1.15F * scale,
         label,
-        kMuted);
+        kText);
 
-    ui.rectangle(
-        rect.x - 2.0F,
-        rect.y - 2.0F,
-        rect.width + 4.0F,
-        rect.height + 4.0F,
-        active ? kAccent : kBorder);
     ui.rectangle(
         rect.x,
         rect.y,
         rect.width,
         rect.height,
         kField);
+    draw_outline(
+        ui,
+        rect,
+        std::max(1.0F, 1.4F * scale),
+        active ? kAccent : kBorder);
 
     const auto visible =
-        visible_tail(value, 39U);
+        visible_tail(value, 46U);
+    const auto shown =
+        visible.empty()
+            ? std::string{placeholder}
+            : visible;
     ui.text(
-        rect.x + 14.0F,
-        rect.y + 16.0F,
-        2.0F,
-        visible.empty() ? "-" : visible,
-        value.empty() ? kMuted : kText);
+        rect.x + 14.0F * scale,
+        rect.y + 15.0F * scale,
+        1.25F * scale,
+        shown,
+        visible.empty() ? kMuted : kText);
 }
 
 void draw_login_form(
     render::UiRenderer& ui,
     const LoginFormState& form,
     const LoginLayout& layout) {
+    const auto s = layout.scale;
+    const auto width = layout.screen.width;
+    const auto height = layout.screen.height;
+
     ui.begin();
 
+    ui.vertical_gradient(
+        0.0F,
+        0.0F,
+        width,
+        height,
+        kBackgroundTop,
+        kBackgroundBottom);
+
+    ui.circle(
+        80.0F * s,
+        250.0F * s,
+        255.0F * s,
+        kPlanetEdge,
+        96U);
+    ui.circle(
+        80.0F * s,
+        250.0F * s,
+        244.0F * s,
+        kPlanet,
+        96U);
+    ui.circle(
+        405.0F * s,
+        128.0F * s,
+        40.0F * s,
+        render::UiColor{
+            0.07F, 0.17F, 0.31F, 0.9F},
+        48U);
+
     ui.rectangle(
-        layout.panel.x - 2.0F,
-        layout.panel.y - 2.0F,
-        layout.panel.width + 4.0F,
-        layout.panel.height + 4.0F,
+        0.0F,
+        430.0F * s,
+        width,
+        2.0F * s,
+        render::UiColor{
+            0.06F, 0.28F, 0.5F, 0.28F});
+    ui.vertical_gradient(
+        0.0F,
+        430.0F * s,
+        width,
+        250.0F * s,
+        render::UiColor{
+            0.01F, 0.08F, 0.15F, 0.08F},
+        render::UiColor{
+            0.005F, 0.02F, 0.045F, 0.9F});
+
+    ui.rectangle(
+        layout.top_bar.x,
+        layout.top_bar.y,
+        layout.top_bar.width,
+        layout.top_bar.height,
+        kTopBar);
+    ui.rectangle(
+        0.0F,
+        layout.top_bar.height - 1.0F,
+        width,
+        1.0F,
+        kLine);
+    ui.text(
+        22.0F * s,
+        17.0F * s,
+        1.45F * s,
+        "OPENGENESISLINK VIEWER",
+        kText);
+    ui.text(
+        265.0F * s,
+        18.0F * s,
+        1.0F * s,
+        std::string{"V"} + OGL_VIEWER_VERSION,
+        kMuted);
+
+    ui.text(
+        44.0F * s,
+        120.0F * s,
+        1.55F * s,
+        "MORE THAN A WORLD...",
+        kText);
+    ui.text(
+        64.0F * s,
+        146.0F * s,
+        1.35F * s,
+        "A NEW BEGINNING.",
+        kMuted);
+
+    const auto title_left = std::string_view{"OPENGENESIS"};
+    const auto title_right = std::string_view{"LINK"};
+    const auto title_scale = 4.6F * s;
+    const auto title_width =
+        ui.text_width(title_left, title_scale) +
+        ui.text_width(title_right, title_scale);
+    const auto title_x = (width - title_width) * 0.5F;
+    ui.text(
+        title_x,
+        92.0F * s,
+        title_scale,
+        title_left,
+        kText);
+    ui.text(
+        title_x +
+            ui.text_width(title_left, title_scale),
+        92.0F * s,
+        title_scale,
+        title_right,
         kAccent);
+
+    const auto viewer_label = std::string_view{"V I E W E R"};
+    const auto viewer_scale = 2.1F * s;
+    ui.text(
+        (width -
+         ui.text_width(
+             viewer_label,
+             viewer_scale)) *
+            0.5F,
+        145.0F * s,
+        viewer_scale,
+        viewer_label,
+        kText);
+
+    const auto claim =
+        std::string_view{
+            "EXPLORE  -  CREATE  -  CONNECT  -  BELONG"};
+    ui.text(
+        (width -
+         ui.text_width(
+             claim,
+             1.25F * s)) *
+            0.5F,
+        184.0F * s,
+        1.25F * s,
+        claim,
+        kMuted);
+    const auto subclaim =
+        std::string_view{
+            "A VIRTUAL WORLD, REBUILT FROM THE CORE."};
+    ui.text(
+        (width -
+         ui.text_width(
+             subclaim,
+             1.0F * s)) *
+            0.5F,
+        211.0F * s,
+        1.0F * s,
+        subclaim,
+        kText);
+
+    ui.rectangle(
+        width - 335.0F * s,
+        85.0F * s,
+        275.0F * s,
+        102.0F * s,
+        render::UiColor{
+            0.005F, 0.04F, 0.09F, 0.38F});
+    ui.text(
+        width - 310.0F * s,
+        105.0F * s,
+        1.4F * s,
+        "REAL PEOPLE.",
+        kText);
+    ui.text(
+        width - 310.0F * s,
+        132.0F * s,
+        1.4F * s,
+        "ENDLESS POSSIBILITIES.",
+        kAccent);
+
     ui.rectangle(
         layout.panel.x,
         layout.panel.y,
         layout.panel.width,
         layout.panel.height,
-        kPanel);
+        kGlass);
+    draw_outline(
+        ui,
+        layout.panel,
+        std::max(1.0F, 1.0F * s),
+        render::UiColor{
+            0.12F, 0.28F, 0.46F, 0.85F});
 
     ui.rectangle(
-        layout.panel.x + 20.0F,
-        layout.panel.y + 20.0F,
-        layout.panel.width - 40.0F,
-        104.0F,
+        layout.tab_login.x,
+        layout.tab_login.y,
+        layout.tab_login.width,
+        layout.tab_login.height,
         kPanelInner);
+    ui.rectangle(
+        layout.tab_grids.x,
+        layout.tab_grids.y,
+        layout.tab_grids.width,
+        layout.tab_grids.height,
+        kGlassSoft);
+    ui.rectangle(
+        layout.tab_settings.x,
+        layout.tab_settings.y,
+        layout.tab_settings.width,
+        layout.tab_settings.height,
+        kGlassSoft);
+    ui.rectangle(
+        layout.tab_advanced.x,
+        layout.tab_advanced.y,
+        layout.tab_advanced.width,
+        layout.tab_advanced.height,
+        kGlassSoft);
+    ui.rectangle(
+        layout.tab_login.x,
+        layout.tab_login.y +
+            layout.tab_login.height -
+            3.0F * s,
+        layout.tab_login.width,
+        3.0F * s,
+        kAccent);
 
     ui.text(
-        layout.panel.x + 42.0F,
-        layout.panel.y + 42.0F,
-        4.0F,
-        "OPENGENESISLINK",
+        layout.tab_login.x + 46.0F * s,
+        layout.tab_login.y + 16.0F * s,
+        1.15F * s,
+        "LOGIN",
         kText);
     ui.text(
-        layout.panel.x + 44.0F,
-        layout.panel.y + 80.0F,
-        2.0F,
-        "VIEWER  /  ENTER YOUR WORLD",
-        kAccent);
+        layout.tab_grids.x + 46.0F * s,
+        layout.tab_grids.y + 16.0F * s,
+        1.15F * s,
+        "GRIDS",
+        kMuted);
     ui.text(
-        layout.panel.x + 44.0F,
-        layout.panel.y + 104.0F,
-        1.0F,
-        "SERVER AUTHORITATIVE  |  SCENE V2  |  OGL1",
+        layout.tab_settings.x + 25.0F * s,
+        layout.tab_settings.y + 16.0F * s,
+        1.05F * s,
+        "EINSTELLUNGEN",
+        kMuted);
+    ui.text(
+        layout.tab_advanced.x + 34.0F * s,
+        layout.tab_advanced.y + 16.0F * s,
+        1.05F * s,
+        "ERWEITERT",
         kMuted);
 
     draw_field(
         ui,
         layout.server,
         form.active_field == LoginField::server,
-        "SERVER / CORE URL",
-        form.server);
-    draw_field(
-        ui,
-        layout.username,
-        form.active_field == LoginField::username,
-        "USERNAME",
-        form.username);
-    draw_field(
-        ui,
-        layout.password,
-        form.active_field == LoginField::password,
-        "PASSWORD",
-        form.masked_password());
+        "GRID / WELT",
+        form.server,
+        "CORE URL",
+        s);
     draw_field(
         ui,
         layout.region,
         form.active_field == LoginField::region,
-        "REGION ID",
-        form.region);
+        "STARTREGION",
+        form.region,
+        "REGION",
+        s);
+    draw_field(
+        ui,
+        layout.username,
+        form.active_field == LoginField::username,
+        "BENUTZERNAME",
+        form.username,
+        "BENUTZERNAME ODER E-MAIL",
+        s);
+    draw_field(
+        ui,
+        layout.password,
+        form.active_field == LoginField::password,
+        "PASSWORT",
+        form.masked_password(),
+        "PASSWORT",
+        s);
+
+    ui.rectangle(
+        layout.panel.x + 30.0F * s,
+        layout.panel.y + 281.0F * s,
+        16.0F * s,
+        16.0F * s,
+        kAccent);
+    ui.text(
+        layout.panel.x + 55.0F * s,
+        layout.panel.y + 282.0F * s,
+        0.95F * s,
+        "ZUGANGSDATEN SPEICHERN",
+        kText);
+    draw_outline(
+        ui,
+        Rect{
+            layout.panel.x + 360.0F * s,
+            layout.panel.y + 281.0F * s,
+            16.0F * s,
+            16.0F * s},
+        std::max(1.0F, s),
+        kBorder);
+    ui.text(
+        layout.panel.x + 385.0F * s,
+        layout.panel.y + 282.0F * s,
+        0.95F * s,
+        "BEIM START EINLOGGEN",
+        kMuted);
 
     const auto button_color =
         form.connecting || !form.complete()
             ? kButtonDisabled
             : kButton;
-    ui.rectangle(
+    ui.vertical_gradient(
         layout.button.x,
         layout.button.y,
         layout.button.width,
         layout.button.height,
-        button_color);
-
+        button_color,
+        render::UiColor{
+            button_color.r * 0.72F,
+            button_color.g * 0.82F,
+            std::min(1.0F, button_color.b * 1.05F),
+            button_color.a});
     const std::string_view button_text =
         form.connecting
-            ? "CONNECTING..."
-            : "ENTER WORLD";
+            ? "VERBINDUNG WIRD HERGESTELLT..."
+            : "EINLOGGEN IN DIE WELT";
     const auto button_text_width =
-        ui.text_width(button_text, 2.5F);
+        ui.text_width(
+            button_text,
+            1.55F * s);
     ui.text(
         layout.button.x +
-            (layout.button.width - button_text_width) * 0.5F,
-        layout.button.y + 19.0F,
-        2.5F,
+            (layout.button.width -
+             button_text_width) *
+                0.5F,
+        layout.button.y + 18.0F * s,
+        1.55F * s,
         button_text,
         kText);
 
+    ui.text(
+        layout.panel.x + 88.0F * s,
+        layout.panel.y + 372.0F * s,
+        0.9F * s,
+        "ACCOUNT ERSTELLEN  |  PASSWORT VERGESSEN?  |  GRID HINZUFUEGEN",
+        kAccent);
+
     if (!form.error.empty()) {
         ui.text(
-            layout.panel.x + 42.0F,
-            layout.panel.y + 550.0F,
-            1.2F,
-            visible_tail(form.error, 68U),
+            layout.panel.x + 30.0F * s,
+            layout.panel.y + 405.0F * s,
+            0.9F * s,
+            visible_tail(form.error, 86U),
             kError);
     } else if (!form.status.empty()) {
         ui.text(
-            layout.panel.x + 42.0F,
-            layout.panel.y + 550.0F,
-            1.2F,
-            visible_tail(form.status, 68U),
+            layout.panel.x + 30.0F * s,
+            layout.panel.y + 405.0F * s,
+            0.9F * s,
+            visible_tail(form.status, 86U),
             kSuccess);
-    } else {
-        ui.text(
-            layout.panel.x + 42.0F,
-            layout.panel.y + 550.0F,
-            1.2F,
-            "TAB: NEXT FIELD   SHIFT+TAB: BACK   ENTER: CONNECT",
-            kMuted);
     }
+
+    ui.rectangle(
+        layout.left_feature.x,
+        layout.left_feature.y,
+        layout.left_feature.width,
+        layout.left_feature.height,
+        kGlassSoft);
+    draw_outline(
+        ui,
+        layout.left_feature,
+        std::max(1.0F, s),
+        render::UiColor{
+            0.12F, 0.29F, 0.48F, 0.85F});
+    ui.vertical_gradient(
+        layout.left_feature.x + 10.0F * s,
+        layout.left_feature.y + 10.0F * s,
+        layout.left_feature.width - 20.0F * s,
+        145.0F * s,
+        render::UiColor{
+            0.03F, 0.16F, 0.28F, 0.88F},
+        render::UiColor{
+            0.015F, 0.07F, 0.12F, 0.92F});
+    ui.text(
+        layout.left_feature.x + 24.0F * s,
+        layout.left_feature.y + 35.0F * s,
+        1.15F * s,
+        "VIRTUELLE WELTEN",
+        kAccent);
+    ui.text(
+        layout.left_feature.x + 24.0F * s,
+        layout.left_feature.y + 64.0F * s,
+        2.05F * s,
+        "ENTDECKEN",
+        kText);
+    ui.text(
+        layout.left_feature.x + 24.0F * s,
+        layout.left_feature.y + 101.0F * s,
+        1.0F * s,
+        "DEINE REISE BEGINNT HIER.",
+        kMuted);
+    ui.text(
+        layout.left_feature.x + 24.0F * s,
+        layout.left_feature.y + 182.0F * s,
+        1.6F * s,
+        "OPEN WORLDS",
+        kText);
+    ui.text(
+        layout.left_feature.x + 24.0F * s,
+        layout.left_feature.y + 215.0F * s,
+        0.95F * s,
+        "FREI  -  OFFEN  -  VERBUNDEN",
+        kMuted);
+
+    ui.rectangle(
+        layout.right_news.x,
+        layout.right_news.y,
+        layout.right_news.width,
+        layout.right_news.height,
+        kGlassSoft);
+    draw_outline(
+        ui,
+        layout.right_news,
+        std::max(1.0F, s),
+        render::UiColor{
+            0.12F, 0.29F, 0.48F, 0.85F});
+    ui.text(
+        layout.right_news.x + 24.0F * s,
+        layout.right_news.y + 26.0F * s,
+        1.55F * s,
+        "NEUIGKEITEN",
+        kText);
+    ui.text(
+        layout.right_news.x + 285.0F * s,
+        layout.right_news.y + 28.0F * s,
+        0.85F * s,
+        "ALLE ANZEIGEN >",
+        kAccent);
+    ui.rectangle(
+        layout.right_news.x + 24.0F * s,
+        layout.right_news.y + 62.0F * s,
+        82.0F * s,
+        50.0F * s,
+        render::UiColor{
+            0.05F, 0.17F, 0.29F, 1.0F});
+    ui.text(
+        layout.right_news.x + 122.0F * s,
+        layout.right_news.y + 68.0F * s,
+        1.0F * s,
+        "0.13.0-ALPHA.1",
+        kText);
+    ui.text(
+        layout.right_news.x + 122.0F * s,
+        layout.right_news.y + 91.0F * s,
+        0.82F * s,
+        "ERSTER TESTBUILD BEREIT",
+        kMuted);
+    ui.rectangle(
+        layout.right_news.x + 24.0F * s,
+        layout.right_news.y + 126.0F * s,
+        82.0F * s,
+        50.0F * s,
+        render::UiColor{
+            0.04F, 0.13F, 0.23F, 1.0F});
+    ui.text(
+        layout.right_news.x + 122.0F * s,
+        layout.right_news.y + 132.0F * s,
+        1.0F * s,
+        "ALPHA TEST",
+        kText);
+    ui.text(
+        layout.right_news.x + 122.0F * s,
+        layout.right_news.y + 155.0F * s,
+        0.82F * s,
+        "LOGIN, WORLD, SOCIAL, BUILD",
+        kMuted);
+    ui.rectangle(
+        layout.right_news.x + 24.0F * s,
+        layout.right_news.y + 190.0F * s,
+        82.0F * s,
+        50.0F * s,
+        render::UiColor{
+            0.035F, 0.11F, 0.2F, 1.0F});
+    ui.text(
+        layout.right_news.x + 122.0F * s,
+        layout.right_news.y + 196.0F * s,
+        1.0F * s,
+        "ROADMAP",
+        kText);
+    ui.text(
+        layout.right_news.x + 122.0F * s,
+        layout.right_news.y + 219.0F * s,
+        0.82F * s,
+        "ATLAS UND VISUAL ASSETS ALS NAECHSTES",
+        kMuted);
+
+    const auto feature_y =
+        std::min(
+            height - 103.0F * s,
+            layout.panel.y +
+                layout.panel.height +
+                34.0F * s);
+    const auto feature_start =
+        width * 0.5F - 300.0F * s;
+    constexpr std::array<std::string_view, 5> feature_titles{
+        "MENSCHEN",
+        "WELTEN",
+        "BAUEN",
+        "HANDEL",
+        "EVENTS",
+    };
+    for (std::size_t index = 0U;
+         index < feature_titles.size();
+         ++index) {
+        const auto x =
+            feature_start +
+            static_cast<float>(index) *
+                150.0F * s;
+        draw_outline(
+            ui,
+            Rect{
+                x + 32.0F * s,
+                feature_y,
+                42.0F * s,
+                42.0F * s},
+            std::max(1.0F, 1.5F * s),
+            index == 2U ? kAccent : kText);
+        ui.text(
+            x,
+            feature_y + 55.0F * s,
+            0.85F * s,
+            feature_titles[index],
+            index == 2U ? kAccent : kText);
+    }
+
+    ui.rectangle(
+        layout.footer.x,
+        layout.footer.y,
+        layout.footer.width,
+        layout.footer.height,
+        kTopBar);
+    ui.rectangle(
+        0.0F,
+        layout.footer.y,
+        width,
+        1.0F,
+        kLine);
+    ui.text(
+        24.0F * s,
+        layout.footer.y + 17.0F * s,
+        0.9F * s,
+        "SPRACHE: DEUTSCH  |  BARRIEREFREIHEIT  |  SUPPORT  |  WEBSEITE",
+        kMuted);
+    const auto powered =
+        std::string_view{
+            "POWERED BY NEXVORTEX.DE  |  OPENGENESISLINK"};
+    ui.text(
+        width -
+            ui.text_width(
+                powered,
+                0.9F * s) -
+            24.0F * s,
+        layout.footer.y + 17.0F * s,
+        0.9F * s,
+        powered,
+        kAccent);
 
     ui.render();
 }
@@ -1111,14 +1690,21 @@ int DesktopApplication::run(
                    : " - Login");
 
     GLFWwindow* window = glfwCreateWindow(
-        1280,
-        720,
+        1600,
+        900,
         initial_title.c_str(),
         nullptr,
         nullptr);
     if (window == nullptr) {
         throw std::runtime_error("Unable to create Viewer window");
     }
+
+    glfwSetWindowSizeLimits(
+        window,
+        1100,
+        680,
+        GLFW_DONT_CARE,
+        GLFW_DONT_CARE);
 
     struct WindowGuard {
         GLFWwindow* value = nullptr;
@@ -1151,7 +1737,7 @@ int DesktopApplication::run(
 
         LoginFormState login_form;
         login_form.status =
-            "ENTER SERVER, USERNAME, PASSWORD AND REGION";
+            "SERVER, ZUGANGSDATEN UND STARTREGION EINGEBEN";
         bool show_login = graphical_login;
         bool submit_requested = false;
         bool previous_mouse_pressed = false;
