@@ -633,23 +633,60 @@ struct UiRenderer::Impl {
     GLuint vao = 0;
     GLuint vbo = 0;
     GLint viewport_location = -1;
+
+    GLuint text_program = 0;
+    GLuint text_vao = 0;
+    GLuint text_vbo = 0;
+    GLuint font_atlas = 0;
+    GLint text_viewport_location = -1;
+    GLint text_sampler_location = -1;
+
     int width = 1280;
     int height = 720;
     bool initialized = false;
     bool modern_font_ready = false;
     std::array<ModernGlyph, 128> modern_glyphs{};
     std::vector<UiVertex> vertices;
+    std::vector<TextVertex> text_vertices;
 
     void destroy() noexcept {
-        if (vbo != 0U) glDeleteBuffers(1, &vbo);
-        if (vao != 0U) glDeleteVertexArrays(1, &vao);
-        if (program != 0U) glDeleteProgram(program);
-        vbo = 0;
-        vao = 0;
-        program = 0;
+        if (text_vbo != 0U) {
+            glDeleteBuffers(1, &text_vbo);
+        }
+        if (text_vao != 0U) {
+            glDeleteVertexArrays(1, &text_vao);
+        }
+        if (font_atlas != 0U) {
+            glDeleteTextures(1, &font_atlas);
+        }
+        if (text_program != 0U) {
+            glDeleteProgram(text_program);
+        }
+        if (vbo != 0U) {
+            glDeleteBuffers(1, &vbo);
+        }
+        if (vao != 0U) {
+            glDeleteVertexArrays(1, &vao);
+        }
+        if (program != 0U) {
+            glDeleteProgram(program);
+        }
+
+        text_vbo = 0U;
+        text_vao = 0U;
+        font_atlas = 0U;
+        text_program = 0U;
+        vbo = 0U;
+        vao = 0U;
+        program = 0U;
+        text_viewport_location = -1;
+        text_sampler_location = -1;
+        viewport_location = -1;
         initialized = false;
         modern_font_ready = false;
         vertices.clear();
+        text_vertices.clear();
+
         for (auto& glyph : modern_glyphs) {
             glyph.alpha.clear();
         }
@@ -711,9 +748,83 @@ void UiRenderer::initialize() {
             offsetof(UiVertex, r)));
 
     glBindVertexArray(0);
-    impl_->modern_font_ready =
-        load_modern_font(
-            impl_->modern_glyphs);
+
+    if (load_modern_font(
+            impl_->modern_glyphs)) {
+        impl_->font_atlas =
+            build_font_atlas(
+                impl_->modern_glyphs);
+    }
+
+    if (impl_->font_atlas != 0U) {
+        impl_->text_program =
+            build_text_program();
+        impl_->text_viewport_location =
+            glGetUniformLocation(
+                impl_->text_program,
+                "uViewport");
+        impl_->text_sampler_location =
+            glGetUniformLocation(
+                impl_->text_program,
+                "uGlyphAtlas");
+
+        if (impl_->text_viewport_location < 0 ||
+            impl_->text_sampler_location < 0) {
+            impl_->destroy();
+            throw std::runtime_error(
+                "UI text shader uniforms are unavailable");
+        }
+
+        glGenVertexArrays(
+            1,
+            &impl_->text_vao);
+        glGenBuffers(
+            1,
+            &impl_->text_vbo);
+
+        glBindVertexArray(
+            impl_->text_vao);
+        glBindBuffer(
+            GL_ARRAY_BUFFER,
+            impl_->text_vbo);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            0,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            static_cast<GLsizei>(
+                sizeof(TextVertex)),
+            reinterpret_cast<const void*>(
+                offsetof(TextVertex, x)));
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(
+            1,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            static_cast<GLsizei>(
+                sizeof(TextVertex)),
+            reinterpret_cast<const void*>(
+                offsetof(TextVertex, u)));
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(
+            2,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            static_cast<GLsizei>(
+                sizeof(TextVertex)),
+            reinterpret_cast<const void*>(
+                offsetof(TextVertex, r)));
+
+        glBindVertexArray(0);
+        impl_->modern_font_ready = true;
+    }
+
     impl_->initialized = true;
 }
 
@@ -724,6 +835,7 @@ void UiRenderer::resize(int width, int height) {
 
 void UiRenderer::begin() {
     impl_->vertices.clear();
+    impl_->text_vertices.clear();
 }
 
 void UiRenderer::rectangle(
