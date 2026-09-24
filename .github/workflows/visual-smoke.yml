@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev libfreetype6-dev xvfb xdotool x11-apps imagemagick
+          sudo apt-get install -y ninja-build libcurl4-openssl-dev nlohmann-json3-dev libgl1-mesa-dev libglfw3-dev libglew-dev libglm-dev libfreetype6-dev xvfb xdotool ffmpeg
       - name: Configure
         run: cmake --preset release -DOGL_VIEWER_BUILD_TESTS=OFF
       - name: Build Viewer
@@ -50,9 +50,9 @@ jobs:
             exit 1
           fi
           sleep 1
-          WINDOW_ID="$(xdotool search --name 'OpenGenesisLINK Viewer' | head -n 1)"
-          xwd -silent -id "$WINDOW_ID" -out /tmp/login-screen.xwd
-          convert /tmp/login-screen.xwd artifacts/login-screen.png
+          ffmpeg -hide_banner -loglevel error -y \
+            -f x11grab -draw_mouse 0 -video_size 1600x900 \
+            -i :99.0 -frames:v 1 artifacts/login-screen.png
           cp /tmp/ogl-viewer.log artifacts/viewer.log || true
           kill "$VIEWER_PID" || true
           kill "$XVFB_PID" || true
