@@ -1072,8 +1072,11 @@ void UiRenderer::modern_text(
     auto baseline =
         y + kModernOutputHeight * scale;
 
-    for (const char raw_character : value) {
-        if (raw_character == '\n') {
+    const auto codepoints =
+        decode_utf8(value);
+
+    for (const auto code : codepoints) {
+        if (code == U'\n') {
             x = start_x;
             y += 17.0F * scale;
             baseline =
@@ -1081,15 +1084,20 @@ void UiRenderer::modern_text(
             continue;
         }
 
-        const auto byte =
-            static_cast<unsigned char>(
-                raw_character);
-        const auto code =
-            byte >= 32U && byte <= 126U
-                ? byte
-                : static_cast<unsigned char>('?');
+        auto found =
+            impl_->modern_glyphs.find(code);
+        if (found ==
+            impl_->modern_glyphs.end()) {
+            found =
+                impl_->modern_glyphs.find(U'?');
+        }
+        if (found ==
+            impl_->modern_glyphs.end()) {
+            continue;
+        }
+
         const auto& glyph =
-            impl_->modern_glyphs[code];
+            found->second;
 
         if (glyph.width > 0 &&
             glyph.height > 0) {
@@ -1185,8 +1193,11 @@ float UiRenderer::modern_text_width(
     float current = 0.0F;
     float longest = 0.0F;
 
-    for (const char raw_character : value) {
-        if (raw_character == '\n') {
+    const auto codepoints =
+        decode_utf8(value);
+
+    for (const auto code : codepoints) {
+        if (code == U'\n') {
             longest =
                 std::max(
                     longest,
@@ -1195,16 +1206,19 @@ float UiRenderer::modern_text_width(
             continue;
         }
 
-        const auto byte =
-            static_cast<unsigned char>(
-                raw_character);
-        const auto code =
-            byte >= 32U && byte <= 126U
-                ? byte
-                : static_cast<unsigned char>('?');
-        current +=
-            impl_->modern_glyphs[code].advance *
-            unit;
+        auto found =
+            impl_->modern_glyphs.find(code);
+        if (found ==
+            impl_->modern_glyphs.end()) {
+            found =
+                impl_->modern_glyphs.find(U'?');
+        }
+        if (found !=
+            impl_->modern_glyphs.end()) {
+            current +=
+                found->second.advance *
+                unit;
+        }
     }
 
     return std::max(
