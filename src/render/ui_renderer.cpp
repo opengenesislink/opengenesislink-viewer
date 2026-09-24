@@ -649,6 +649,138 @@ void append_rectangle(
         {a, b, c, a, c, d});
 }
 
+void append_rounded_rectangle(
+    std::vector<UiVertex>& vertices,
+    float x,
+    float y,
+    float width,
+    float height,
+    float radius,
+    UiColor color,
+    unsigned int segments) {
+    if (width <= 0.0F || height <= 0.0F) {
+        return;
+    }
+
+    const auto r =
+        std::clamp(
+            radius,
+            0.0F,
+            std::min(width, height) * 0.5F);
+
+    if (r <= 0.0F) {
+        append_rectangle(
+            vertices,
+            x,
+            y,
+            width,
+            height,
+            color);
+        return;
+    }
+
+    append_rectangle(
+        vertices,
+        x + r,
+        y,
+        width - 2.0F * r,
+        height,
+        color);
+    append_rectangle(
+        vertices,
+        x,
+        y + r,
+        r,
+        height - 2.0F * r,
+        color);
+    append_rectangle(
+        vertices,
+        x + width - r,
+        y + r,
+        r,
+        height - 2.0F * r,
+        color);
+
+    const auto quarter_segments =
+        std::max(3U, segments / 4U);
+    constexpr float pi =
+        3.14159265358979323846F;
+
+    const auto append_corner =
+        [&vertices, color, quarter_segments](
+            float cx,
+            float cy,
+            float rvalue,
+            float start_angle) {
+            const UiVertex center{
+                cx,
+                cy,
+                color.r,
+                color.g,
+                color.b,
+                color.a};
+
+            for (unsigned int index = 0U;
+                 index < quarter_segments;
+                 ++index) {
+                const auto t0 =
+                    static_cast<float>(index) /
+                    static_cast<float>(
+                        quarter_segments);
+                const auto t1 =
+                    static_cast<float>(index + 1U) /
+                    static_cast<float>(
+                        quarter_segments);
+                const auto a0 =
+                    start_angle +
+                    t0 * (pi * 0.5F);
+                const auto a1 =
+                    start_angle +
+                    t1 * (pi * 0.5F);
+
+                const UiVertex p0{
+                    cx + std::cos(a0) * rvalue,
+                    cy + std::sin(a0) * rvalue,
+                    color.r,
+                    color.g,
+                    color.b,
+                    color.a};
+                const UiVertex p1{
+                    cx + std::cos(a1) * rvalue,
+                    cy + std::sin(a1) * rvalue,
+                    color.r,
+                    color.g,
+                    color.b,
+                    color.a};
+
+                vertices.insert(
+                    vertices.end(),
+                    {center, p0, p1});
+            }
+        };
+
+    append_corner(
+        x + r,
+        y + r,
+        r,
+        pi);
+    append_corner(
+        x + width - r,
+        y + r,
+        r,
+        pi * 1.5F);
+    append_corner(
+        x + width - r,
+        y + height - r,
+        r,
+        0.0F);
+    append_corner(
+        x + r,
+        y + height - r,
+        r,
+        pi * 0.5F);
+}
+
 void append_vertical_gradient(
     std::vector<UiVertex>& vertices,
     float x,
@@ -969,6 +1101,25 @@ void UiRenderer::rectangle(
         width,
         height,
         color);
+}
+
+void UiRenderer::rounded_rectangle(
+    float x,
+    float y,
+    float width,
+    float height,
+    float radius,
+    UiColor color,
+    unsigned int segments) {
+    append_rounded_rectangle(
+        impl_->vertices,
+        x,
+        y,
+        width,
+        height,
+        radius,
+        color,
+        segments);
 }
 
 void UiRenderer::vertical_gradient(
