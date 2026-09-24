@@ -784,22 +784,29 @@ void draw_field(
     float scale) {
     ui.modern_text(
         rect.x,
-        rect.y - 17.0F * scale,
-        1.15F * scale,
+        rect.y - 18.0F * scale,
+        0.92F * scale,
         label,
         kText);
 
-    ui.rectangle(
+    const auto border_color =
+        active ? kAccent : kBorder;
+
+    ui.rounded_rectangle(
         rect.x,
         rect.y,
         rect.width,
         rect.height,
-        kField);
-    draw_outline(
-        ui,
-        rect,
-        std::max(1.0F, 1.4F * scale),
-        active ? kAccent : kBorder);
+        7.0F * scale,
+        border_color);
+    ui.rounded_rectangle(
+        rect.x + 1.2F * scale,
+        rect.y + 1.2F * scale,
+        rect.width - 2.4F * scale,
+        rect.height - 2.4F * scale,
+        6.0F * scale,
+        render::UiColor{
+            0.015F, 0.052F, 0.10F, 0.97F});
 
     const auto visible =
         visible_tail(value, 46U);
@@ -809,8 +816,8 @@ void draw_field(
             : visible;
     ui.modern_text(
         rect.x + 14.0F * scale,
-        rect.y + 15.0F * scale,
-        1.25F * scale,
+        rect.y + 13.0F * scale,
+        1.02F * scale,
         shown,
         visible.empty() ? kMuted : kText);
 }
@@ -1051,42 +1058,58 @@ void draw_login_form(
         "Endless possibilities.",
         kAccent);
 
-    ui.rectangle(
+    ui.rounded_rectangle(
+        layout.panel.x + 8.0F * s,
+        layout.panel.y + 10.0F * s,
+        layout.panel.width,
+        layout.panel.height,
+        14.0F * s,
+        render::UiColor{
+            0.0F, 0.0F, 0.0F, 0.28F});
+    ui.rounded_rectangle(
         layout.panel.x,
         layout.panel.y,
         layout.panel.width,
         layout.panel.height,
-        kGlass);
-    draw_outline(
-        ui,
-        layout.panel,
-        std::max(1.0F, 1.0F * s),
+        14.0F * s,
         render::UiColor{
-            0.12F, 0.28F, 0.46F, 0.85F});
+            0.018F, 0.050F, 0.092F, 0.94F});
+    ui.rounded_rectangle(
+        layout.panel.x + 1.0F * s,
+        layout.panel.y + 1.0F * s,
+        layout.panel.width - 2.0F * s,
+        layout.panel.height - 2.0F * s,
+        13.0F * s,
+        render::UiColor{
+            0.018F, 0.055F, 0.105F, 0.90F});
 
-    ui.rectangle(
-        layout.tab_login.x,
-        layout.tab_login.y,
-        layout.tab_login.width,
-        layout.tab_login.height,
+    ui.rounded_rectangle(
+        layout.tab_login.x + 4.0F * s,
+        layout.tab_login.y + 4.0F * s,
+        layout.tab_login.width - 8.0F * s,
+        layout.tab_login.height - 4.0F * s,
+        8.0F * s,
         kPanelInner);
-    ui.rectangle(
-        layout.tab_grids.x,
-        layout.tab_grids.y,
-        layout.tab_grids.width,
-        layout.tab_grids.height,
+    ui.rounded_rectangle(
+        layout.tab_grids.x + 4.0F * s,
+        layout.tab_grids.y + 4.0F * s,
+        layout.tab_grids.width - 8.0F * s,
+        layout.tab_grids.height - 4.0F * s,
+        8.0F * s,
         kGlassSoft);
-    ui.rectangle(
-        layout.tab_settings.x,
-        layout.tab_settings.y,
-        layout.tab_settings.width,
-        layout.tab_settings.height,
+    ui.rounded_rectangle(
+        layout.tab_settings.x + 4.0F * s,
+        layout.tab_settings.y + 4.0F * s,
+        layout.tab_settings.width - 8.0F * s,
+        layout.tab_settings.height - 4.0F * s,
+        8.0F * s,
         kGlassSoft);
-    ui.rectangle(
-        layout.tab_advanced.x,
-        layout.tab_advanced.y,
-        layout.tab_advanced.width,
-        layout.tab_advanced.height,
+    ui.rounded_rectangle(
+        layout.tab_advanced.x + 4.0F * s,
+        layout.tab_advanced.y + 4.0F * s,
+        layout.tab_advanced.width - 8.0F * s,
+        layout.tab_advanced.height - 4.0F * s,
+        8.0F * s,
         kGlassSoft);
     ui.rectangle(
         layout.tab_login.x,
@@ -1187,17 +1210,24 @@ void draw_login_form(
         form.connecting || !form.complete()
             ? kButtonDisabled
             : kButton;
-    ui.vertical_gradient(
+    ui.rounded_rectangle(
         layout.button.x,
         layout.button.y,
         layout.button.width,
         layout.button.height,
-        button_color,
+        8.0F * s,
         render::UiColor{
-            button_color.r * 0.72F,
-            button_color.g * 0.82F,
-            std::min(1.0F, button_color.b * 1.05F),
+            std::min(1.0F, button_color.r + 0.06F),
+            std::min(1.0F, button_color.g + 0.08F),
+            std::min(1.0F, button_color.b + 0.08F),
             button_color.a});
+    ui.rounded_rectangle(
+        layout.button.x + 1.5F * s,
+        layout.button.y + 1.5F * s,
+        layout.button.width - 3.0F * s,
+        layout.button.height - 3.0F * s,
+        7.0F * s,
+        button_color);
     const std::string_view button_text =
         form.connecting
             ? "Verbindung wird hergestellt ..."
@@ -1239,23 +1269,35 @@ void draw_login_form(
             kSuccess);
     }
 
-    ui.rectangle(
+    ui.rounded_rectangle(
+        layout.left_feature.x + 6.0F * s,
+        layout.left_feature.y + 8.0F * s,
+        layout.left_feature.width,
+        layout.left_feature.height,
+        12.0F * s,
+        render::UiColor{
+            0.0F, 0.0F, 0.0F, 0.24F});
+    ui.rounded_rectangle(
         layout.left_feature.x,
         layout.left_feature.y,
         layout.left_feature.width,
         layout.left_feature.height,
-        kGlassSoft);
-    draw_outline(
-        ui,
-        layout.left_feature,
-        std::max(1.0F, s),
+        12.0F * s,
         render::UiColor{
-            0.12F, 0.29F, 0.48F, 0.85F});
-    ui.vertical_gradient(
+            0.018F, 0.06F, 0.105F, 0.91F});
+    ui.rounded_rectangle(
         layout.left_feature.x + 10.0F * s,
         layout.left_feature.y + 10.0F * s,
         layout.left_feature.width - 20.0F * s,
         145.0F * s,
+        9.0F * s,
+        render::UiColor{
+            0.025F, 0.14F, 0.23F, 0.92F});
+    ui.vertical_gradient(
+        layout.left_feature.x + 16.0F * s,
+        layout.left_feature.y + 16.0F * s,
+        layout.left_feature.width - 32.0F * s,
+        133.0F * s,
         render::UiColor{
             0.03F, 0.16F, 0.28F, 0.88F},
         render::UiColor{
@@ -1291,18 +1333,22 @@ void draw_login_form(
         "Frei  ·  Offen  ·  Verbunden",
         kMuted);
 
-    ui.rectangle(
+    ui.rounded_rectangle(
+        layout.right_news.x + 6.0F * s,
+        layout.right_news.y + 8.0F * s,
+        layout.right_news.width,
+        layout.right_news.height,
+        12.0F * s,
+        render::UiColor{
+            0.0F, 0.0F, 0.0F, 0.24F});
+    ui.rounded_rectangle(
         layout.right_news.x,
         layout.right_news.y,
         layout.right_news.width,
         layout.right_news.height,
-        kGlassSoft);
-    draw_outline(
-        ui,
-        layout.right_news,
-        std::max(1.0F, s),
+        12.0F * s,
         render::UiColor{
-            0.12F, 0.29F, 0.48F, 0.85F});
+            0.018F, 0.06F, 0.105F, 0.91F});
     ui.modern_text(
         layout.right_news.x + 24.0F * s,
         layout.right_news.y + 26.0F * s,
