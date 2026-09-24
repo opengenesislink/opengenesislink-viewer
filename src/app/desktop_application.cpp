@@ -763,6 +763,57 @@ void draw_reference_backdrop(
         render::UiColor{
             0.03F, 0.15F, 0.22F, 0.95F});
 
+    ui.rounded_rectangle(
+        1324.0F * s,
+        292.0F * s,
+        138.0F * s,
+        142.0F * s,
+        8.0F * s,
+        render::UiColor{
+            0.018F, 0.07F, 0.12F, 0.92F});
+    ui.rounded_rectangle(
+        1327.0F * s,
+        295.0F * s,
+        132.0F * s,
+        136.0F * s,
+        6.0F * s,
+        render::UiColor{
+            0.025F, 0.10F, 0.17F, 0.94F});
+    ui.modern_text(
+        1344.0F * s,
+        314.0F * s,
+        1.05F * s,
+        "OPEN",
+        render::UiColor{
+            0.56F, 0.79F, 1.0F, 1.0F});
+    ui.modern_text(
+        1344.0F * s,
+        338.0F * s,
+        1.05F * s,
+        "VIRTUAL",
+        render::UiColor{
+            0.56F, 0.79F, 1.0F, 1.0F});
+    ui.modern_text(
+        1344.0F * s,
+        362.0F * s,
+        1.05F * s,
+        "WORLDS",
+        render::UiColor{
+            0.56F, 0.79F, 1.0F, 1.0F});
+    ui.modern_text(
+        1344.0F * s,
+        386.0F * s,
+        0.92F * s,
+        "FOR EVERYONE",
+        kAccent);
+    ui.rectangle(
+        1391.0F * s,
+        434.0F * s,
+        3.0F * s,
+        82.0F * s,
+        render::UiColor{
+            0.04F, 0.10F, 0.15F, 0.96F});
+
     ui.vertical_gradient(
         0.0F,
         620.0F * s,
@@ -1852,6 +1903,41 @@ void draw_login_form(
         0.9F * s,
         "Sprache: Deutsch   |   Barrierefreiheit   |   Support   |   Webseite",
         kMuted);
+    const auto social_y =
+        layout.footer.y + 23.0F * s;
+    const auto social_start =
+        width - 455.0F * s;
+    constexpr std::array<std::string_view, 4> social_labels{
+        "D", "GH", "YT", "X",
+    };
+    for (std::size_t social = 0U;
+         social < social_labels.size();
+         ++social) {
+        const auto x =
+            social_start +
+            static_cast<float>(social) *
+                38.0F * s;
+        ui.circle(
+            x,
+            social_y,
+            12.0F * s,
+            render::UiColor{
+                0.08F, 0.16F, 0.25F, 0.92F},
+            24U);
+        const auto label_scale =
+            social == 1U ? 0.58F * s : 0.68F * s;
+        const auto label_width =
+            ui.modern_text_width(
+                social_labels[social],
+                label_scale);
+        ui.modern_text(
+            x - label_width * 0.5F,
+            social_y - 5.0F * s,
+            label_scale,
+            social_labels[social],
+            kText);
+    }
+
     const auto powered =
         std::string_view{
             "Powered by NexVortex.de   |   OpenGenesisLINK"};
