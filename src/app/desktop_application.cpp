@@ -690,9 +690,70 @@ void draw_login_form(
         "A new Beginning.",
         kMuted);
 
+    const auto logo_x = width * 0.5F;
+    const auto logo_top = 58.0F * s;
+    const auto logo_mid = 94.0F * s;
+    const auto logo_bottom = 138.0F * s;
+    const auto logo_half = 42.0F * s;
+
+    ui.triangle(
+        logo_x,
+        logo_top,
+        logo_x - logo_half,
+        80.0F * s,
+        logo_x,
+        logo_mid,
+        render::UiColor{
+            0.18F, 0.52F, 0.92F, 1.0F});
+    ui.triangle(
+        logo_x,
+        logo_top,
+        logo_x,
+        logo_mid,
+        logo_x + logo_half,
+        80.0F * s,
+        render::UiColor{
+            0.34F, 0.70F, 1.0F, 1.0F});
+    ui.triangle(
+        logo_x - logo_half,
+        80.0F * s,
+        logo_x - logo_half,
+        116.0F * s,
+        logo_x,
+        logo_mid,
+        render::UiColor{
+            0.06F, 0.30F, 0.62F, 1.0F});
+    ui.triangle(
+        logo_x - logo_half,
+        116.0F * s,
+        logo_x,
+        logo_bottom,
+        logo_x,
+        logo_mid,
+        render::UiColor{
+            0.035F, 0.20F, 0.46F, 1.0F});
+    ui.triangle(
+        logo_x,
+        logo_mid,
+        logo_x + logo_half,
+        80.0F * s,
+        logo_x + logo_half,
+        116.0F * s,
+        render::UiColor{
+            0.08F, 0.38F, 0.76F, 1.0F});
+    ui.triangle(
+        logo_x,
+        logo_mid,
+        logo_x + logo_half,
+        116.0F * s,
+        logo_x,
+        logo_bottom,
+        render::UiColor{
+            0.045F, 0.25F, 0.58F, 1.0F});
+
     const auto title_left = std::string_view{"OpenGenesis"};
     const auto title_right = std::string_view{"LINK"};
-    const auto title_scale = 4.6F * s;
+    const auto title_scale = 4.15F * s;
     const auto title_width =
         ui.modern_text_width(title_left, title_scale) +
         ui.modern_text_width(title_right, title_scale);
@@ -706,7 +767,7 @@ void draw_login_form(
     ui.modern_text(
         title_x +
             ui.modern_text_width(title_left, title_scale),
-        92.0F * s,
+        155.0F * s,
         title_scale,
         title_right,
         kAccent);
