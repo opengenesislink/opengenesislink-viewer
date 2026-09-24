@@ -33,6 +33,21 @@ public:
         float height,
         UiColor color);
 
+    void vertical_gradient(
+        float x,
+        float y,
+        float width,
+        float height,
+        UiColor top,
+        UiColor bottom);
+
+    void circle(
+        float center_x,
+        float center_y,
+        float radius,
+        UiColor color,
+        unsigned int segments = 64U);
+
     void text(
         float x,
         float y,
