@@ -48,6 +48,15 @@ public:
         UiColor color,
         unsigned int segments = 64U);
 
+    void triangle(
+        float ax,
+        float ay,
+        float bx,
+        float by,
+        float cx,
+        float cy,
+        UiColor color);
+
     void text(
         float x,
         float y,
