@@ -30,17 +30,34 @@ struct UiVertex {
     float a = 1.0F;
 };
 
+struct TextVertex {
+    float x = 0.0F;
+    float y = 0.0F;
+    float u = 0.0F;
+    float v = 0.0F;
+    float r = 1.0F;
+    float g = 1.0F;
+    float b = 1.0F;
+    float a = 1.0F;
+};
+
 struct ModernGlyph {
     int width = 0;
     int height = 0;
     int bearing_x = 0;
     int bearing_y = 0;
     float advance = 0.0F;
+    float u0 = 0.0F;
+    float v0 = 0.0F;
+    float u1 = 0.0F;
+    float v1 = 0.0F;
     std::vector<std::uint8_t> alpha;
 };
 
-constexpr float kModernFontPixelSize = 24.0F;
-constexpr float kModernOutputHeight = 7.0F;
+constexpr float kModernFontPixelSize = 48.0F;
+constexpr float kModernOutputHeight = 13.0F;
+constexpr int kFontAtlasWidth = 1024;
+constexpr int kFontAtlasHeight = 256;
 
 bool load_modern_font(
     std::array<ModernGlyph, 128>& glyphs) {
