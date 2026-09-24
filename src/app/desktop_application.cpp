@@ -564,7 +564,7 @@ void draw_field(
     const std::string& value,
     std::string_view placeholder,
     float scale) {
-    ui.text(
+    ui.modern_text(
         rect.x,
         rect.y - 17.0F * scale,
         1.15F * scale,
@@ -589,7 +589,7 @@ void draw_field(
         visible.empty()
             ? std::string{placeholder}
             : visible;
-    ui.text(
+    ui.modern_text(
         rect.x + 14.0F * scale,
         rect.y + 15.0F * scale,
         1.25F * scale,
