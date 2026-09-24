@@ -17,7 +17,7 @@ Development currently targets:
 
 Unknown additive JSON fields are tolerated. Optional functionality is capability-detected rather than assumed.
 
-## Current status — 0.13.0-alpha.3
+## Current status — 0.13.0-alpha.4
 
 The first foundation block contains:
 
@@ -64,6 +64,7 @@ The first foundation block contains:
 - terrain patch reuse while the authoritative terrain revision is unchanged
 - dynamic OpenGL terrain VAO/VBO/EBO path rendered below water/objects/avatars
 - cinematic responsive login landing screen aligned with the Viewer target design
+- native sci-fi login backdrop, rounded glass UI, field icons, NexVerse preview/news cards and footer social affordances
 - anti-aliased textured FreeType Sans typography with UTF-8 UI glyphs and bitmap fallback
 - in-window graphical login form for Core URL, username, password and Region
 - mouse and keyboard form navigation with masked password input
