@@ -186,6 +186,127 @@ bool load_modern_font(
     return true;
 }
 
+GLuint build_font_atlas(
+    std::array<ModernGlyph, 128>& glyphs) {
+    std::vector<std::uint8_t> atlas(
+        static_cast<std::size_t>(kFontAtlasWidth) *
+            static_cast<std::size_t>(kFontAtlasHeight),
+        static_cast<std::uint8_t>(0U));
+
+    int pen_x = 1;
+    int pen_y = 1;
+    int row_height = 0;
+
+    for (unsigned int code = 32U;
+         code <= 126U;
+         ++code) {
+        auto& glyph = glyphs[code];
+
+        if (glyph.width <= 0 ||
+            glyph.height <= 0 ||
+            glyph.alpha.empty()) {
+            continue;
+        }
+
+        if (pen_x + glyph.width + 1 >
+            kFontAtlasWidth) {
+            pen_x = 1;
+            pen_y += row_height + 1;
+            row_height = 0;
+        }
+
+        if (pen_y + glyph.height + 1 >
+            kFontAtlasHeight) {
+            return 0U;
+        }
+
+        for (int row = 0;
+             row < glyph.height;
+             ++row) {
+            const auto source_row =
+                glyph.height - 1 - row;
+            for (int column = 0;
+                 column < glyph.width;
+                 ++column) {
+                atlas[
+                    static_cast<std::size_t>(
+                        pen_y + row) *
+                        static_cast<std::size_t>(
+                            kFontAtlasWidth) +
+                    static_cast<std::size_t>(
+                        pen_x + column)] =
+                    glyph.alpha[
+                        static_cast<std::size_t>(
+                            source_row) *
+                            static_cast<std::size_t>(
+                                glyph.width) +
+                        static_cast<std::size_t>(
+                            column)];
+            }
+        }
+
+        glyph.u0 =
+            static_cast<float>(pen_x) /
+            static_cast<float>(kFontAtlasWidth);
+        glyph.v0 =
+            static_cast<float>(pen_y) /
+            static_cast<float>(kFontAtlasHeight);
+        glyph.u1 =
+            static_cast<float>(
+                pen_x + glyph.width) /
+            static_cast<float>(kFontAtlasWidth);
+        glyph.v1 =
+            static_cast<float>(
+                pen_y + glyph.height) /
+            static_cast<float>(kFontAtlasHeight);
+
+        pen_x += glyph.width + 1;
+        row_height =
+            std::max(row_height, glyph.height);
+    }
+
+    GLuint texture = 0U;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R8,
+        kFontAtlasWidth,
+        kFontAtlasHeight,
+        0,
+        GL_RED,
+        GL_UNSIGNED_BYTE,
+        atlas.data());
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR);
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR);
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE);
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    for (auto& glyph : glyphs) {
+        glyph.alpha.clear();
+        glyph.alpha.shrink_to_fit();
+    }
+
+    return texture;
+}
+
 GLuint compile_shader(GLenum type, const char* source) {
     const auto shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, nullptr);
@@ -261,6 +382,85 @@ void main() {
     glDeleteProgram(program);
     throw std::runtime_error(
         "UI shader link failed: " + log);
+}
+
+GLuint build_text_program() {
+    constexpr const char* vertex_source = R"GLSL(
+#version 330 core
+layout(location = 0) in vec2 aPosition;
+layout(location = 1) in vec2 aUv;
+layout(location = 2) in vec4 aColor;
+uniform vec2 uViewport;
+out vec2 vUv;
+out vec4 vColor;
+void main() {
+    vec2 ndc = vec2(
+        (aPosition.x / uViewport.x) * 2.0 - 1.0,
+        1.0 - (aPosition.y / uViewport.y) * 2.0);
+    gl_Position = vec4(ndc, 0.0, 1.0);
+    vUv = aUv;
+    vColor = aColor;
+}
+)GLSL";
+
+    constexpr const char* fragment_source = R"GLSL(
+#version 330 core
+in vec2 vUv;
+in vec4 vColor;
+uniform sampler2D uGlyphAtlas;
+out vec4 FragColor;
+void main() {
+    float coverage = texture(uGlyphAtlas, vUv).r;
+    FragColor = vec4(
+        vColor.rgb,
+        vColor.a * coverage);
+}
+)GLSL";
+
+    const auto vertex =
+        compile_shader(
+            GL_VERTEX_SHADER,
+            vertex_source);
+    const auto fragment =
+        compile_shader(
+            GL_FRAGMENT_SHADER,
+            fragment_source);
+
+    const auto program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+
+    GLint ok = GL_FALSE;
+    glGetProgramiv(
+        program,
+        GL_LINK_STATUS,
+        &ok);
+    if (ok == GL_TRUE) {
+        return program;
+    }
+
+    GLint length = 0;
+    glGetProgramiv(
+        program,
+        GL_INFO_LOG_LENGTH,
+        &length);
+    std::string log(
+        static_cast<std::size_t>(
+            length > 0 ? length : 1),
+        '\0');
+    glGetProgramInfoLog(
+        program,
+        length,
+        nullptr,
+        log.data());
+    glDeleteProgram(program);
+    throw std::runtime_error(
+        "UI text shader link failed: " +
+        log);
 }
 
 using Glyph = std::array<std::uint8_t, 7>;
